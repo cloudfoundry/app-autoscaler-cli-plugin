@@ -1,18 +1,29 @@
-# Cloud Foundry CLI AutoScaler Plugin [![Build Status](https://travis-ci.org/cloudfoundry-incubator/app-autoscaler-cli-plugin.svg?branch=master)](https://travis-ci.org/cloudfoundry-incubator/app-autoscaler-cli-plugin)
+# Cloud Foundry CLI AutoScaler Plug-in [![Build Status](https://travis-ci.org/cloudfoundry-incubator/app-autoscaler-cli-plugin.svg?branch=master)](https://travis-ci.org/cloudfoundry-incubator/app-autoscaler-cli-plugin)
 
-AutoScaler plugin provides the command line interface to manage [AutoScaler](https://github.com/cloudfoundry-incubator/app-autoscaler) service policies, retrieve metrics and scaling history.
+App-AutoScaler plug-in provides the command line interface to manage [App AutoScaler](https://github.com/cloudfoundry-incubator/app-autoscaler) service policies, retrieve metrics and scaling history.
+
+
+## Set up
+
+To set up the development, follow the steps below
+
+```
+$ git clone git@github.com:cloudfoundry-incubator/app-autoscaler-cli-plugin.git
+$ cd app-autoscaler-cli-plugin
+$ source .envrc
+$ git submodule update --init --recursive
+```
 
 ## Build and install
 
-Run the following command to build the AutoScaler plugin
+Run the following script to build the AutoScaler plug-in for your OS
 ```
-cd src/cli
-go build -o ascli cli
+scripts/build
 ```
 
 To install the plugin to cf cli
 ```
-cf install-plugin ascli
+cf install-plugin out/ascli
 ```
 
 To uninstall the plugin
