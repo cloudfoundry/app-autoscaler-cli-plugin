@@ -1,0 +1,20 @@
+language: go
+
+dist: trusty
+sudo: required
+
+env:
+  global:
+    - GO_VERSION=1.7
+
+before_install:
+  - source .envrc
+
+install:
+  - go install github.com/onsi/ginkgo/ginkgo
+
+script:
+  # Unit test
+  - pushd src/cli
+  - ginkgo -r
+  - popd
