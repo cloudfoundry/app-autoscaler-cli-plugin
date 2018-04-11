@@ -6,22 +6,22 @@ type ScalingStatus int
 type ScalingPolicy struct {
 	InstanceMin  int               `json:"instance_min_count"`
 	InstanceMax  int               `json:"instance_max_count"`
-	ScalingRules []*ScalingRule    `json:"scaling_rules"`
+	ScalingRules []*ScalingRule    `json:"scaling_rules,omitempty"`
 	Schedules    *ScalingSchedules `json:"schedules,omitempty"`
 }
 
 type ScalingRule struct {
 	MetricType            string `json:"metric_type"`
-	StatWindowSeconds     int    `json:"stat_window_secs"`
-	BreachDurationSeconds int    `json:"breach_duration_secs"`
+	StatWindowSeconds     int    `json:"stat_window_secs,omitempty"`
+	BreachDurationSeconds int    `json:"breach_duration_secs,omitempty"`
 	Threshold             int64  `json:"threshold"`
 	Operator              string `json:"operator"`
-	CoolDownSeconds       int    `json:"cool_down_secs"`
+	CoolDownSeconds       int    `json:"cool_down_secs,omitempty"`
 	Adjustment            string `json:"adjustment"`
 }
 
 type ScalingSchedules struct {
-	Timezone              string                  `json:"timezone,omitempty"`
+	Timezone              string                  `json:"timezone"`
 	RecurringSchedules    []*RecurringSchedule    `json:"recurring_schedule,omitempty"`
 	SpecificDateSchedules []*SpecificDateSchedule `json:"specific_date,omitempty"`
 }
