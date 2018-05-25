@@ -31,6 +31,8 @@ type RecurringSchedule struct {
 	EndTime               string `json:"end_time"`
 	DaysOfWeek            []int  `json:"days_of_week,omitempty"`
 	DaysOfMonth           []int  `json:"days_of_month,omitempty"`
+	StartDate             string `json:"start_date,omitempty"`
+	EndDate               string `json:"end_date,omitempty"`
 	ScheduledInstanceMin  int    `json:"instance_min_count"`
 	ScheduledInstanceMax  int    `json:"instance_max_count"`
 	ScheduledInstanceInit int    `json:"initial_min_instance_count"`
