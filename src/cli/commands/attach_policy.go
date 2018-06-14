@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+
+	"cli/models"
 )
 
 type AttachPolicyCommand struct {
@@ -48,7 +50,8 @@ func CreatePolicy(cliConnection api.Connection, appName string, policyFile strin
 	if err != nil {
 		return fmt.Errorf(ui.FailToLoadPolicyFile, policyFile)
 	}
-	var policy map[string]interface{}
+
+	var policy models.ScalingPolicy
 	err = json.Unmarshal(contents, &policy)
 	if err != nil {
 		return fmt.Errorf(ui.InvalidPolicy, err)
@@ -58,7 +61,33 @@ func CreatePolicy(cliConnection api.Connection, appName string, policyFile strin
 	if err != nil {
 		return err
 	}
-
 	ui.SayOK()
+
+	if policy.Schedules != nil {
+		warning := false
+
+		if policy.Schedules.RecurringSchedules != nil {
+			if policy.Schedules.SpecificDateSchedules != nil {
+				warning = true
+			} else {
+				hasDayofMonth := false
+				hasDayofWeek := false
+				for _, schedule := range policy.Schedules.RecurringSchedules {
+					if schedule.DaysOfMonth != nil {
+						hasDayofMonth = true
+					}
+					if schedule.DaysOfWeek != nil {
+						hasDayofWeek = true
+					}
+				}
+				warning = hasDayofMonth && hasDayofWeek
+			}
+		}
+		if warning {
+			ui.SayMessage(ui.ScheduleConflictWarning)
+		}
+
+	}
+
 	return nil
 }
