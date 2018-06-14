@@ -34,6 +34,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 		fakeAppName     string = "fakeAppName"
 		fakeAppId       string = "fakeAppId"
 		fakeAccessToken string = "fakeAccessToken"
+		policyJSON      string = "policy.json"
 		outputFile      string = "output.txt"
 	)
 
@@ -74,8 +75,8 @@ var _ = Describe("App-AutoScaler Commands", func() {
 				},
 				SpecificDateSchedules: []*SpecificDateSchedule{
 					{
-						StartDateTime:         "2006-01-02T15:04",
-						EndDateTime:           "2006-01-02T15:04",
+						StartDateTime:         "2099-01-02T15:04",
+						EndDateTime:           "2099-01-02T15:04",
 						ScheduledInstanceMin:  10,
 						ScheduledInstanceMax:  50,
 						ScheduledInstanceInit: 30,
@@ -129,7 +130,9 @@ var _ = Describe("App-AutoScaler Commands", func() {
 		if _, err = os.Stat(outputFile); !os.IsNotExist(err) {
 			err = os.Remove(outputFile)
 		}
-
+		if _, err = os.Stat(policyJSON); !os.IsNotExist(err) {
+			err = os.Remove(policyJSON)
+		}
 	})
 
 	Describe("Commands autoscaling-api, asa", func() {
@@ -558,6 +561,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 	Describe("Commands attach-autoscaling-policy, aasp", func() {
 
 		var urlpath = "/v1/apps/" + fakeAppId + "/policy"
+
 		Context("attach-autoscaling-policy", func() {
 
 			Context("when the args are not properly provided", func() {
@@ -584,7 +588,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 
 			Context("when cf not login", func() {
 				It("exits with 'You must be logged in' error ", func() {
-					args = []string{ts.Port(), "attach-autoscaling-policy", fakeAppName, outputFile}
+					args = []string{ts.Port(), "attach-autoscaling-policy", fakeAppName, policyJSON}
 					session, err := gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
 					Expect(err).NotTo(HaveOccurred())
 					session.Wait()
@@ -609,7 +613,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 					})
 
 					It("exits with 'App not found' error ", func() {
-						args = []string{ts.Port(), "attach-autoscaling-policy", fakeAppName, outputFile}
+						args = []string{ts.Port(), "attach-autoscaling-policy", fakeAppName, policyJSON}
 						session, err := gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
 						Expect(err).NotTo(HaveOccurred())
 						session.Wait()
@@ -637,27 +641,27 @@ var _ = Describe("App-AutoScaler Commands", func() {
 
 					Context("when policy file is not exist", func() {
 						BeforeEach(func() {
-							err = os.Remove(outputFile)
+							err = os.Remove(policyJSON)
 						})
 
 						It("Failed when policy file not exist", func() {
-							args = []string{ts.Port(), "attach-autoscaling-policy", fakeAppName, outputFile}
+							args = []string{ts.Port(), "attach-autoscaling-policy", fakeAppName, policyJSON}
 							session, err := gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
 							Expect(err).NotTo(HaveOccurred())
 							session.Wait()
-							Expect(session).To(gbytes.Say(ui.FailToLoadPolicyFile, outputFile))
+							Expect(session).To(gbytes.Say(ui.FailToLoadPolicyFile, policyJSON))
 							Expect(session.ExitCode()).To(Equal(1))
 						})
 					})
 
 					Context("when policy file is empty", func() {
 						BeforeEach(func() {
-							err = ioutil.WriteFile(outputFile, nil, 0666)
+							err = ioutil.WriteFile(policyJSON, nil, 0666)
 							Expect(err).NotTo(HaveOccurred())
 						})
 
 						It("Failed when policy file is empty", func() {
-							args = []string{ts.Port(), "attach-autoscaling-policy", fakeAppName, outputFile}
+							args = []string{ts.Port(), "attach-autoscaling-policy", fakeAppName, policyJSON}
 							session, err := gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
 							Expect(err).NotTo(HaveOccurred())
 							session.Wait()
@@ -669,12 +673,12 @@ var _ = Describe("App-AutoScaler Commands", func() {
 					Context("when policy file is invalid json", func() {
 						BeforeEach(func() {
 							invalidPolicy := []byte(`{"policy":invalidPolicy}`)
-							err = ioutil.WriteFile(outputFile, invalidPolicy, 0666)
+							err = ioutil.WriteFile(policyJSON, invalidPolicy, 0666)
 							Expect(err).NotTo(HaveOccurred())
 						})
 
 						It("Failed when policy file is empty", func() {
-							args = []string{ts.Port(), "attach-autoscaling-policy", fakeAppName, outputFile}
+							args = []string{ts.Port(), "attach-autoscaling-policy", fakeAppName, policyJSON}
 							session, err := gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
 							Expect(err).NotTo(HaveOccurred())
 							session.Wait()
@@ -688,7 +692,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 						BeforeEach(func() {
 							policyBytes, err := cjson.MarshalWithoutHTMLEscape(fakePolicy)
 							Expect(err).NotTo(HaveOccurred())
-							err = ioutil.WriteFile(outputFile, policyBytes, 0666)
+							err = ioutil.WriteFile(policyJSON, policyBytes, 0666)
 							Expect(err).NotTo(HaveOccurred())
 						})
 
@@ -705,7 +709,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 							})
 
 							It("failed with 401 error", func() {
-								args = []string{ts.Port(), "attach-autoscaling-policy", fakeAppName, outputFile}
+								args = []string{ts.Port(), "attach-autoscaling-policy", fakeAppName, policyJSON}
 								session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
 								Expect(err).NotTo(HaveOccurred())
 								session.Wait()
@@ -743,7 +747,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 
 								It("Failed with 400", func() {
 
-									args = []string{ts.Port(), "attach-autoscaling-policy", fakeAppName, outputFile}
+									args = []string{ts.Port(), "attach-autoscaling-policy", fakeAppName, policyJSON}
 									session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
 									Expect(err).NotTo(HaveOccurred())
 									session.Wait()
@@ -767,7 +771,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 								})
 
 								It("Succeed with 201", func() {
-									args = []string{ts.Port(), "attach-autoscaling-policy", fakeAppName, outputFile}
+									args = []string{ts.Port(), "attach-autoscaling-policy", fakeAppName, policyJSON}
 									session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
 									Expect(err).NotTo(HaveOccurred())
 									session.Wait()
@@ -791,7 +795,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 
 								It("Succeed with 200", func() {
 
-									args = []string{ts.Port(), "attach-autoscaling-policy", fakeAppName, outputFile}
+									args = []string{ts.Port(), "attach-autoscaling-policy", fakeAppName, policyJSON}
 									session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
 									Expect(err).NotTo(HaveOccurred())
 									session.Wait()
@@ -800,6 +804,138 @@ var _ = Describe("App-AutoScaler Commands", func() {
 									Expect(session.Out).To(gbytes.Say("OK"))
 									Expect(session.ExitCode()).To(Equal(0))
 
+								})
+
+							})
+
+							Context("Warning msg with multiple schedules", func() {
+								BeforeEach(func() {
+									apiServer.RouteToHandler("PUT", urlpath,
+										ghttp.CombineHandlers(
+											ghttp.RespondWith(http.StatusCreated, ""),
+											ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
+										),
+									)
+								})
+
+								JustBeforeEach(func() {
+									policyBytes, err := cjson.MarshalWithoutHTMLEscape(fakePolicy)
+									Expect(err).NotTo(HaveOccurred())
+									err = ioutil.WriteFile(policyJSON, policyBytes, 0666)
+									Expect(err).NotTo(HaveOccurred())
+								})
+
+								Context("when both recurring and specific date schedule defined", func() {
+									It("Succeed without warning msg", func() {
+										args = []string{ts.Port(), "attach-autoscaling-policy", fakeAppName, policyJSON}
+										session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+										Expect(err).NotTo(HaveOccurred())
+										session.Wait()
+
+										Expect(session.Out).To(gbytes.Say(ui.AttachPolicyHint, fakeAppName))
+										Expect(session.Out).To(gbytes.Say("OK"))
+										Expect(session.ExitCode()).To(Equal(0))
+										Expect(session.Out).To(gbytes.Say(ui.ScheduleConflictWarning))
+									})
+								})
+
+								Context("when multiple recurring defined with day-of-month and day-of-week", func() {
+									BeforeEach(func() {
+										fakePolicy = ScalingPolicy{
+											InstanceMin: 1,
+											InstanceMax: 2,
+											ScalingRules: []*ScalingRule{
+												{
+													MetricType:            "memoryused",
+													StatWindowSeconds:     300,
+													BreachDurationSeconds: 600,
+													Threshold:             30,
+													Operator:              "<=",
+													CoolDownSeconds:       300,
+													Adjustment:            "-1",
+												},
+											},
+											Schedules: &ScalingSchedules{
+												Timezone: "Asia/Shanghai",
+												RecurringSchedules: []*RecurringSchedule{
+													{
+														StartTime:             "10:00",
+														EndTime:               "18:00",
+														DaysOfWeek:            []int{1, 2, 3},
+														ScheduledInstanceMin:  5,
+														ScheduledInstanceMax:  20,
+														ScheduledInstanceInit: 10,
+													},
+													{
+														StartTime:             "10:00",
+														EndTime:               "18:00",
+														DaysOfMonth:           []int{1, 2, 3},
+														ScheduledInstanceMin:  5,
+														ScheduledInstanceMax:  20,
+														ScheduledInstanceInit: 10,
+													},
+												},
+											},
+										}
+									})
+
+									It("Succeed with warning msg", func() {
+										args = []string{ts.Port(), "attach-autoscaling-policy", fakeAppName, policyJSON}
+										session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+										Expect(err).NotTo(HaveOccurred())
+										session.Wait()
+
+										Expect(session.Out).To(gbytes.Say(ui.AttachPolicyHint, fakeAppName))
+										Expect(session.Out).To(gbytes.Say("OK"))
+										Expect(session.ExitCode()).To(Equal(0))
+										Expect(session.Out).To(gbytes.Say(ui.ScheduleConflictWarning))
+									})
+								})
+
+								Context("when a single schedule defined", func() {
+									BeforeEach(func() {
+										fakePolicy = ScalingPolicy{
+											InstanceMin: 1,
+											InstanceMax: 2,
+											ScalingRules: []*ScalingRule{
+												{
+													MetricType:            "memoryused",
+													StatWindowSeconds:     300,
+													BreachDurationSeconds: 600,
+													Threshold:             30,
+													Operator:              "<=",
+													CoolDownSeconds:       300,
+													Adjustment:            "-1",
+												},
+											},
+											Schedules: &ScalingSchedules{
+												Timezone: "Asia/Shanghai",
+												RecurringSchedules: []*RecurringSchedule{
+													{
+														StartTime:             "10:00",
+														EndTime:               "18:00",
+														DaysOfWeek:            []int{1, 2, 3},
+														ScheduledInstanceMin:  5,
+														ScheduledInstanceMax:  20,
+														ScheduledInstanceInit: 10,
+													},
+												},
+											},
+										}
+									})
+
+									It("Succeed without warning msg ", func() {
+										args = []string{ts.Port(), "attach-autoscaling-policy", fakeAppName, policyJSON}
+										session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+										Expect(err).NotTo(HaveOccurred())
+										session.Wait()
+
+										Expect(session.Out).To(gbytes.Say(ui.AttachPolicyHint, fakeAppName))
+										Expect(session.Out).To(gbytes.Say("OK"))
+										Expect(session.ExitCode()).To(Equal(0))
+										Expect(session.Out).NotTo(gbytes.Say(ui.ScheduleConflictWarning))
+
+									})
 								})
 
 							})
