@@ -71,11 +71,11 @@ METRIC_NAME:
 	memoryused, memoryutil, responsetime, throughput.	
 
 OPTIONS:
-	--app-instance-index, -i         Application instance index, default to empty so aggregated metrics will be returned.
-	--start							 Start time of metrics collected with format "yyyy-MM-ddTHH:mm:ss+/-HH:mm" or "yyyy-MM-ddTHH:mm:ssZ", default to very beginning if not specified.
-	--end							 End time of the metrics collected with format "yyyy-MM-ddTHH:mm:ss+/-HH:mm" or "yyyy-MM-ddTHH:mm:ssZ", default to current time if not speficied.
-	--desc							 Display in descending order, default to ascending order if not specified.
-	--output					     Dump the metrics to a file in table format.
+	--app-instance-index, -i		Application instance index, default to empty so aggregated metrics will be returned.
+	--start							Start time of metrics collected with format "yyyy-MM-ddTHH:mm:ss+/-HH:mm" or "yyyy-MM-ddTHH:mm:ssZ", default to very beginning if not specified.
+	--end							End time of the metrics collected with format "yyyy-MM-ddTHH:mm:ss+/-HH:mm" or "yyyy-MM-ddTHH:mm:ssZ", default to current time if not speficied.
+	--desc							Display in descending order, default to ascending order if not specified.
+	--output						Dump the metrics to a file in table format.
 					`,
 				},
 			},
