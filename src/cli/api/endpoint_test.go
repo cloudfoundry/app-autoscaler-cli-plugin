@@ -3,12 +3,15 @@ package api_test
 import (
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"os"
 
 	. "cli/api"
+	"cli/api/fakes"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega/ghttp"
 )
 
 var _ = Describe("Endpoint Helper Test", func() {
@@ -22,25 +25,41 @@ var _ = Describe("Endpoint Helper Test", func() {
 		configFilePath string
 		content        []byte
 		err            error
+		apiServer      *ghttp.Server
+		cliConnection  *fakes.FakeConnection
 	)
 
 	BeforeEach(func() {
 		os.Setenv("AUTOSCALER_CONFIG_FILE", "test_config.json")
 		configFilePath = ConfigFile()
+		cliConnection = &fakes.FakeConnection{}
 	})
 
 	AfterEach(func() {
+		os.RemoveAll("plugins")
 	})
 
 	Context("Set API endpoint", func() {
 
+		BeforeEach(func() {
+			cliConnection.ApiEndpointReturns("api.bosh-lite.com", nil)
+			cliConnection.IsSSLDisabledReturns(false, nil)
+
+			apiServer = ghttp.NewServer()
+			apiServer.RouteToHandler("GET", "/health",
+				ghttp.RespondWith(http.StatusOK, ""),
+			)
+
+		})
+
 		It("Set a valid json in config file", func() {
-			err = SetEndpoint(fakeApiEndpoint, false)
+
+			err = SetEndpoint(cliConnection, apiServer.URL(), false)
 			Expect(err).NotTo(HaveOccurred())
 
 			content, err = ioutil.ReadFile(configFilePath)
 			Expect(err).NotTo(HaveOccurred())
-			Expect(content).Should(MatchJSON(fmt.Sprintf(`{"URL":"%s", "SkipSSLValidation":%t}`, fakeApiEndpoint, false)))
+			Expect(content).Should(MatchJSON(fmt.Sprintf(`{"URL":"%s", "SkipSSLValidation":%t}`, apiServer.URL(), false)))
 		})
 	})
 
