@@ -29,15 +29,22 @@ var ConfigFile = func() string {
 func GetEndpoint() (*APIEndpoint, error) {
 
 	configFilePath := ConfigFile()
-	content, err := ioutil.ReadFile(configFilePath)
-	if err != nil {
-		return nil, err
-	}
-
 	endpoint := &APIEndpoint{}
-	err = json.Unmarshal(content, &endpoint)
-	if err != nil || endpoint.URL == "" {
-		ioutil.WriteFile(configFilePath, nil, 0600)
+
+	if _, err := os.Stat(configFilePath); os.IsNotExist(err) {
+		err := ioutil.WriteFile(configFilePath, nil, 0600)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		content, err := ioutil.ReadFile(configFilePath)
+		if err != nil {
+			return nil, err
+		}
+		err = json.Unmarshal(content, &endpoint)
+		if err != nil || endpoint.URL == "" {
+			ioutil.WriteFile(configFilePath, nil, 0600)
+		}
 	}
 	return endpoint, nil
 
@@ -53,11 +60,22 @@ func UnsetEndpoint() error {
 	return nil
 }
 
-func SetEndpoint(url string, skipSSLValidation bool) error {
+func SetEndpoint(cliConnection Connection, url string, skipSSLValidation bool) error {
 
+	cfclient, err := NewCFClient(cliConnection)
+	if err != nil {
+		return err
+	}
+	skipSSLValidation = skipSSLValidation || cfclient.IsSSLDisabled
 	endpoint := &APIEndpoint{
 		URL:               url,
 		SkipSSLValidation: skipSSLValidation,
+	}
+
+	apihelper := NewAPIHelper(endpoint, cfclient, os.Getenv("CF_TRACE"))
+	err = apihelper.CheckHealth()
+	if err != nil {
+		return err
 	}
 
 	urlConfig, err := json.Marshal(endpoint)

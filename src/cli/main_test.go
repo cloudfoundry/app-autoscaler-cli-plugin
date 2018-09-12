@@ -126,10 +126,8 @@ var _ = Describe("App-AutoScaler Commands", func() {
 	AfterEach(func() {
 		ts.Stop()
 		apiServer.Close()
-		if _, err = os.Stat(outputFile); !os.IsNotExist(err) {
-			err = os.Remove(outputFile)
-		}
-
+		os.Remove(outputFile)
+		os.RemoveAll("plugins")
 	})
 
 	Describe("Commands autoscaling-api, asa", func() {
@@ -257,20 +255,33 @@ var _ = Describe("App-AutoScaler Commands", func() {
 
 			Context("No previous end-point setting", func() {
 
-				BeforeEach(func() {
-					args = []string{ts.Port(), "autoscaling-api", "--unset"}
-					session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
-					Expect(err).NotTo(HaveOccurred())
-					session.Wait()
+				Context("when config file doesn't exist", func() {
+					It("response with no endpoint..", func() {
+						args = []string{ts.Port(), "autoscaling-api"}
+						session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+						Expect(err).NotTo(HaveOccurred())
+						session.Wait()
+						Expect(session).To(gbytes.Say(ui.NoEndpoint))
+						Expect(session.ExitCode()).To(Equal(0))
+					})
 				})
 
-				It("response with no endpoint..", func() {
-					args = []string{ts.Port(), "autoscaling-api"}
-					session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
-					Expect(err).NotTo(HaveOccurred())
-					session.Wait()
-					Expect(session).To(gbytes.Say(ui.NoEndpoint))
-					Expect(session.ExitCode()).To(Equal(0))
+				Context("when config file exists", func() {
+					BeforeEach(func() {
+						args = []string{ts.Port(), "autoscaling-api", "--unset"}
+						session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+						Expect(err).NotTo(HaveOccurred())
+						session.Wait()
+					})
+
+					It("response with no endpoint..", func() {
+						args = []string{ts.Port(), "autoscaling-api"}
+						session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+						Expect(err).NotTo(HaveOccurred())
+						session.Wait()
+						Expect(session).To(gbytes.Say(ui.NoEndpoint))
+						Expect(session.ExitCode()).To(Equal(0))
+					})
 				})
 			})
 

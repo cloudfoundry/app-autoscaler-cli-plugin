@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"os"
 	"strings"
 
 	"cli/api"
@@ -69,23 +68,7 @@ func (cmd *ApiCommand) SetEndpoint(cliConnection api.Connection, url string, ski
 
 	ui.SayMessage(ui.SetAPIEndpoint, url)
 
-	cfclient, err := api.NewCFClient(cliConnection)
-	if err != nil {
-		return err
-	}
-	skipSSLValidation = skipSSLValidation || cfclient.IsSSLDisabled
-	endpoint := &api.APIEndpoint{
-		URL:               url,
-		SkipSSLValidation: skipSSLValidation,
-	}
-
-	apihelper := api.NewAPIHelper(endpoint, cfclient, os.Getenv("CF_TRACE"))
-	err = apihelper.CheckHealth()
-	if err != nil {
-		return err
-	}
-
-	err = api.SetEndpoint(url, skipSSLValidation)
+	err := api.SetEndpoint(cliConnection, url, skipSSLValidation)
 	if err != nil {
 		return err
 	}
