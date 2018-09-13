@@ -311,11 +311,10 @@ func (helper *APIHelper) DeletePolicy() error {
 
 func (helper *APIHelper) GetInstanceMetrics(metricName string, instanceIndex, startTime, endTime int64, desc bool, page uint64) (bool, [][]string, error) {
 
-	hasNext := false
 	if page <= 1 {
 		err := helper.CheckHealth()
 		if err != nil {
-			return hasNext, nil, err
+			return false, nil, err
 		}
 	}
 
@@ -346,7 +345,7 @@ func (helper *APIHelper) GetInstanceMetrics(metricName string, instanceIndex, st
 
 	resp, err := helper.DoRequest(req)
 	if err != nil {
-		return hasNext, nil, err
+		return false, nil, err
 	}
 	defer resp.Body.Close()
 
@@ -359,16 +358,16 @@ func (helper *APIHelper) GetInstanceMetrics(metricName string, instanceIndex, st
 		default:
 			errorMsg, err = parseErrResponse(raw)
 			if err != nil {
-				return hasNext, nil, err
+				return false, nil, err
 			}
 		}
-		return hasNext, nil, errors.New(errorMsg)
+		return false, nil, errors.New(errorMsg)
 	}
 
 	var metrics models.InstanceMetricsResults
 	err = json.Unmarshal(raw, &metrics)
 	if err != nil {
-		return hasNext, nil, err
+		return false, nil, err
 	}
 
 	var data [][]string
@@ -377,19 +376,19 @@ func (helper *APIHelper) GetInstanceMetrics(metricName string, instanceIndex, st
 	}
 
 	if metrics.Page < metrics.TotalPages {
-		hasNext = true
+		return true, data, nil
+	} else {
+		return false, data, nil
 	}
-	return hasNext, data, nil
 
 }
 
 func (helper *APIHelper) GetAggregatedMetrics(metricName string, startTime, endTime int64, desc bool, page uint64) (bool, [][]string, error) {
 
-	hasNext := false
 	if page <= 1 {
 		err := helper.CheckHealth()
 		if err != nil {
-			return hasNext, nil, err
+			return false, nil, err
 		}
 	}
 
@@ -417,7 +416,7 @@ func (helper *APIHelper) GetAggregatedMetrics(metricName string, startTime, endT
 
 	resp, err := helper.DoRequest(req)
 	if err != nil {
-		return hasNext, nil, err
+		return false, nil, err
 	}
 	defer resp.Body.Close()
 
@@ -430,16 +429,16 @@ func (helper *APIHelper) GetAggregatedMetrics(metricName string, startTime, endT
 		default:
 			errorMsg, err = parseErrResponse(raw)
 			if err != nil {
-				return hasNext, nil, err
+				return false, nil, err
 			}
 		}
-		return hasNext, nil, errors.New(errorMsg)
+		return false, nil, errors.New(errorMsg)
 	}
 
 	var metrics models.AggregatedMetricsResults
 	err = json.Unmarshal(raw, &metrics)
 	if err != nil {
-		return hasNext, nil, err
+		return false, nil, err
 	}
 
 	var data [][]string
@@ -448,19 +447,19 @@ func (helper *APIHelper) GetAggregatedMetrics(metricName string, startTime, endT
 	}
 
 	if metrics.Page < metrics.TotalPages {
-		hasNext = true
+		return true, data, nil
+	} else {
+		return false, data, nil
 	}
-	return hasNext, data, nil
 
 }
 
 func (helper *APIHelper) GetHistory(startTime, endTime int64, desc bool, page uint64) (bool, [][]string, error) {
 
-	hasNext := false
 	if page <= 1 {
 		err := helper.CheckHealth()
 		if err != nil {
-			return hasNext, nil, err
+			return false, nil, err
 		}
 	}
 
@@ -486,7 +485,7 @@ func (helper *APIHelper) GetHistory(startTime, endTime int64, desc bool, page ui
 
 	resp, err := helper.DoRequest(req)
 	if err != nil {
-		return hasNext, nil, err
+		return false, nil, err
 	}
 	defer resp.Body.Close()
 
@@ -499,16 +498,16 @@ func (helper *APIHelper) GetHistory(startTime, endTime int64, desc bool, page ui
 		default:
 			errorMsg, err = parseErrResponse(raw)
 			if err != nil {
-				return hasNext, nil, err
+				return false, nil, err
 			}
 		}
-		return hasNext, nil, errors.New(errorMsg)
+		return false, nil, errors.New(errorMsg)
 	}
 
 	var history models.HistoryResults
 	err = json.Unmarshal(raw, &history)
 	if err != nil {
-		return hasNext, nil, err
+		return false, nil, err
 	}
 
 	var data [][]string
@@ -538,9 +537,9 @@ func (helper *APIHelper) GetHistory(startTime, endTime int64, desc bool, page ui
 	}
 
 	if history.Page < history.TotalPages {
-		hasNext = true
+		return true, data, nil
+	} else {
+		return false, data, nil
 	}
-
-	return hasNext, data, nil
 
 }
