@@ -7,7 +7,8 @@ import (
 	"os"
 
 	. "cli/api"
-	"cli/api/fakes"
+
+	"code.cloudfoundry.org/cli/plugin/pluginfakes"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -26,13 +27,13 @@ var _ = Describe("Endpoint Helper Test", func() {
 		content        []byte
 		err            error
 		apiServer      *ghttp.Server
-		cliConnection  *fakes.FakeConnection
+		cliConnection  *pluginfakes.FakeCliConnection
 	)
 
 	BeforeEach(func() {
 		os.Setenv("AUTOSCALER_CONFIG_FILE", "test_config.json")
 		configFilePath = ConfigFile()
-		cliConnection = &fakes.FakeConnection{}
+		cliConnection = &pluginfakes.FakeCliConnection{}
 	})
 
 	AfterEach(func() {
