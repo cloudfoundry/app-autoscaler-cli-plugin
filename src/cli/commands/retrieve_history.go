@@ -59,10 +59,10 @@ func (command HistoryCommand) Execute([]string) error {
 
 	return RetrieveHistory(AutoScaler.CLIConnection,
 		command.RequiredlArgs.AppName,
-		st, et, command.Desc, writer)
+		st, et, command.Desc, writer, command.Output)
 }
 
-func RetrieveHistory(cliConnection api.Connection, appName string, startTime, endTime int64, desc bool, writer io.Writer) error {
+func RetrieveHistory(cliConnection api.Connection, appName string, startTime, endTime int64, desc bool, writer io.Writer, outputfile string) error {
 
 	cfclient, err := api.NewCFClient(cliConnection)
 	if err != nil {
@@ -83,7 +83,11 @@ func RetrieveHistory(cliConnection api.Connection, appName string, startTime, en
 
 	apihelper := api.NewAPIHelper(endpoint, cfclient, os.Getenv("CF_TRACE"))
 
-	ui.SayMessage(ui.ShowHistoryHint, appName)
+	if outputfile != "" {
+		ui.SayMessage(ui.SaveHistoryHint, appName, outputfile)
+	} else {
+		ui.SayMessage(ui.ShowHistoryHint, appName)
+	}
 
 	table := ui.NewTable(writer, []string{"Scaling Type", "Status", "Instance Changes", "Time", "Action", "Error"})
 	var (
@@ -117,7 +121,7 @@ func RetrieveHistory(cliConnection api.Connection, appName string, startTime, en
 		ui.SayOK()
 		ui.SayMessage(ui.HistoryNotFound, appName)
 	} else {
-		if writer != os.Stdout {
+		if outputfile != "" {
 			ui.SayOK()
 		}
 	}

@@ -69,10 +69,10 @@ func (command MetricsCommand) Execute([]string) error {
 
 	return RetrieveMetrics(AutoScaler.CLIConnection,
 		command.RequiredlArgs.AppName, command.RequiredlArgs.MetricName,
-		st, et, command.Desc, writer)
+		st, et, command.Desc, writer, command.Output)
 }
 
-func RetrieveMetrics(cliConnection api.Connection, appName, metricName string, startTime, endTime int64, desc bool, writer io.Writer) error {
+func RetrieveMetrics(cliConnection api.Connection, appName, metricName string, startTime, endTime int64, desc bool, writer io.Writer, outputfile string) error {
 
 	cfclient, err := api.NewCFClient(cliConnection)
 	if err != nil {
@@ -93,7 +93,11 @@ func RetrieveMetrics(cliConnection api.Connection, appName, metricName string, s
 
 	apihelper := api.NewAPIHelper(endpoint, cfclient, os.Getenv("CF_TRACE"))
 
-	ui.SayMessage(ui.ShowMetricsHint, appName)
+	if outputfile != "" {
+		ui.SayMessage(ui.SaveMetricHint, appName, outputfile)
+	} else {
+		ui.SayMessage(ui.ShowMetricsHint, appName)
+	}
 
 	table := ui.NewTable(writer, []string{"Metrics Name", "Instance Index", "Value", "At"})
 	var (
@@ -126,7 +130,7 @@ func RetrieveMetrics(cliConnection api.Connection, appName, metricName string, s
 		ui.SayOK()
 		ui.SayMessage(ui.MetricsNotFound, appName)
 	} else {
-		if writer != os.Stdout {
+		if outputfile != "" {
 			ui.SayOK()
 		}
 	}

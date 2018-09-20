@@ -764,14 +764,25 @@ var _ = Describe("API Helper Test", func() {
 							Message:      "fakeMsg",
 							Error:        "fakeError",
 						})
+						histories_ut = append(histories_ut, &AppScalingHistory{
+							AppId:        fakeAppId,
+							Timestamp:    now + 2*int64(120*1E9),
+							ScalingType:  0, //dynamic
+							Status:       0, //succeed
+							OldInstances: 2,
+							NewInstances: 10,
+							Reason:       "fakeReason",
+							Message:      "fakeMsg",
+							Error:        "fakeError",
+						})
 
 						apiServer.AppendHandlers(
 							ghttp.CombineHandlers(
 								ghttp.RespondWithJSONEncoded(http.StatusOK, &HistoryResults{
-									TotalResults: 2,
+									TotalResults: 3,
 									TotalPages:   1,
 									Page:         1,
-									Histories:    histories_ut[0:2],
+									Histories:    histories_ut[0:3],
 								}),
 								ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
 								ghttp.VerifyRequest("GET", urlpath, "order=asc&page=1"),
@@ -784,7 +795,7 @@ var _ = Describe("API Helper Test", func() {
 						next, data, err := apihelper.GetHistory(0, 0, false, uint64(1))
 						Expect(err).NotTo(HaveOccurred())
 						Expect(next).To(BeFalse())
-						Expect(len(data)).To(Equal(2))
+						Expect(len(data)).To(Equal(3))
 
 						Expect(data[0][0]).To(Equal("dynamic"))
 						Expect(data[0][1]).To(Equal("succeeded"))
@@ -799,6 +810,13 @@ var _ = Describe("API Helper Test", func() {
 						Expect(data[1][3]).To(Equal(time.Unix(0, now+int64(120*1E9)).Format(time.RFC3339)))
 						Expect(data[1][4]).To(Equal("-9 instance(s) because fakeMsg"))
 						Expect(data[1][5]).To(Equal("fakeError"))
+
+						Expect(data[2][0]).To(Equal("dynamic"))
+						Expect(data[2][1]).To(Equal("succeeded"))
+						Expect(data[2][2]).To(Equal("2->10"))
+						Expect(data[2][3]).To(Equal(time.Unix(0, now+2*int64(120*1E9)).Format(time.RFC3339)))
+						Expect(data[2][4]).To(Equal("+8 instance(s) because fakeMsg"))
+						Expect(data[2][5]).To(Equal("fakeError"))
 
 					})
 				})

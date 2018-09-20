@@ -449,7 +449,11 @@ func (helper *APIHelper) GetHistory(startTime, endTime int64, desc bool, page ui
 
 		var adjustment = entry.NewInstances - entry.OldInstances
 		if entry.Message != "" {
-			entry.Reason = fmt.Sprintf("%d instance(s) because %s", adjustment, entry.Message)
+			if adjustment >= 0 {
+				entry.Reason = fmt.Sprintf("+%d instance(s) because %s", adjustment, entry.Message)
+			} else {
+				entry.Reason = fmt.Sprintf("%d instance(s) because %s", adjustment, entry.Message)
+			}
 		}
 		data = append(data, []string{scalingType, status,
 			strconv.Itoa(entry.OldInstances) + "->" + strconv.Itoa(entry.NewInstances),
