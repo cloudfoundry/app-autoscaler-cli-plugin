@@ -57,7 +57,16 @@ var _ = Describe("App-AutoScaler Commands", func() {
 					Threshold:             30,
 					Operator:              "<=",
 					CoolDownSeconds:       300,
-					Adjustment:            "-1",
+					Adjustment:            "-2",
+				},
+				{
+					MetricType:            "memoryused",
+					StatWindowSeconds:     300,
+					BreachDurationSeconds: 600,
+					Threshold:             30,
+					Operator:              ">",
+					CoolDownSeconds:       300,
+					Adjustment:            "+100%",
 				},
 			},
 			Schedules: &ScalingSchedules{
@@ -476,6 +485,16 @@ var _ = Describe("App-AutoScaler Commands", func() {
 									"Adjustment":            Equal(fakePolicy.ScalingRules[0].Adjustment),
 								}))
 
+								Expect(*actualPolicy.ScalingRules[1]).To(MatchFields(IgnoreExtras, Fields{
+									"MetricType":            Equal(fakePolicy.ScalingRules[1].MetricType),
+									"StatWindowSeconds":     BeNumerically("==", fakePolicy.ScalingRules[1].StatWindowSeconds),
+									"BreachDurationSeconds": BeNumerically("==", fakePolicy.ScalingRules[1].BreachDurationSeconds),
+									"Threshold":             BeNumerically("==", fakePolicy.ScalingRules[1].Threshold),
+									"Operator":              Equal(fakePolicy.ScalingRules[1].Operator),
+									"CoolDownSeconds":       BeNumerically("==", fakePolicy.ScalingRules[1].CoolDownSeconds),
+									"Adjustment":            Equal(fakePolicy.ScalingRules[1].Adjustment),
+								}))
+
 								Expect(*actualPolicy.Schedules).To(MatchFields(IgnoreExtras, Fields{
 									"Timezone": Equal(fakePolicy.Schedules.Timezone),
 								}))
@@ -509,6 +528,8 @@ var _ = Describe("App-AutoScaler Commands", func() {
 									Expect(err).NotTo(HaveOccurred())
 									session.Wait()
 
+									Expect(session.Out).To(gbytes.Say(ui.SavePolicyHint, fakeAppName, outputFile))
+
 									Expect(outputFile).To(BeARegularFile())
 									contents, err := ioutil.ReadFile(outputFile)
 									Expect(err).NotTo(HaveOccurred())
@@ -529,6 +550,15 @@ var _ = Describe("App-AutoScaler Commands", func() {
 										"Operator":              Equal(fakePolicy.ScalingRules[0].Operator),
 										"CoolDownSeconds":       BeNumerically("==", fakePolicy.ScalingRules[0].CoolDownSeconds),
 										"Adjustment":            Equal(fakePolicy.ScalingRules[0].Adjustment),
+									}))
+									Expect(*actualPolicy.ScalingRules[1]).To(MatchFields(IgnoreExtras, Fields{
+										"MetricType":            Equal(fakePolicy.ScalingRules[1].MetricType),
+										"StatWindowSeconds":     BeNumerically("==", fakePolicy.ScalingRules[1].StatWindowSeconds),
+										"BreachDurationSeconds": BeNumerically("==", fakePolicy.ScalingRules[1].BreachDurationSeconds),
+										"Threshold":             BeNumerically("==", fakePolicy.ScalingRules[1].Threshold),
+										"Operator":              Equal(fakePolicy.ScalingRules[1].Operator),
+										"CoolDownSeconds":       BeNumerically("==", fakePolicy.ScalingRules[1].CoolDownSeconds),
+										"Adjustment":            Equal(fakePolicy.ScalingRules[1].Adjustment),
 									}))
 
 									Expect(*actualPolicy.Schedules).To(MatchFields(IgnoreExtras, Fields{
@@ -1461,7 +1491,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 
 								})
 
-								It("Succeed to print the metrics to stdout with asc order", func() {
+								It("Succeed to print the metrics to a file with asc order", func() {
 
 									args = []string{ts.Port(), "autoscaling-metrics", fakeAppName, metricName, "--output", outputFile}
 
@@ -1469,7 +1499,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 									Expect(err).NotTo(HaveOccurred())
 									session.Wait()
 
-									Expect(session.Out).To(gbytes.Say(ui.ShowMetricsHint, fakeAppName))
+									Expect(session.Out).To(gbytes.Say(ui.SaveMetricHint, fakeAppName, outputFile))
 									Expect(session.Out).To(gbytes.Say("OK"))
 
 									Expect(outputFile).To(BeARegularFile())
@@ -1869,7 +1899,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 
 								})
 
-								It("Succeed to print the metrics to stdout with asc order", func() {
+								It("Succeed to print the history to stdout with asc order", func() {
 
 									args = []string{ts.Port(), "autoscaling-history", fakeAppName,
 										"--start", now.Format(time.RFC3339),
@@ -1965,7 +1995,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 
 								})
 
-								It("Succeed to print the metrics to stdout with desc order", func() {
+								It("Succeed to print the history to stdout with desc order", func() {
 
 									args = []string{ts.Port(), "autoscaling-history", fakeAppName,
 										"--start", now.Format(time.RFC3339),
@@ -2029,7 +2059,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 
 								})
 
-								It("Succeed to print the metrics to stdout with asc order", func() {
+								It("Succeed to print the history to a file with asc order", func() {
 
 									args = []string{ts.Port(), "autoscaling-history", fakeAppName, "--output", outputFile}
 
@@ -2037,7 +2067,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 									Expect(err).NotTo(HaveOccurred())
 									session.Wait()
 
-									Expect(session.Out).To(gbytes.Say(ui.ShowHistoryHint, fakeAppName))
+									Expect(session.Out).To(gbytes.Say(ui.SaveHistoryHint, fakeAppName, outputFile))
 									Expect(session.Out).To(gbytes.Say("OK"))
 
 									Expect(outputFile).To(BeARegularFile())

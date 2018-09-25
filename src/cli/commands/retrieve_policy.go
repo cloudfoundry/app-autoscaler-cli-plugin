@@ -35,10 +35,10 @@ func (command PolicyCommand) Execute([]string) error {
 		writer = os.Stdout
 	}
 
-	return RetrievePolicy(AutoScaler.CLIConnection, command.RequiredlArgs.AppName, writer)
+	return RetrievePolicy(AutoScaler.CLIConnection, command.RequiredlArgs.AppName, writer, command.Output)
 }
 
-func RetrievePolicy(cliConnection api.Connection, appName string, writer io.Writer) error {
+func RetrievePolicy(cliConnection api.Connection, appName string, writer io.Writer, outputfile string) error {
 
 	cfclient, err := api.NewCFClient(cliConnection)
 	if err != nil {
@@ -59,16 +59,20 @@ func RetrievePolicy(cliConnection api.Connection, appName string, writer io.Writ
 
 	apihelper := api.NewAPIHelper(endpoint, cfclient, os.Getenv("CF_TRACE"))
 
-	ui.SayMessage(ui.ShowPolicyHint, appName)
+	if outputfile != "" {
+		ui.SayMessage(ui.SavePolicyHint, appName, outputfile)
+	} else {
+		ui.SayMessage(ui.ShowPolicyHint, appName)
+	}
 
 	policy, err := apihelper.GetPolicy()
 	if err != nil {
 		return err
 	}
+	fmt.Fprintf(writer, "%v", string(policy))
 
-	if writer != os.Stdout {
+	if outputfile != "" {
 		ui.SayOK()
 	}
-	fmt.Fprintf(writer, string(policy))
 	return nil
 }
