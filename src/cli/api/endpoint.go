@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"code.cloudfoundry.org/cli/cf/configuration/confighelpers"
 )
@@ -68,7 +69,7 @@ func SetEndpoint(cliConnection Connection, url string, skipSSLValidation bool) e
 	}
 	skipSSLValidation = skipSSLValidation || cfclient.IsSSLDisabled
 	endpoint := &APIEndpoint{
-		URL:               url,
+		URL:               strings.TrimSuffix(url, "/"),
 		SkipSSLValidation: skipSSLValidation,
 	}
 

@@ -56,6 +56,14 @@ type AppInstanceMetric struct {
 	Timestamp     int64  `json:"timestamp"`
 }
 
+type AppAggregatedMetric struct {
+	AppId     string `json:"app_id"`
+	Name      string `json:"name"`
+	Unit      string `json:"unit"`
+	Value     string `json:"value"`
+	Timestamp int64  `json:"timestamp"`
+}
+
 type AppScalingHistory struct {
 	AppId        string        `json:"app_id"`
 	Timestamp    int64         `json:"timestamp"`
@@ -68,11 +76,18 @@ type AppScalingHistory struct {
 	Error        string        `json:"error"`
 }
 
-type MetricsResults struct {
+type InstanceMetricsResults struct {
 	TotalResults uint32               `json:"total_results"`
 	TotalPages   uint16               `json:"total_pages"`
 	Page         uint16               `json:"page"`
 	Metrics      []*AppInstanceMetric `json:"resources"`
+}
+
+type AggregatedMetricsResults struct {
+	TotalResults uint32                 `json:"total_results"`
+	TotalPages   uint16                 `json:"total_pages"`
+	Page         uint16                 `json:"page"`
+	Metrics      []*AppAggregatedMetric `json:"resources"`
 }
 
 type HistoryResults struct {

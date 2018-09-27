@@ -62,6 +62,17 @@ var _ = Describe("Endpoint Helper Test", func() {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(content).Should(MatchJSON(fmt.Sprintf(`{"URL":"%s", "SkipSSLValidation":%t}`, apiServer.URL(), false)))
 		})
+		Context("When endpoint is end with /", func() {
+			BeforeEach(func() {
+				err = SetEndpoint(cliConnection, apiServer.URL()+"/", false)
+				Expect(err).NotTo(HaveOccurred())
+			})
+			It("it prune the last /", func() {
+				content, err = ioutil.ReadFile(configFilePath)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(content).Should(MatchJSON(fmt.Sprintf(`{"URL":"%s", "SkipSSLValidation":%t}`, apiServer.URL(), false)))
+			})
+		})
 	})
 
 	Context("Unset API endpoint", func() {
