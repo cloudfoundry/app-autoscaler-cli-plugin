@@ -2,7 +2,7 @@
 
 App-AutoScaler plug-in provides the command line interface to manage [App AutoScaler](https://github.com/cloudfoundry-incubator/app-autoscaler) service policies, retrieve metrics and scaling history.
 
-
+   
 ## Set up
 
 To set up the development, follow the steps below
