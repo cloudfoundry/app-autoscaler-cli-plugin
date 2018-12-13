@@ -23,7 +23,7 @@ type MetricsCommand struct {
 
 type MetricsPositionalArgs struct {
 	AppName    string `positional-arg-name:"APP_NAME" required:"true"`
-	MetricName string `positional-arg-name:"METRIC_NAME" required:"true" description:"available metric supported: \n memoryused, memoryutil, responsetime, throughput"`
+	MetricName string `positional-arg-name:"METRIC_NAME" required:"true" description:"available metric supported: \n memoryused, memoryutil, responsetime, throughput, cpu"`
 }
 
 func (command MetricsCommand) Execute([]string) error {
@@ -33,6 +33,7 @@ func (command MetricsCommand) Execute([]string) error {
 	case "memoryutil":
 	case "responsetime":
 	case "throughput":
+	case "cpu":
 	default:
 		return errors.New(fmt.Sprintf(ui.UnrecognizedMetricName, command.RequiredlArgs.MetricName))
 	}

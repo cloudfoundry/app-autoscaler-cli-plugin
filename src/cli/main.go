@@ -68,7 +68,7 @@ OPTIONS:
 					Usage: `cf autoscaling-metrics APP_NAME METRIC_NAME [-i INSTANCE_INDEX] [--start START_TIME] [--end END_TIME] [--desc] [--output PATH_TO_FILE]
 
 METRIC_NAME: 
-	memoryused, memoryutil, responsetime, throughput.	
+	memoryused, memoryutil, responsetime, throughput, cpu.	
 
 OPTIONS:
 	--app-instance-index,-i			Application instance index, default to empty so aggregated metrics will be returned.
