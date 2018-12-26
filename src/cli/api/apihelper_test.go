@@ -401,7 +401,7 @@ var _ = Describe("API Helper Test", func() {
 			var instanceIndex int64 = 0
 
 			BeforeEach(func() {
-				now = time.Now().UnixNano()
+				now = int64(1E9)
 
 				for i := 0; i < 30; i++ {
 					metrics = append(metrics, &AppInstanceMetric{
@@ -413,6 +413,7 @@ var _ = Describe("API Helper Test", func() {
 						Value:         "100",
 						Timestamp:     now + int64(i*30*1E9),
 					})
+
 				}
 
 				for i := 0; i < 30; i++ {
@@ -688,7 +689,7 @@ var _ = Describe("API Helper Test", func() {
 			var metrics, reversedMetrics []*AppAggregatedMetric
 
 			BeforeEach(func() {
-				now = time.Now().UnixNano()
+				now = int64(1E9)
 
 				for i := 0; i < 30; i++ {
 					metrics = append(metrics, &AppAggregatedMetric{
@@ -967,7 +968,7 @@ var _ = Describe("API Helper Test", func() {
 			var histories, reversedHistories []*AppScalingHistory
 
 			BeforeEach(func() {
-				now = time.Now().UnixNano()
+				now = int64(1E9)
 
 				for i := 0; i < 10; i++ {
 					histories = append(histories, &AppScalingHistory{
