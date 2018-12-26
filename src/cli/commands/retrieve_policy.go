@@ -44,17 +44,18 @@ func RetrievePolicy(cliConnection api.Connection, appName string, writer io.Writ
 	if err != nil {
 		return err
 	}
-	err = cfclient.Configure(appName)
-	if err != nil {
-		return err
-	}
 
-	endpoint, err := api.GetEndpoint()
+	endpoint, err := api.GetEndpoint(cfclient)
 	if err != nil {
 		return err
 	}
 	if endpoint.URL == "" {
 		return errors.New(ui.NoEndpoint)
+	}
+
+	err = cfclient.Configure(appName)
+	if err != nil {
+		return err
 	}
 
 	apihelper := api.NewAPIHelper(endpoint, cfclient, os.Getenv("CF_TRACE"))

@@ -23,6 +23,7 @@ var _ = Describe("Endpoint Helper Test", func() {
 
 	var (
 		endpoint       *APIEndpoint
+		cfclient       *CFClient
 		configFilePath string
 		content        []byte
 		err            error
@@ -43,34 +44,63 @@ var _ = Describe("Endpoint Helper Test", func() {
 	Context("Set API endpoint", func() {
 
 		BeforeEach(func() {
-			cliConnection.ApiEndpointReturns("api.bosh-lite.com", nil)
-			cliConnection.IsSSLDisabledReturns(false, nil)
-
 			apiServer = ghttp.NewServer()
 			apiServer.RouteToHandler("GET", "/health",
 				ghttp.RespondWith(http.StatusOK, ""),
 			)
 
+			cliConnection.ApiEndpointReturns(apiServer.URL(), nil)
+			cliConnection.IsSSLDisabledReturns(false, nil)
+			cfclient, err = NewCFClient(cliConnection)
+			Expect(err).NotTo(HaveOccurred())
 		})
 
-		It("Set a valid json in config file", func() {
-
-			err = SetEndpoint(cliConnection, apiServer.URL(), false)
-			Expect(err).NotTo(HaveOccurred())
-
-			content, err = ioutil.ReadFile(configFilePath)
-			Expect(err).NotTo(HaveOccurred())
-			Expect(content).Should(MatchJSON(fmt.Sprintf(`{"URL":"%s", "SkipSSLValidation":%t}`, apiServer.URL(), false)))
-		})
-		Context("When endpoint is end with /", func() {
+		Context("When endpoint is valid", func() {
 			BeforeEach(func() {
-				err = SetEndpoint(cliConnection, apiServer.URL()+"/", false)
+				err = SetEndpoint(cfclient, apiServer.URL()+"/", false)
 				Expect(err).NotTo(HaveOccurred())
 			})
+
+			It("Set a valid json to config file", func() {
+				err = SetEndpoint(cfclient, apiServer.URL(), false)
+				Expect(err).NotTo(HaveOccurred())
+
+				content, err = ioutil.ReadFile(configFilePath)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(content).Should(MatchJSON(fmt.Sprintf(`{"URL":"%s", "SkipSSLValidation":%t}`, apiServer.URL(), false)))
+			})
+
 			It("it prune the last /", func() {
 				content, err = ioutil.ReadFile(configFilePath)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(content).Should(MatchJSON(fmt.Sprintf(`{"URL":"%s", "SkipSSLValidation":%t}`, apiServer.URL(), false)))
+			})
+		})
+
+		Context("When autoscaler domain doesn't match CF API domain", func() {
+			BeforeEach(func() {
+				cliConnection.ApiEndpointReturns("api.bosh-lite.com", nil)
+				cliConnection.IsSSLDisabledReturns(false, nil)
+				cfclient, err = NewCFClient(cliConnection)
+				Expect(err).NotTo(HaveOccurred())
+			})
+			It("it fails", func() {
+				err = SetEndpoint(cfclient, apiServer.URL(), false)
+				Expect(err).To(HaveOccurred())
+				fmt.Println(err)
+			})
+		})
+
+		Context("When autoscaler endpoint doesn't exist", func() {
+			BeforeEach(func() {
+				apiServer.RouteToHandler("GET", "/health",
+					ghttp.RespondWith(http.StatusNotFound, ""),
+				)
+			})
+
+			It("it fails", func() {
+				err = SetEndpoint(cfclient, apiServer.URL(), false)
+				Expect(err).To(HaveOccurred())
 			})
 		})
 	})
@@ -95,72 +125,125 @@ var _ = Describe("Endpoint Helper Test", func() {
 
 	Context("Get API Endpoint", func() {
 
-		Context("No endpoint detected when config file is empty", func() {
+		BeforeEach(func() {
+			apiServer = ghttp.NewServer()
+			apiServer.RouteToHandler("GET", "/health",
+				ghttp.RespondWith(http.StatusOK, ""),
+			)
+
+			cliConnection.ApiEndpointReturns(apiServer.URL(), nil)
+			cliConnection.IsSSLDisabledReturns(false, nil)
+			cfclient, err = NewCFClient(cliConnection)
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		Context("when there is an existing endpoint defined in configuration file", func() {
+
+			BeforeEach(func() {
+				urlConfig := []byte(fmt.Sprintf(`{"URL":"%s"}`, apiServer.URL()))
+				err = ioutil.WriteFile(configFilePath, urlConfig, 0600)
+				Expect(err).NotTo(HaveOccurred())
+			})
+
+			It("Return the existing URL when it's domain still consistent with the current cf domain", func() {
+				endpoint, err = GetEndpoint(cfclient)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(endpoint.URL).Should(Equal(apiServer.URL()))
+			})
+
+			Context("when cf domain changes", func() {
+
+				BeforeEach(func() {
+					urlConfig := []byte(fmt.Sprintf(`{"URL":"%s"}`, "autoscaler.bosh-lite.com"))
+					err = ioutil.WriteFile(configFilePath, urlConfig, 0600)
+					Expect(err).NotTo(HaveOccurred())
+				})
+
+				It("Clear staled setting and return the default autoscaler endpoint if it does work ", func() {
+					endpoint, err = GetEndpoint(cfclient)
+					Expect(err).NotTo(HaveOccurred())
+					Expect(endpoint.URL).Should(Equal(apiServer.URL()))
+				})
+
+				Context("When default autoscaler endpoint doesn't exist", func() {
+					BeforeEach(func() {
+						apiServer.RouteToHandler("GET", "/health",
+							ghttp.RespondWith(http.StatusNotFound, ""),
+						)
+					})
+
+					It("Clear staled setting and set the endpoint to empty", func() {
+						endpoint, err = GetEndpoint(cfclient)
+						Expect(err).NotTo(HaveOccurred())
+						Expect(endpoint.URL).Should(Equal(""))
+					})
+				})
+			})
+		})
+
+		Context("when configuration file is empty", func() {
 
 			BeforeEach(func() {
 				err = ioutil.WriteFile(configFilePath, nil, 0600)
 				Expect(err).NotTo(HaveOccurred())
 			})
 
-			It("Return an empty URL", func() {
-				endpoint, err = GetEndpoint()
+			It("Return a default URL when it is an valid autoscaler api server", func() {
+				endpoint, err = GetEndpoint(cfclient)
 				Expect(err).NotTo(HaveOccurred())
-				Expect(endpoint.URL).Should(Equal(""))
+				Expect(endpoint.URL).Should(Equal(apiServer.URL()))
+			})
+
+			Context("When default autoscaler endpoint doesn't exist", func() {
+
+				BeforeEach(func() {
+					apiServer.RouteToHandler("GET", "/health",
+						ghttp.RespondWith(http.StatusNotFound, ""),
+					)
+				})
+
+				It("Return empty string ", func() {
+					endpoint, err = GetEndpoint(cfclient)
+					Expect(err).NotTo(HaveOccurred())
+					Expect(endpoint.URL).Should(Equal(""))
+				})
 			})
 		})
 
-		Context("Load existing URL from config file", func() {
+		Context("When configuration file is invalid", func() {
 
-			BeforeEach(func() {
-				urlConfig := []byte(fmt.Sprintf(`{"URL":"%s"}`, fakeApiEndpoint))
-				err = ioutil.WriteFile(configFilePath, urlConfig, 0600)
-				Expect(err).NotTo(HaveOccurred())
+			Context("with an invalidJSON file", func() {
+
+				BeforeEach(func() {
+					invalidConfig := []byte(`invalidJSON`)
+					err = ioutil.WriteFile(configFilePath, invalidConfig, 0600)
+					Expect(err).NotTo(HaveOccurred())
+				})
+
+				It("Clear the wrong setting and return the default autoscaler endpoint if it works", func() {
+					endpoint, err = GetEndpoint(cfclient)
+					Expect(err).NotTo(HaveOccurred())
+					Expect(endpoint.URL).Should(Equal(apiServer.URL()))
+				})
+
 			})
 
-			It("Return valid URL", func() {
-				endpoint, err = GetEndpoint()
-				Expect(err).NotTo(HaveOccurred())
-				Expect(endpoint.URL).Should(Equal(fakeApiEndpoint))
-			})
-		})
+			Context("when no URL field defined in config file", func() {
 
-		Context("No endpoint detected when config is a invalid JSON file", func() {
+				BeforeEach(func() {
+					invalidConfig := []byte(`{"invalidJSON": invalidJSON}`)
+					err = ioutil.WriteFile(configFilePath, invalidConfig, 0600)
+					Expect(err).NotTo(HaveOccurred())
+				})
 
-			BeforeEach(func() {
-				invalidConfig := []byte(`{"invalidJSON": invalidJSON}`)
-				err = ioutil.WriteFile(configFilePath, invalidConfig, 0600)
-				Expect(err).NotTo(HaveOccurred())
-			})
+				It("Clear the wrong setting and return the default autoscaler endpoint if it works", func() {
+					endpoint, err = GetEndpoint(cfclient)
+					Expect(err).NotTo(HaveOccurred())
+					Expect(endpoint.URL).Should(Equal(apiServer.URL()))
+				})
 
-			It("No error thrown out and unset API endpoint", func() {
-				endpoint, err = GetEndpoint()
-				Expect(err).NotTo(HaveOccurred())
-				Expect(endpoint.URL).Should(Equal(""))
-
-				content, err = ioutil.ReadFile(configFilePath)
-				Expect(err).NotTo(HaveOccurred())
-				Expect(len(content)).Should(Equal(0))
 			})
 
-		})
-
-		Context("No endpoint detected when no URL field defined in config file", func() {
-
-			BeforeEach(func() {
-				invalidConfig := []byte(`{"invalidJSON": invalidJSON}`)
-				err = ioutil.WriteFile(configFilePath, invalidConfig, 0600)
-				Expect(err).NotTo(HaveOccurred())
-			})
-
-			It("No error thrown out and unset API endpoint when missing URL definition in JSON config", func() {
-				endpoint, err = GetEndpoint()
-				Expect(err).NotTo(HaveOccurred())
-				Expect(endpoint.URL).Should(Equal(""))
-
-				content, err = ioutil.ReadFile(configFilePath)
-				Expect(err).NotTo(HaveOccurred())
-				Expect(len(content)).Should(Equal(0))
-			})
 		})
 	})
 })

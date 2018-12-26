@@ -31,6 +31,9 @@ func NewCFClient(connection Connection) (*CFClient, error) {
 	if err != nil {
 		return nil, err
 	}
+	if ccAPIEndpoint == "" {
+		return nil, fmt.Errorf(ui.NOCFAPIEndpoint)
+	}
 
 	isSSLDisabled, err := connection.IsSSLDisabled()
 	if err != nil {

@@ -29,18 +29,19 @@ func CreatePolicy(cliConnection api.Connection, appName string, policyFile strin
 	if err != nil {
 		return err
 	}
-	err = cfclient.Configure(appName)
-	if err != nil {
-		return err
-	}
-
-	endpoint, err := api.GetEndpoint()
+	endpoint, err := api.GetEndpoint(cfclient)
 	if err != nil {
 		return err
 	}
 	if endpoint.URL == "" {
 		return errors.New(ui.NoEndpoint)
 	}
+
+	err = cfclient.Configure(appName)
+	if err != nil {
+		return err
+	}
+
 	apihelper := api.NewAPIHelper(endpoint, cfclient, os.Getenv("CF_TRACE"))
 
 	ui.SayMessage(ui.AttachPolicyHint, appName)
