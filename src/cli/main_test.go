@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"cli/api"
 	. "cli/models"
 	"cli/ui"
 	cjson "cli/util/json"
@@ -99,6 +100,13 @@ var _ = Describe("App-AutoScaler Commands", func() {
 		os.Unsetenv("CF_TRACE")
 		os.Setenv("AUTOSCALER_CONFIG_FILE", "test_config.json")
 
+		//start fake AutoScaler API server
+		apiServer = ghttp.NewServer()
+		apiServer.RouteToHandler("GET", "/health",
+			ghttp.RespondWith(http.StatusOK, ""),
+		)
+		apiEndpoint = apiServer.URL()
+
 		//start rpc server to test cf cli plugin
 		rpcHandlers = new(rpcserverfakes.FakeHandlers)
 
@@ -109,10 +117,13 @@ var _ = Describe("App-AutoScaler Commands", func() {
 			*retVal = true
 			return nil
 		}
-
 		//set rpc.GetOutputAndReset to return empty string; this is used by CliCommand()/CliWithoutTerminalOutput()
 		rpcHandlers.GetOutputAndResetStub = func(_ bool, retVal *[]string) error {
 			*retVal = []string{"{}"}
+			return nil
+		}
+		rpcHandlers.ApiEndpointStub = func(_ string, retVal *string) error {
+			*retVal = apiEndpoint
 			return nil
 		}
 
@@ -121,14 +132,6 @@ var _ = Describe("App-AutoScaler Commands", func() {
 
 		err = ts.Start()
 		Expect(err).NotTo(HaveOccurred())
-
-		//start fake AutoScaler API server
-		apiServer = ghttp.NewServer()
-		apiServer.RouteToHandler("GET", "/health",
-			ghttp.RespondWith(http.StatusOK, ""),
-		)
-
-		apiEndpoint = apiServer.URL()
 
 	})
 
@@ -148,8 +151,8 @@ var _ = Describe("App-AutoScaler Commands", func() {
 			})
 
 			Context("with http server", func() {
-				Context("succeed", func() {
-					It("to say 'Setting AutoScaler api endpoint to ...' ", func() {
+				Context("When endpoint url is valid", func() {
+					It("Succeed' ", func() {
 						session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
 						Expect(err).NotTo(HaveOccurred())
 						session.Wait()
@@ -158,12 +161,12 @@ var _ = Describe("App-AutoScaler Commands", func() {
 					})
 				})
 
-				Context("Failed when api server is unaccessible ", func() {
+				Context("When api server is unaccessible ", func() {
 					BeforeEach(func() {
 						apiServer.Close()
 					})
 
-					It("connection refused", func() {
+					It("Failed with connection refused", func() {
 						session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
 						Expect(err).NotTo(HaveOccurred())
 						session.Wait()
@@ -172,7 +175,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 					})
 				})
 
-				Context("Failed when no /health endpoint ", func() {
+				Context("When no /health endpoint ", func() {
 
 					BeforeEach(func() {
 						apiServer.RouteToHandler("GET", "/health",
@@ -180,11 +183,47 @@ var _ = Describe("App-AutoScaler Commands", func() {
 						)
 					})
 
-					It("Invalid api endpoint", func() {
+					It("Failed with invalid api endpoint", func() {
 						session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
 						Expect(err).NotTo(HaveOccurred())
 						session.Wait()
 						Expect(session).To(gbytes.Say(ui.InvalidAPIEndpoint, apiEndpoint))
+						Expect(session.ExitCode()).To(Equal(1))
+					})
+				})
+
+				Context("When cf api is not set ", func() {
+
+					BeforeEach(func() {
+						rpcHandlers.ApiEndpointStub = func(_ string, retVal *string) error {
+							*retVal = ""
+							return nil
+						}
+					})
+
+					It("Failed with missing cf api setting", func() {
+						session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+						Expect(err).NotTo(HaveOccurred())
+						session.Wait()
+						Expect(session).To(gbytes.Say(ui.NOCFAPIEndpoint))
+						Expect(session.ExitCode()).To(Equal(1))
+					})
+				})
+
+				Context("When autoscaler api domain is inconsitent with CF domain ", func() {
+
+					BeforeEach(func() {
+						rpcHandlers.ApiEndpointStub = func(_ string, retVal *string) error {
+							*retVal = "api.bosh-lite.com"
+							return nil
+						}
+					})
+
+					It("Failed with inconsistent domain", func() {
+						session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+						Expect(err).NotTo(HaveOccurred())
+						session.Wait()
+						Expect(session).To(gbytes.Say(ui.InconsistentDomain, apiEndpoint, "api.bosh-lite.com"))
 						Expect(session.ExitCode()).To(Equal(1))
 					})
 				})
@@ -250,7 +289,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 				Expect(session.ExitCode()).To(Equal(0))
 			})
 
-			It("'unset'take higher proprity than the other argument", func() {
+			It("'unset take higher proprity than the other argument", func() {
 				args = []string{ts.Port(), "autoscaling-api", apiEndpoint, "--unset"}
 				session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
 				Expect(err).NotTo(HaveOccurred())
@@ -260,22 +299,22 @@ var _ = Describe("App-AutoScaler Commands", func() {
 			})
 		})
 
-		Context("Show api endpoint", func() {
+		Context("Get api endpoint", func() {
 
-			Context("No previous end-point setting", func() {
+			Context("When no previous endpoint setting", func() {
 
-				Context("when config file doesn't exist", func() {
-					It("response with no endpoint..", func() {
+				Context("When config file doesn't exist at all", func() {
+					It("Succeed with the default autoscaler endpoint", func() {
 						args = []string{ts.Port(), "autoscaling-api"}
 						session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
 						Expect(err).NotTo(HaveOccurred())
 						session.Wait()
-						Expect(session).To(gbytes.Say(ui.NoEndpoint))
+						Expect(session).To(gbytes.Say(ui.APIEndpoint, apiEndpoint))
 						Expect(session.ExitCode()).To(Equal(0))
 					})
 				})
 
-				Context("when config file exists", func() {
+				Context("When config file exists with empty content", func() {
 					BeforeEach(func() {
 						args = []string{ts.Port(), "autoscaling-api", "--unset"}
 						session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
@@ -283,18 +322,18 @@ var _ = Describe("App-AutoScaler Commands", func() {
 						session.Wait()
 					})
 
-					It("response with no endpoint..", func() {
+					It("Succeed with the default autoscaler endpoint", func() {
 						args = []string{ts.Port(), "autoscaling-api"}
 						session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
 						Expect(err).NotTo(HaveOccurred())
 						session.Wait()
-						Expect(session).To(gbytes.Say(ui.NoEndpoint))
+						Expect(session).To(gbytes.Say(ui.APIEndpoint, apiEndpoint))
 						Expect(session.ExitCode()).To(Equal(0))
 					})
 				})
 			})
 
-			Context("End-point was set", func() {
+			Context("When endpoint was set", func() {
 
 				BeforeEach(func() {
 					args = []string{ts.Port(), "autoscaling-api", apiEndpoint}
@@ -303,13 +342,78 @@ var _ = Describe("App-AutoScaler Commands", func() {
 					session.Wait()
 				})
 
-				It("response with the pre-defined endpoint..", func() {
+				It("Succeed with the pre-defined endpoint..", func() {
 					args = []string{ts.Port(), "autoscaling-api"}
 					session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
 					Expect(err).NotTo(HaveOccurred())
 					session.Wait()
 					Expect(session).To(gbytes.Say(ui.APIEndpoint, apiEndpoint))
 					Expect(session.ExitCode()).To(Equal(0))
+				})
+			})
+
+			Context("When cf api is not set ", func() {
+				BeforeEach(func() {
+
+					rpcHandlers.ApiEndpointStub = func(_ string, retVal *string) error {
+						*retVal = ""
+						return nil
+					}
+
+					args = []string{ts.Port(), "autoscaling-api", apiEndpoint}
+					session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+
+					rpcHandlers.ApiEndpointStub = func(_ string, retVal *string) error {
+						*retVal = ""
+						return nil
+					}
+				})
+
+				It("Failed with missing cf api setting", func() {
+					args = []string{ts.Port(), "autoscaling-api"}
+					session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+					Expect(err).NotTo(HaveOccurred())
+					session.Wait()
+					Expect(session).To(gbytes.Say(ui.NOCFAPIEndpoint))
+					Expect(session.ExitCode()).To(Equal(1))
+				})
+			})
+
+			Context("When cf api is changed ", func() {
+				BeforeEach(func() {
+					urlConfig := []byte(fmt.Sprintf(`{"URL":"%s"}`, "autoscaler.bosh-lite.com"))
+					err = ioutil.WriteFile(api.ConfigFile(), urlConfig, 0600)
+					Expect(err).NotTo(HaveOccurred())
+
+				})
+
+				Context("When the default endpoint works", func() {
+					It("succeed to return the default endpoint according to the new domain", func() {
+						args = []string{ts.Port(), "autoscaling-api"}
+						session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+						Expect(err).NotTo(HaveOccurred())
+						session.Wait()
+						Expect(session).To(gbytes.Say(ui.APIEndpoint, apiEndpoint))
+						Expect(session.ExitCode()).To(Equal(0))
+					})
+				})
+
+				Context("When the default endpoint doesn't work", func() {
+
+					BeforeEach(func() {
+						apiServer.RouteToHandler("GET", "/health",
+							ghttp.RespondWith(http.StatusNotFound, ""),
+						)
+					})
+
+					It("Failed with no api endpoint setting", func() {
+						args = []string{ts.Port(), "autoscaling-api"}
+						session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+						Expect(err).NotTo(HaveOccurred())
+						session.Wait()
+						Expect(session).To(gbytes.Say(ui.NoEndpoint))
+						Expect(session.ExitCode()).To(Equal(0))
+					})
 				})
 			})
 
@@ -341,6 +445,60 @@ var _ = Describe("App-AutoScaler Commands", func() {
 
 					Expect(session).To(gbytes.Say("open invalidDir/invalidFile: no such file or directory"))
 					Expect(session.ExitCode()).To(Equal(1))
+				})
+			})
+
+			Context("When cf api is not set ", func() {
+				BeforeEach(func() {
+
+					rpcHandlers.ApiEndpointStub = func(_ string, retVal *string) error {
+						*retVal = ""
+						return nil
+					}
+
+					args = []string{ts.Port(), "autoscaling-api", apiEndpoint}
+					session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+
+					rpcHandlers.ApiEndpointStub = func(_ string, retVal *string) error {
+						*retVal = ""
+						return nil
+					}
+				})
+
+				It("Failed with missing cf api setting", func() {
+					args = []string{ts.Port(), "autoscaling-policy", fakeAppName}
+					session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+					Expect(err).NotTo(HaveOccurred())
+					session.Wait()
+					Expect(session).To(gbytes.Say(ui.NOCFAPIEndpoint))
+					Expect(session.ExitCode()).To(Equal(1))
+				})
+			})
+
+			Context("When cf api is changed ", func() {
+				BeforeEach(func() {
+					urlConfig := []byte(fmt.Sprintf(`{"URL":"%s"}`, "autoscaler.bosh-lite.com"))
+					err = ioutil.WriteFile(api.ConfigFile(), urlConfig, 0600)
+					Expect(err).NotTo(HaveOccurred())
+
+				})
+
+				Context("When the default endpoint doesn't work", func() {
+
+					BeforeEach(func() {
+						apiServer.RouteToHandler("GET", "/health",
+							ghttp.RespondWith(http.StatusNotFound, ""),
+						)
+					})
+
+					It("Failed with no api endpoint setting", func() {
+						args = []string{ts.Port(), "autoscaling-policy", fakeAppName}
+						session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+						Expect(err).NotTo(HaveOccurred())
+						session.Wait()
+						Expect(session).To(gbytes.Say(ui.NoEndpoint))
+						Expect(session.ExitCode()).To(Equal(1))
+					})
 				})
 			})
 
@@ -623,6 +781,60 @@ var _ = Describe("App-AutoScaler Commands", func() {
 				})
 			})
 
+			Context("When cf api is not set ", func() {
+				BeforeEach(func() {
+
+					rpcHandlers.ApiEndpointStub = func(_ string, retVal *string) error {
+						*retVal = ""
+						return nil
+					}
+
+					args = []string{ts.Port(), "autoscaling-api", apiEndpoint}
+					session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+
+					rpcHandlers.ApiEndpointStub = func(_ string, retVal *string) error {
+						*retVal = ""
+						return nil
+					}
+				})
+
+				It("Failed with missing cf api setting", func() {
+					args = []string{ts.Port(), "attach-autoscaling-policy", fakeAppName, outputFile}
+					session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+					Expect(err).NotTo(HaveOccurred())
+					session.Wait()
+					Expect(session).To(gbytes.Say(ui.NOCFAPIEndpoint))
+					Expect(session.ExitCode()).To(Equal(1))
+				})
+			})
+
+			Context("When cf api is changed ", func() {
+				BeforeEach(func() {
+					urlConfig := []byte(fmt.Sprintf(`{"URL":"%s"}`, "autoscaler.bosh-lite.com"))
+					err = ioutil.WriteFile(api.ConfigFile(), urlConfig, 0600)
+					Expect(err).NotTo(HaveOccurred())
+
+				})
+
+				Context("When the default endpoint doesn't work", func() {
+
+					BeforeEach(func() {
+						apiServer.RouteToHandler("GET", "/health",
+							ghttp.RespondWith(http.StatusNotFound, ""),
+						)
+					})
+
+					It("Failed with no api endpoint setting", func() {
+						args = []string{ts.Port(), "attach-autoscaling-policy", fakeAppName, outputFile}
+						session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+						Expect(err).NotTo(HaveOccurred())
+						session.Wait()
+						Expect(session).To(gbytes.Say(ui.NoEndpoint))
+						Expect(session.ExitCode()).To(Equal(1))
+					})
+				})
+			})
+
 			Context("when cf not login", func() {
 				It("exits with 'You must be logged in' error ", func() {
 					args = []string{ts.Port(), "attach-autoscaling-policy", fakeAppName, outputFile}
@@ -868,6 +1080,60 @@ var _ = Describe("App-AutoScaler Commands", func() {
 
 					Expect(session).To(gbytes.Say("required argument `APP_NAME` was not provided"))
 					Expect(session.ExitCode()).To(Equal(1))
+				})
+			})
+
+			Context("When cf api is not set ", func() {
+				BeforeEach(func() {
+
+					rpcHandlers.ApiEndpointStub = func(_ string, retVal *string) error {
+						*retVal = ""
+						return nil
+					}
+
+					args = []string{ts.Port(), "autoscaling-api", apiEndpoint}
+					session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+
+					rpcHandlers.ApiEndpointStub = func(_ string, retVal *string) error {
+						*retVal = ""
+						return nil
+					}
+				})
+
+				It("Failed with missing cf api setting", func() {
+					args = []string{ts.Port(), "detach-autoscaling-policy", fakeAppName}
+					session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+					Expect(err).NotTo(HaveOccurred())
+					session.Wait()
+					Expect(session).To(gbytes.Say(ui.NOCFAPIEndpoint))
+					Expect(session.ExitCode()).To(Equal(1))
+				})
+			})
+
+			Context("When cf api is changed ", func() {
+				BeforeEach(func() {
+					urlConfig := []byte(fmt.Sprintf(`{"URL":"%s"}`, "autoscaler.bosh-lite.com"))
+					err = ioutil.WriteFile(api.ConfigFile(), urlConfig, 0600)
+					Expect(err).NotTo(HaveOccurred())
+
+				})
+
+				Context("When the default endpoint doesn't work", func() {
+
+					BeforeEach(func() {
+						apiServer.RouteToHandler("GET", "/health",
+							ghttp.RespondWith(http.StatusNotFound, ""),
+						)
+					})
+
+					It("Failed with no api endpoint setting", func() {
+						args = []string{ts.Port(), "detach-autoscaling-policy", fakeAppName}
+						session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+						Expect(err).NotTo(HaveOccurred())
+						session.Wait()
+						Expect(session).To(gbytes.Say(ui.NoEndpoint))
+						Expect(session.ExitCode()).To(Equal(1))
+					})
 				})
 			})
 
@@ -1138,6 +1404,60 @@ var _ = Describe("App-AutoScaler Commands", func() {
 					Expect(session.ExitCode()).To(Equal(1))
 				})
 
+			})
+
+			Context("When cf api is not set ", func() {
+				BeforeEach(func() {
+
+					rpcHandlers.ApiEndpointStub = func(_ string, retVal *string) error {
+						*retVal = ""
+						return nil
+					}
+
+					args = []string{ts.Port(), "autoscaling-api", apiEndpoint}
+					session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+
+					rpcHandlers.ApiEndpointStub = func(_ string, retVal *string) error {
+						*retVal = ""
+						return nil
+					}
+				})
+
+				It("Failed with missing cf api setting", func() {
+					args = []string{ts.Port(), "autoscaling-metrics", fakeAppName, metricName}
+					session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+					Expect(err).NotTo(HaveOccurred())
+					session.Wait()
+					Expect(session).To(gbytes.Say(ui.NOCFAPIEndpoint))
+					Expect(session.ExitCode()).To(Equal(1))
+				})
+			})
+
+			Context("When cf api is changed ", func() {
+				BeforeEach(func() {
+					urlConfig := []byte(fmt.Sprintf(`{"URL":"%s"}`, "autoscaler.bosh-lite.com"))
+					err = ioutil.WriteFile(api.ConfigFile(), urlConfig, 0600)
+					Expect(err).NotTo(HaveOccurred())
+
+				})
+
+				Context("When the default endpoint doesn't work", func() {
+
+					BeforeEach(func() {
+						apiServer.RouteToHandler("GET", "/health",
+							ghttp.RespondWith(http.StatusNotFound, ""),
+						)
+					})
+
+					It("Failed with no api endpoint setting", func() {
+						args = []string{ts.Port(), "autoscaling-metrics", fakeAppName, metricName}
+						session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+						Expect(err).NotTo(HaveOccurred())
+						session.Wait()
+						Expect(session).To(gbytes.Say(ui.NoEndpoint))
+						Expect(session.ExitCode()).To(Equal(1))
+					})
+				})
 			})
 
 			Context("when cf not login", func() {
@@ -1960,6 +2280,60 @@ var _ = Describe("App-AutoScaler Commands", func() {
 					Expect(session.ExitCode()).To(Equal(1))
 				})
 
+			})
+
+			Context("When cf api is not set ", func() {
+				BeforeEach(func() {
+
+					rpcHandlers.ApiEndpointStub = func(_ string, retVal *string) error {
+						*retVal = ""
+						return nil
+					}
+
+					args = []string{ts.Port(), "autoscaling-api", apiEndpoint}
+					session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+
+					rpcHandlers.ApiEndpointStub = func(_ string, retVal *string) error {
+						*retVal = ""
+						return nil
+					}
+				})
+
+				It("Failed with missing cf api setting", func() {
+					args = []string{ts.Port(), "autoscaling-history", fakeAppName}
+					session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+					Expect(err).NotTo(HaveOccurred())
+					session.Wait()
+					Expect(session).To(gbytes.Say(ui.NOCFAPIEndpoint))
+					Expect(session.ExitCode()).To(Equal(1))
+				})
+			})
+
+			Context("When cf api is changed ", func() {
+				BeforeEach(func() {
+					urlConfig := []byte(fmt.Sprintf(`{"URL":"%s"}`, "autoscaler.bosh-lite.com"))
+					err = ioutil.WriteFile(api.ConfigFile(), urlConfig, 0600)
+					Expect(err).NotTo(HaveOccurred())
+
+				})
+
+				Context("When the default endpoint doesn't work", func() {
+
+					BeforeEach(func() {
+						apiServer.RouteToHandler("GET", "/health",
+							ghttp.RespondWith(http.StatusNotFound, ""),
+						)
+					})
+
+					It("Failed with no api endpoint setting", func() {
+						args = []string{ts.Port(), "autoscaling-history", fakeAppName}
+						session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+						Expect(err).NotTo(HaveOccurred())
+						session.Wait()
+						Expect(session).To(gbytes.Say(ui.NoEndpoint))
+						Expect(session.ExitCode()).To(Equal(1))
+					})
+				})
 			})
 
 			Context("when cf not login", func() {
