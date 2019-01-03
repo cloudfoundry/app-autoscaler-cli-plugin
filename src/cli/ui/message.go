@@ -20,13 +20,13 @@ const (
 	PolicyNotFound       = "No policy defined for app %s."
 	InvalidPolicy        = "Invalid policy definition: %v."
 
-	ShowPolicyHint   = "Retriving policy for app %s..."
+	ShowPolicyHint   = "Retrieving policy for app %s..."
 	AttachPolicyHint = "Attaching policy for app %s..."
 	DetachPolicyHint = "Detaching policy for app %s..."
 
-	ShowInstanceMetricsHint   = "Retriving instance metrics for app %s..."
-	ShowAggregatedMetricsHint = "Retriving aggregated metrics for app %s..."
-	ShowHistoryHint           = "Retriving history for app %s..."
+	ShowInstanceMetricsHint   = "Retrieving instance metrics for app %s..."
+	ShowAggregatedMetricsHint = "Retrieving aggregated metrics for app %s..."
+	ShowHistoryHint           = "Retrieving history for app %s..."
 
 	SavePolicyHint           = "Saving policy for app %s to %s... "
 	SaveInstanceMetricHint   = "Saving instance metrics for app %s to %s... "
