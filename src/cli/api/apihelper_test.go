@@ -230,7 +230,7 @@ var _ = Describe("API Helper Test", func() {
 					)
 				})
 
-				It("Fail with 502 error", func() {
+				It("Fail with 404 error", func() {
 					_, err = apihelper.GetPolicy()
 					Expect(err).Should(HaveOccurred())
 					Expect(err).Should(MatchError(fmt.Sprintf(ui.PolicyNotFound, apihelper.Client.AppName)))
@@ -399,7 +399,7 @@ var _ = Describe("API Helper Test", func() {
 					)
 				})
 
-				It("Fail with 502 error", func() {
+				It("Fail with 404 error", func() {
 					err = apihelper.DeletePolicy()
 					Expect(err).Should(HaveOccurred())
 					Expect(err).Should(MatchError(fmt.Sprintf(ui.PolicyNotFound, apihelper.Client.AppName)))
