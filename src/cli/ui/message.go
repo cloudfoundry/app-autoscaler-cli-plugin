@@ -24,23 +24,17 @@ const (
 	AttachPolicyHint = "Attaching policy for app %s..."
 	DetachPolicyHint = "Detaching policy for app %s..."
 
-	ShowInstanceMetricsHint   = "Retrieving instance metrics for app %s..."
 	ShowAggregatedMetricsHint = "Retrieving aggregated metrics for app %s..."
 	ShowHistoryHint           = "Retrieving history for app %s..."
 
 	SavePolicyHint           = "Saving policy for app %s to %s... "
-	SaveInstanceMetricHint   = "Saving instance metrics for app %s to %s... "
 	SaveAggregatedMetricHint = "Saving aggregated metrics for app %s to %s... "
 	SaveHistoryHint          = "Saving history for app %s to %s... "
 
-	InvalidInstanceIndex   = "Invalid instance index input: %s. An integer is expected."
 	UnrecognizedTimeFormat = "Unrecognized date time input: %s. \nSupported formats are yyyy-MM-ddTHH:mm:ss+/-hhmm, yyyy-MM-ddTHH:mm:ssZ with an input later than 1970-01-01T00:00:00Z."
 	UnrecognizedMetricName = "Unrecognized metric name input: %s. \nSupported value: memoryused, memoryutil, responsetime, throughput, cpu."
 	InvalidTimeRange       = "Invalid time range. The start time %s is greater than the end time %s."
 
 	AggregatedMetricsNotFound = "No aggregated metrics found for app %s."
-	InstanceMetricsNotFound   = "No instance metrics found for app %s."
 	HistoryNotFound           = "No history found for app %s."
-
-	UseInstanceMetricMsg = "Query application instance metrics by adding flag '--app-instance-index' or '-i'."
 )
