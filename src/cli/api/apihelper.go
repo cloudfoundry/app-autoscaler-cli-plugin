@@ -95,12 +95,12 @@ func (helper *APIHelper) DoRequest(req *http.Request) (*http.Response, error) {
 
 }
 
-func parseErrResponse(raw []byte) (string, error) {
+func parseErrResponse(raw []byte) string {
 
 	var f interface{}
 	err := json.Unmarshal(raw, &f)
 	if err != nil {
-		return "", err
+		return string(raw)
 	}
 
 	m := f.(map[string]interface{})
@@ -134,7 +134,7 @@ func parseErrResponse(raw []byte) (string, error) {
 		}
 	}
 
-	return retMsg, nil
+	return retMsg
 }
 
 func (helper *APIHelper) CheckHealth() error {
@@ -190,10 +190,7 @@ func (helper *APIHelper) GetPolicy() ([]byte, error) {
 		case 404:
 			errorMsg = fmt.Sprintf(ui.PolicyNotFound, helper.Client.AppName)
 		default:
-			errorMsg, err = parseErrResponse(raw)
-			if err != nil {
-				return nil, err
-			}
+			errorMsg = parseErrResponse(raw)
 		}
 		return nil, errors.New(errorMsg)
 	}
@@ -251,17 +248,9 @@ func (helper *APIHelper) CreatePolicy(data interface{}) error {
 		case 401:
 			errorMsg = fmt.Sprintf(ui.Unauthorized, baseURL, helper.Client.CCAPIEndpoint)
 		case 400:
-			errorMsg, err = parseErrResponse(raw)
-			if err != nil {
-				return err
-			}
-			errorMsg = fmt.Sprintf(ui.InvalidPolicy, errorMsg)
-
+			errorMsg = fmt.Sprintf(ui.InvalidPolicy, parseErrResponse(raw))
 		default:
-			errorMsg, err = parseErrResponse(raw)
-			if err != nil {
-				return err
-			}
+			errorMsg = parseErrResponse(raw)
 		}
 		return errors.New(errorMsg)
 	}
@@ -296,10 +285,7 @@ func (helper *APIHelper) DeletePolicy() error {
 		case 404:
 			errorMsg = fmt.Sprintf(ui.PolicyNotFound, helper.Client.AppName)
 		default:
-			errorMsg, err = parseErrResponse(raw)
-			if err != nil {
-				return err
-			}
+			errorMsg = parseErrResponse(raw)
 		}
 		return errors.New(errorMsg)
 	}
@@ -352,10 +338,7 @@ func (helper *APIHelper) GetAggregatedMetrics(metricName string, startTime, endT
 		case 401:
 			errorMsg = fmt.Sprintf(ui.Unauthorized, baseURL, helper.Client.CCAPIEndpoint)
 		default:
-			errorMsg, err = parseErrResponse(raw)
-			if err != nil {
-				return false, nil, err
-			}
+			errorMsg = parseErrResponse(raw)
 		}
 		return false, nil, errors.New(errorMsg)
 	}
@@ -421,10 +404,7 @@ func (helper *APIHelper) GetHistory(startTime, endTime int64, desc bool, page ui
 		case 401:
 			errorMsg = fmt.Sprintf(ui.Unauthorized, baseURL, helper.Client.CCAPIEndpoint)
 		default:
-			errorMsg, err = parseErrResponse(raw)
-			if err != nil {
-				return false, nil, err
-			}
+			errorMsg = parseErrResponse(raw)
 		}
 		return false, nil, errors.New(errorMsg)
 	}

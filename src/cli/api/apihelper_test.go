@@ -250,6 +250,20 @@ var _ = Describe("API Helper Test", func() {
 				})
 			})
 
+			Context("When error msg is a plain text", func() {
+				BeforeEach(func() {
+					apiServer.RouteToHandler("GET", urlpath,
+						ghttp.RespondWith(http.StatusBadGateway, "502 bad gateway"),
+					)
+				})
+
+				It("Fail with 502 error", func() {
+					_, err = apihelper.GetPolicy()
+					Expect(err).Should(HaveOccurred())
+					Expect(err).Should(MatchError("502 bad gateway"))
+				})
+			})
+
 		})
 
 		Context("Create Policy", func() {
@@ -329,6 +343,20 @@ var _ = Describe("API Helper Test", func() {
 				})
 			})
 
+			Context("When error msg is a plain text", func() {
+				BeforeEach(func() {
+					apiServer.RouteToHandler("PUT", urlpath,
+						ghttp.RespondWith(http.StatusBadGateway, "502 bad gateway"),
+					)
+				})
+
+				It("Fail with 502 error", func() {
+					err = apihelper.CreatePolicy(fakePolicy)
+					Expect(err).Should(HaveOccurred())
+					Expect(err).Should(MatchError("502 bad gateway"))
+				})
+			})
+
 		})
 
 		Context("Delete Policy", func() {
@@ -389,6 +417,20 @@ var _ = Describe("API Helper Test", func() {
 					err = apihelper.DeletePolicy()
 					Expect(err).Should(HaveOccurred())
 					Expect(err).Should(MatchError("Internal error"))
+				})
+			})
+
+			Context("When error msg is a plain text", func() {
+				BeforeEach(func() {
+					apiServer.RouteToHandler("DELETE", urlpath,
+						ghttp.RespondWith(http.StatusBadGateway, "502 bad gateway"),
+					)
+				})
+
+				It("Fail with 502 error", func() {
+					err = apihelper.DeletePolicy()
+					Expect(err).Should(HaveOccurred())
+					Expect(err).Should(MatchError("502 bad gateway"))
 				})
 			})
 
@@ -668,6 +710,23 @@ var _ = Describe("API Helper Test", func() {
 					_, _, err = apihelper.GetAggregatedMetrics("memoryused", 0, 0, false, uint64(1))
 					Expect(err).Should(HaveOccurred())
 					Expect(err).Should(MatchError("Internal error"))
+				})
+			})
+
+			Context("When error msg is a plain text", func() {
+				BeforeEach(func() {
+					apiServer.AppendHandlers(
+						ghttp.CombineHandlers(
+							ghttp.RespondWith(http.StatusNotFound, "502 bad gateway"),
+							ghttp.VerifyRequest("GET", urlpath, "order=asc&page=1"),
+						),
+					)
+				})
+
+				It("Fail with 502 error", func() {
+					_, _, err = apihelper.GetAggregatedMetrics("memoryused", 0, 0, false, uint64(1))
+					Expect(err).Should(HaveOccurred())
+					Expect(err).Should(MatchError("502 bad gateway"))
 				})
 			})
 
@@ -1083,6 +1142,23 @@ var _ = Describe("API Helper Test", func() {
 					_, _, err := apihelper.GetHistory(0, 0, false, uint64(1))
 					Expect(err).Should(HaveOccurred())
 					Expect(err).Should(MatchError("Internal error"))
+				})
+			})
+
+			Context("When error msg is a plain text", func() {
+				BeforeEach(func() {
+					apiServer.AppendHandlers(
+						ghttp.CombineHandlers(
+							ghttp.RespondWith(http.StatusNotFound, "502 bad gateway"),
+							ghttp.VerifyRequest("GET", urlpath, "order=asc&page=1"),
+						),
+					)
+				})
+
+				It("Fail with 502 error", func() {
+					_, _, err := apihelper.GetHistory(0, 0, false, uint64(1))
+					Expect(err).Should(HaveOccurred())
+					Expect(err).Should(MatchError("502 bad gateway"))
 				})
 			})
 
