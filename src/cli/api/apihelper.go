@@ -28,7 +28,6 @@ import (
 const (
 	HealthPath           = "/health"
 	PolicyPath           = "/v1/apps/{appId}/policy"
-	InstanceMetricPath   = "/v1/apps/{appId}/metric_histories/{metric_type}"
 	AggregatedMetricPath = "/v1/apps/{appId}/aggregated_metric_histories/{metric_type}"
 	HistoryPath          = "/v1/apps/{appId}/scaling_histories"
 )
@@ -292,77 +291,6 @@ func (helper *APIHelper) DeletePolicy() error {
 	}
 
 	return nil
-
-}
-
-func (helper *APIHelper) GetInstanceMetrics(metricName string, instanceIndex, startTime, endTime int64, desc bool, page uint64) (bool, [][]string, error) {
-
-	if page <= 1 {
-		err := helper.CheckHealth()
-		if err != nil {
-			return false, nil, err
-		}
-	}
-
-	baseURL := helper.Endpoint.URL
-	queryMetricURL := strings.Replace(InstanceMetricPath, "{appId}", helper.Client.AppId, -1)
-	queryMetricURL = strings.Replace(queryMetricURL, "{metric_type}", metricName, -1)
-	requestURL := fmt.Sprintf("%s%s", baseURL, queryMetricURL)
-
-	req, err := http.NewRequest("GET", requestURL, nil)
-	req.Header.Add("Authorization", helper.Client.AuthToken)
-	q := req.URL.Query()
-	if instanceIndex >= 0 {
-		q.Add("instance-index", strconv.FormatInt(instanceIndex, 10))
-	}
-	if startTime > 0 {
-		q.Add("start-time", strconv.FormatInt(startTime, 10))
-	}
-	if endTime > 0 {
-		q.Add("end-time", strconv.FormatInt(endTime, 10))
-	}
-	if desc {
-		q.Add("order", "desc")
-	} else {
-		q.Add("order", "asc")
-	}
-	q.Add("page", strconv.FormatUint(page, 10))
-	req.URL.RawQuery = q.Encode()
-
-	resp, err := helper.DoRequest(req)
-	if err != nil {
-		return false, nil, err
-	}
-	defer resp.Body.Close()
-
-	raw, err := ioutil.ReadAll(resp.Body)
-	if resp.StatusCode != http.StatusOK {
-		var errorMsg string
-		switch resp.StatusCode {
-		case 401:
-			errorMsg = fmt.Sprintf(ui.Unauthorized, baseURL, helper.Client.CCAPIEndpoint)
-		default:
-			errorMsg = parseErrResponse(raw)
-		}
-		return false, nil, errors.New(errorMsg)
-	}
-
-	var metrics models.InstanceMetricsResults
-	err = json.Unmarshal(raw, &metrics)
-	if err != nil {
-		return false, nil, err
-	}
-
-	var data [][]string
-	for _, entry := range metrics.Metrics {
-		data = append(data, []string{entry.Name, fmt.Sprint(entry.InstanceIndex), entry.Value + entry.Unit, time.Unix(0, entry.Timestamp).Format(time.RFC3339)})
-	}
-
-	if metrics.Page < metrics.TotalPages {
-		return true, data, nil
-	} else {
-		return false, data, nil
-	}
 
 }
 

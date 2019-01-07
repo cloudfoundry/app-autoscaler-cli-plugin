@@ -46,16 +46,6 @@ type SpecificDateSchedule struct {
 	ScheduledInstanceInit int    `json:"initial_min_instance_count"`
 }
 
-type AppInstanceMetric struct {
-	AppId         string `json:"app_id"`
-	InstanceIndex uint32 `json:"instance_index"`
-	CollectedAt   int64  `json:"collected_at"`
-	Name          string `json:"name"`
-	Unit          string `json:"unit"`
-	Value         string `json:"value"`
-	Timestamp     int64  `json:"timestamp"`
-}
-
 type AppAggregatedMetric struct {
 	AppId     string `json:"app_id"`
 	Name      string `json:"name"`
@@ -74,13 +64,6 @@ type AppScalingHistory struct {
 	Reason       string        `json:"reason"`
 	Message      string        `json:"message"`
 	Error        string        `json:"error"`
-}
-
-type InstanceMetricsResults struct {
-	TotalResults uint32               `json:"total_results"`
-	TotalPages   uint16               `json:"total_pages"`
-	Page         uint16               `json:"page"`
-	Metrics      []*AppInstanceMetric `json:"resources"`
 }
 
 type AggregatedMetricsResults struct {
