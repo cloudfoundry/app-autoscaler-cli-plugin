@@ -3,30 +3,28 @@
 App-AutoScaler plug-in provides the command line interface to manage [App AutoScaler](https://github.com/cloudfoundry-incubator/app-autoscaler) service policies, retrieve metrics and scaling history.
 
 
-## Set up
+## Install plugin
 
-To set up the development, follow the steps below
+### From CF-Community
+
+```
+cf install-plugin -r CF-Community app-autoscaler-plugin
+```
+
+## From source code
+
 
 ```
 $ git clone git@github.com:cloudfoundry-incubator/app-autoscaler-cli-plugin.git
 $ cd app-autoscaler-cli-plugin
-$ source .envrc
 $ git submodule update --init --recursive
+$ source .envrc
+$ scripts/build
+$ cf install-plugin out/ascli
 ```
 
-## Build and install
+## Uninstall plugin
 
-Run the following script to build the AutoScaler plug-in for your OS
-```
-scripts/build
-```
-
-To install the plugin to cf cli
-```
-cf install-plugin out/ascli
-```
-
-To uninstall the plugin
 ```
 cf uninstall-plugin AutoScaler
 ```
@@ -46,7 +44,7 @@ cf uninstall-plugin AutoScaler
 
 ### `cf autoscaling-api`
 
-Set or view AutoScaler service API endpoint
+Set or view AutoScaler service API endpoint. If the CF API endpoint is https://api.example.com, then typically the autoscaler API endpoint will be https://autoscaler.example.com. Check the manifest when autoscaler is deployed to get the autoscaler service API endpoint. 
 
 ```
 cf autoscaling-api [URL] [--unset] [--skip-ssl-validation]
@@ -102,7 +100,7 @@ cf autoscaling-metrics APP_NAME METRIC_NAME [--start START_TIME] [--end END_TIME
 
 
 **OPTIONS**
-- `METRIC_NAME` : available metric supported: memoryused, memoryutil, responsetime,throughput.
+- `METRIC_NAME` : available metric supported: memoryused, memoryutil, responsetime, throughput, cpu.
 - `--start` : start time of metrics collected with format "yyyy-MM-ddTHH:mm:ss+/-HH:mm" or "yyyy-MM-ddTHH:mm:ssZ", default to very beginning if not specified.
 - `--end` : end time of the metrics collected  with format "yyyy-MM-ddTHH:mm:ss+/-HH:mm" or "yyyy-MM-ddTHH:mm:ssZ", default to current time if not speficied.
 - `--desc` : display in descending order, default to ascending order if not specified

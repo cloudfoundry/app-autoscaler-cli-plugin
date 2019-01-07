@@ -1,8 +1,11 @@
 package api
 
 import (
+	"cli/ui"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -27,7 +30,85 @@ var ConfigFile = func() string {
 	return filepath.Join(targetsPath, defaultConfigFileName)
 }
 
-func GetEndpoint() (*APIEndpoint, error) {
+func UnsetEndpoint() error {
+
+	configFilePath := ConfigFile()
+	err := ioutil.WriteFile(configFilePath, nil, 0600)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func SetEndpoint(cfclient *CFClient, url string, skipSSLValidation bool) error {
+
+	cfDomain := getDomain(cfclient.CCAPIEndpoint)
+	autoscalerDomain := getDomain(url)
+	if cfDomain != autoscalerDomain {
+		return fmt.Errorf(ui.InconsistentDomain, url, cfclient.CCAPIEndpoint)
+	}
+
+	skipSSLValidation = skipSSLValidation || cfclient.IsSSLDisabled
+	endpoint := &APIEndpoint{
+		URL:               strings.TrimSuffix(url, "/"),
+		SkipSSLValidation: skipSSLValidation,
+	}
+
+	apihelper := NewAPIHelper(endpoint, cfclient, os.Getenv("CF_TRACE"))
+	err := apihelper.CheckHealth()
+	if err != nil {
+		return err
+	}
+	urlConfig, err := json.Marshal(endpoint)
+	if err != nil {
+		return err
+	}
+	err = ioutil.WriteFile(ConfigFile(), urlConfig, 0600)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func GetEndpoint(cfclient *CFClient) (*APIEndpoint, error) {
+
+	endpoint, err := getEndpointFromConfig()
+	if err != nil {
+		return nil, err
+	}
+
+	if endpoint.URL != "" {
+		cfDomain := getDomain(cfclient.CCAPIEndpoint)
+		autoscalerDomain := getDomain(endpoint.URL)
+		if cfDomain != autoscalerDomain {
+			UnsetEndpoint()
+			endpoint = &APIEndpoint{}
+		}
+	}
+
+	if endpoint.URL == "" {
+		endpoint, err = getDefaultEndpoint(cfclient)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return endpoint, nil
+
+}
+
+func getDefaultEndpoint(cfclient *CFClient) (*APIEndpoint, error) {
+
+	ccAPIURL := cfclient.CCAPIEndpoint
+	asAPIURL := strings.Replace(ccAPIURL, "api.", "autoscaler.", 1)
+
+	//ignore all erros here if the default value won't work
+	SetEndpoint(cfclient, asAPIURL, cfclient.IsSSLDisabled)
+	return getEndpointFromConfig()
+
+}
+
+func getEndpointFromConfig() (*APIEndpoint, error) {
 
 	configFilePath := ConfigFile()
 	endpoint := &APIEndpoint{}
@@ -51,43 +132,21 @@ func GetEndpoint() (*APIEndpoint, error) {
 
 }
 
-func UnsetEndpoint() error {
+func getDomain(urlstr string) string {
 
-	configFilePath := ConfigFile()
-	err := ioutil.WriteFile(configFilePath, nil, 0600)
-	if err != nil {
-		return err
+	domain := ""
+	if strings.HasSuffix(urlstr, "/") {
+		urlstr = strings.TrimSuffix(urlstr, "/")
 	}
-	return nil
-}
-
-func SetEndpoint(cliConnection Connection, url string, skipSSLValidation bool) error {
-
-	cfclient, err := NewCFClient(cliConnection)
-	if err != nil {
-		return err
-	}
-	skipSSLValidation = skipSSLValidation || cfclient.IsSSLDisabled
-	endpoint := &APIEndpoint{
-		URL:               strings.TrimSuffix(url, "/"),
-		SkipSSLValidation: skipSSLValidation,
+	if !strings.HasPrefix(urlstr, "http") {
+		urlstr = "https://" + urlstr
 	}
 
-	apihelper := NewAPIHelper(endpoint, cfclient, os.Getenv("CF_TRACE"))
-	err = apihelper.CheckHealth()
-	if err != nil {
-		return err
+	u, err := url.Parse(urlstr)
+	if err == nil && strings.Contains(u.Hostname(), ".") {
+		domain = strings.SplitN(u.Hostname(), ".", 2)[1]
 	}
 
-	urlConfig, err := json.Marshal(endpoint)
-	if err != nil {
-		return err
-	}
+	return domain
 
-	err = ioutil.WriteFile(ConfigFile(), urlConfig, 0600)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
