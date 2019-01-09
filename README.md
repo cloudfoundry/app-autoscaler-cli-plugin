@@ -58,7 +58,7 @@ cf autoscaling-api [URL] [--unset] [--skip-ssl-validation]
 
 #### EXAMPLES:
 
-- Set AutoScaler API endpoint, replace `DOMAIN` with the domain of your working environment:
+- Set AutoScaler API endpoint, replace `DOMAIN` with the domain of your Cloud Foundry environment:
 ```
 $ cf autoscaling-api https://autoscaler.<DOMAIN>
 
@@ -94,7 +94,7 @@ Error: No api endpoint set. Use 'cf autoscaling-api' to set an endpoint.
 
 ### `cf autoscaling-policy` 
 
-Retrieve the scaling policy of an application, the policy will be shown/stored in JSON format.
+Retrieve the scaling policy of an application, the policy will be displayed in JSON format.
 
 ```
 cf autoscaling-policy APP_NAME [--output PATH_TO_FILE]
@@ -181,7 +181,7 @@ OK
 
 ### `cf autoscaling-metrics`
 
-Retrieve the aggregated metrics of an application, you can specify the start time and end time of the query range, as well as the record number and order of the outputs. The metrics will be shown in a table.
+Retrieve the aggregated metrics of an application, you can specify the start time and end time, or the  number of the latest records you want to return and the order of the outputs. The metrics will be shown in a table.
 
 ```
 cf autoscaling-metrics APP_NAME METRIC_NAME [--number RECORD_NUMBER] [--start START_TIME] [--end END_TIME] [--desc] [--output PATH_TO_FILE]
@@ -190,16 +190,16 @@ cf autoscaling-metrics APP_NAME METRIC_NAME [--number RECORD_NUMBER] [--start ST
 
 
 #### OPTIONS:
-- `METRIC_NAME` : available metric supported: memoryused, memoryutil, responsetime, throughput, cpu.
+- `METRIC_NAME` : available metric supported: memoryused, memoryutil, responsetime, throughput and cpu.
 - `--start` : start time of metrics collected with format "yyyy-MM-ddTHH:mm:ss+/-HH:mm" or "yyyy-MM-ddTHH:mm:ssZ", default to very beginning if not specified.
 - `--end` : end time of the metrics collected with format "yyyy-MM-ddTHH:mm:ss+/-HH:mm" or "yyyy-MM-ddTHH:mm:ssZ", default to current time if not speficied.
-- `--number|-n` : number of the records will be returned, default one page if not speficied, will be ignored if both start time and end time are specified.
+- `--number|-n` : the number of the latest records to return, will be ignored if both start time and end time are specified.
 - `--desc` : display in descending order, default to ascending order if not specified
 - `--output` : dump the metrics to a file
 
 #### EXAMPLES:
 ```
-$ cf autoscaling-metrics APP_NAME memoryused --start 2018-12-27T11:49:00+08:00 --end 2018-12-27T11:52:20+08:00 --number 5 --desc
+$ cf autoscaling-metrics APP_NAME memoryused --start 2018-12-27T11:49:00+08:00 --end 2018-12-27T11:52:20+08:00 --desc
 
 Retriving aggregated metrics for app APP_NAME...
 Metrics Name     	Value     	Timestamp
@@ -211,11 +211,11 @@ memoryused       	62MB      	2018-12-27T11:51:40+08:00
 ```
 - `Metrics Name`: name of the current metric item
 - `Value`: the value of the current metric item with unit
-- `At`: collect time of the current metric item
+- `Timestamp`: collect time of the current metric item
 
 ###  `cf autoscaling-history`
 
-Retrieve the scaling history of an application, you can specify the start time and end time of the query range, as well as the record number and order of the outputs. The scaling history will be shown in a table.
+Retrieve the scaling history of an application, you can specify the start time and end time, or the  number of the latest records you want to return and the order of the outputs. The scaling history will be shown in a table.
 ```
 cf autoscaling-history APP_NAME [--number RECORD_NUMBER] [--start START_TIME] [--end END_TIME] [--desc] [--output PATH_TO_FILE]
 ```
@@ -225,7 +225,7 @@ cf autoscaling-history APP_NAME [--number RECORD_NUMBER] [--start START_TIME] [-
 #### OPTIONS:
 - `--start` : start time of the scaling history with format "yyyy-MM-ddTHH:mm:ss+/-HH:mm" or "yyyy-MM-ddTHH:mm:ssZ", default to very beginning if not specified.
 - `--end` : end time of the scaling history with format "yyyy-MM-ddTHH:mm:ss+/-HH:mm" or "yyyy-MM-ddTHH:mm:ssZ", default to current time if not speficied.
-- `--number|-n` : number of the records will be returned, default one page if not speficied, will be ignored if both start time and end time are specified.
+- `--number|-n` : the number of the latest records to return, will be ignored if both start time and end time are specified.
 - `--desc` : display in descending order, default to ascending order if not specified
 - `--output` : dump the scaling history to a file
 
