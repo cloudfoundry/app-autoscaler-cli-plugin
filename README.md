@@ -1,18 +1,24 @@
 # Cloud Foundry CLI AutoScaler Plug-in [![Build Status](https://travis-ci.org/cloudfoundry-incubator/app-autoscaler-cli-plugin.svg?branch=master)](https://travis-ci.org/cloudfoundry-incubator/app-autoscaler-cli-plugin)
 
-App-AutoScaler plug-in provides the command line interface to manage [App AutoScaler](https://github.com/cloudfoundry-incubator/app-autoscaler) service policies, retrieve metrics and scaling history.
+This topic explains how to use the App-AutoScaler command-line interface.
 
+The App Autoscaler CLI allows you to manage `App Autoscaler` from your local command line by extending the Cloud Foundry command-line interface (cf CLI).
 
 ## Install plugin
+Before you launch App Autoscaler CLI commands on your local machine, you must install [Cloud Foundry Command Line][a] . 
 
 ### From CF-Community
-
+If this is the first time for all to install a [cf CLI Plugin][b], you can add a plugin repository with command
 ```
-cf install-plugin -r CF-Community app-autoscaler-plugin
+cf add-plugin-repo CF-Community https://plugins.cloudfoundry.org
 ```
 
-## From source code
+Then, launch the App AutoScaler CLI Plugin installation with command
+```
+cf install-plugin -r CF-Community "app-autoscaler-plugin"
+```  
 
+### From source code
 
 ```
 $ git clone git@github.com:cloudfoundry-incubator/app-autoscaler-cli-plugin.git
@@ -40,12 +46,15 @@ cf uninstall-plugin AutoScaler
 | [autoscaling-metrics, asm](#cf-autoscaling-metrics) | Retrieve the metrics of an application |
 | [autoscaling-history, ash](#cf-autoscaling-history) | Retrieve the scaling history of an application|
 
-## Command usage
+## Command Usage
 
 ### `cf autoscaling-api`
 
-Set or view AutoScaler service API endpoint. If the CF API endpoint is https://api.example.com, then typically the autoscaler API endpoint will be https://autoscaler.example.com. Check the manifest when autoscaler is deployed to get the autoscaler service API endpoint. 
+Run `cf autoscaling-api`  to set or view an App-AutoScaler API endpoint. 
 
+By default, App AutoScaler API endpoint is set to `autoscaler.<DOMAIN>` , but you can change it with `cf autoscaling-api`.
+
+**Syntax**
 ```
 cf autoscaling-api [URL] [--unset] [--skip-ssl-validation]
 ```
@@ -53,48 +62,34 @@ cf autoscaling-api [URL] [--unset] [--skip-ssl-validation]
 #### ALIAS: asa
 
 #### OPTIONS:
-- `--unset`: Unset the api endpoint
-- `--skip-ssl-validation` : Skip verification of the API endpoint. Not recommended!
+-  `--unset`: Unset the api endpoint
+-  `--skip-ssl-validation` : Skip verification of the API endpoint. Not recommended!
 
 #### EXAMPLES:
-
 - Set AutoScaler API endpoint, replace `DOMAIN` with the domain of your Cloud Foundry environment:
 ```
 $ cf autoscaling-api https://autoscaler.<DOMAIN>
-
 Setting AutoScaler api endpoint to https://autoscaler.<DOMAIN>
 OK
 ```
 - View AutoScaler API endpoint:
 ```
 $ cf autoscaling-api
-
 Autoscaler api endpoint: https://autoscaler.<DOMAIN>
 ```
 - Unset AutoScaler API endpoint:
-
-(you will get a error prompt if the AutoScaler API endpoint is not set when you execute other commands. )
 ```
 $ cf autoscaling-api --unset
-
 Unsetting AutoScaler api endpoint.
 OK
-
-$ cf autoscaling-api
-
-No api endpoint set. Use 'cf autoscaling-api' to set an endpoint.
-
 $ cf autoscaling-policy APP_NAME
-
 FAILED
-
 Error: No api endpoint set. Use 'cf autoscaling-api' to set an endpoint.
 ```
-
+Note: when AutoScaler API endpoint is unset, all other `App-AutoScaler CLI` commands execution will fail.
 
 ### `cf autoscaling-policy` 
-
-Retrieve the scaling policy of an application, the policy will be displayed in JSON format.
+Run `cf autoscaling-policy` to  retrieve the scaling policy of an application. The policy will be displayed in JSON format.
 
 ```
 cf autoscaling-policy APP_NAME [--output PATH_TO_FILE]
@@ -102,10 +97,8 @@ cf autoscaling-policy APP_NAME [--output PATH_TO_FILE]
 
 #### ALIAS: asp
 
-
 #### OPTIONS:
 - `--output` : dump the policy to a file in JSON format
-
 
 #### EXAMPLES:
 - View scaling policy, replace `APP_NAME` with the name of your application:
@@ -138,15 +131,16 @@ Showing policy for app APP_NAME...
 ```
 - Dump the scaling policy to a file in JSON format:
 ```
-$ cf asp testScalingPython --output PATH_TO_FILE
+$ cf asp APP_NAME --output PATH_TO_FILE
 
 Showing policy for app APP_NAME...
 OK
 ```
 
 ### `cf attach-autoscaling-policy` 
+Run `cf attach-autoscaling-policy` to attach a scaling policy to an application. 
 
-Attach a scaling policy to an application, the policy file must be a well-formated JSON file, refer to [policy specification](http://cdlliuy.github.io/app-autoscaler/policy.html#allsample) for details.
+The policy file must be written in JSON format and will be validated by [policy specification][policy]
 ```
 cf attach-autoscaling-policy APP_NAME PATH_TO_POLICY_FILE
 ```
@@ -161,10 +155,10 @@ Attaching policy for app APP_NAME...
 OK
 ```
 
-
 ### `cf detach-autoscaling-policy` 
+Run `cf detach-autoscaling-policy` to detach the scaling policy from an application.  
 
-Detach the scaling policy from an application, the policy will be **deleted** when detached, make sure to have a copy of the policy before detach it id you would like to reuse it in the future.
+With this command, the policy will be **deleted** from App-AutoScaler and all autoscaling setting are discarded. 
 ```
 cf detach-as-policy APP_NAME
 ```
@@ -178,22 +172,20 @@ Detaching policy for app APP_NAME...
 OK
 ```
 
-
 ### `cf autoscaling-metrics`
+Run `cf autoscaling-metrics` to retrieve the metrics of your application. 
 
-Retrieve the aggregated metrics of an application, you can specify the start time and end time, or the  number of the latest records you want to return and the order of the outputs. The metrics will be shown in a table.
-
+You can specify the query range with start/end time,  switch the display order between ascending and descending and customize the number of the returned query result. The metrics will be shown in a table.
 ```
 cf autoscaling-metrics APP_NAME METRIC_NAME [--number RECORD_NUMBER] [--start START_TIME] [--end END_TIME] [--desc] [--output PATH_TO_FILE]
 ```
 #### ALIAS: asm
 
-
 #### OPTIONS:
 - `METRIC_NAME` : available metric supported: memoryused, memoryutil, responsetime, throughput and cpu.
-- `--start` : start time of metrics collected with format "yyyy-MM-ddTHH:mm:ss+/-HH:mm" or "yyyy-MM-ddTHH:mm:ssZ", default to very beginning if not specified.
-- `--end` : end time of the metrics collected with format "yyyy-MM-ddTHH:mm:ss+/-HH:mm" or "yyyy-MM-ddTHH:mm:ssZ", default to current time if not speficied.
-- `--number|-n` : the number of the latest records to return, will be ignored if both start time and end time are specified.
+- `--start` : start time of metrics collected with format `yyyy-MM-ddTHH:mm:ss+/-HH:mm` or `yyyy-MM-ddTHH:mm:ssZ`, default to very beginning if not specified.
+- `--end` : end time of the metrics collected with format `yyyy-MM-ddTHH:mm:ss+/-HH:mm` or `yyyy-MM-ddTHH:mm:ssZ`, default to current time if not speficied.
+- `--number|-n` : the number of the records to return, will be ignored if both start time and end time are specified.
 - `--desc` : display in descending order, default to ascending order if not specified
 - `--output` : dump the metrics to a file
 
@@ -214,8 +206,9 @@ memoryused       	62MB      	2018-12-27T11:51:40+08:00
 - `Timestamp`: collect time of the current metric item
 
 ###  `cf autoscaling-history`
+Run `cf autoscaling-history`  to retrieve the scaling history of an application.
 
-Retrieve the scaling history of an application, you can specify the start time and end time, or the  number of the latest records you want to return and the order of the outputs. The scaling history will be shown in a table.
+You can specify the query range with start/end time,  switch the display order between ascending and descending and customize the number of query result. The scaling history will be shown in a table.
 ```
 cf autoscaling-history APP_NAME [--number RECORD_NUMBER] [--start START_TIME] [--end END_TIME] [--desc] [--output PATH_TO_FILE]
 ```
@@ -223,9 +216,9 @@ cf autoscaling-history APP_NAME [--number RECORD_NUMBER] [--start START_TIME] [-
 #### ALIAS: ash
 
 #### OPTIONS:
-- `--start` : start time of the scaling history with format "yyyy-MM-ddTHH:mm:ss+/-HH:mm" or "yyyy-MM-ddTHH:mm:ssZ", default to very beginning if not specified.
-- `--end` : end time of the scaling history with format "yyyy-MM-ddTHH:mm:ss+/-HH:mm" or "yyyy-MM-ddTHH:mm:ssZ", default to current time if not speficied.
-- `--number|-n` : the number of the latest records to return, will be ignored if both start time and end time are specified.
+- `--start` : start time of the scaling history with format `yyyy-MM-ddTHH:mm:ss+/-HH:mm` or `yyyy-MM-ddTHH:mm:ssZ`, default to very beginning if not specified.
+- `--end` : end time of the scaling history with format `yyyy-MM-ddTHH:mm:ss+/-HH:mm` or `yyyy-MM-ddTHH:mm:ssZ`, default to current time if not speficied.
+- `--number|-n` : the number of the records to return, will be ignored if both start time and end time are specified.
 - `--desc` : display in descending order, default to ascending order if not specified
 - `--output` : dump the scaling history to a file
 
@@ -248,3 +241,7 @@ dynamic          	failed        	2->-1                	2018-08-16T17:58:53+08:00
 - `Action`: the detail information about why and how the application scaled
 - `Error`: the reason why scaling failed
 
+
+[a]:https://docs.cloudfoundry.org/cf-cli/install-go-cli.html
+[b]:https://docs.cloudfoundry.org/cf-cli/use-cli-plugins.html
+[policy]:https://github.com/cloudfoundry-incubator/blob/master/docs/policy.md
