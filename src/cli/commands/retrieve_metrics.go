@@ -110,7 +110,7 @@ func RetrieveAggregatedMetrics(cliConnection api.Connection, appName, metricName
 	if outputfile != "" {
 		ui.SayMessage(ui.SaveAggregatedMetricHint, appName, outputfile)
 	} else {
-		ui.SayMessage(ui.ShowAggregatedMetricsHint, appName)
+		ui.SayMessage(ui.ShowAggregatedMetricsHint, metricName, appName)
 	}
 
 	table := ui.NewTable(writer, []string{"Metrics Name", "Value", "Timestamp"})
@@ -146,7 +146,7 @@ func RetrieveAggregatedMetrics(cliConnection api.Connection, appName, metricName
 
 	if noResult {
 		ui.SayOK()
-		ui.SayMessage(ui.AggregatedMetricsNotFound, appName)
+		ui.SayMessage(ui.AggregatedMetricsNotFound, metricName, appName)
 
 	} else {
 

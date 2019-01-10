@@ -24,7 +24,7 @@ const (
 	AttachPolicyHint = "Attaching policy for app %s..."
 	DetachPolicyHint = "Detaching policy for app %s..."
 
-	ShowAggregatedMetricsHint = "Retrieving aggregated metrics for app %s..."
+	ShowAggregatedMetricsHint = "Retrieving aggregated metrics %s for app %s..."
 	ShowHistoryHint           = "Retrieving history for app %s..."
 
 	SavePolicyHint           = "Saving policy for app %s to %s... "
@@ -36,6 +36,6 @@ const (
 	UnrecognizedMetricName = "Unrecognized metric name input: %s. \nSupported value: memoryused, memoryutil, responsetime, throughput, cpu."
 	InvalidTimeRange       = "Invalid time range. The start time %s is greater than the end time %s."
 
-	AggregatedMetricsNotFound = "No aggregated metrics found for app %s."
+	AggregatedMetricsNotFound = "No aggregated metrics of %s collected for app %s."
 	HistoryNotFound           = "No history found for app %s."
 )

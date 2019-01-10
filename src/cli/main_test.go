@@ -1571,7 +1571,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 								session.Wait()
 
 								Expect(session).To(gbytes.Say("OK"))
-								Expect(session).To(gbytes.Say(ui.AggregatedMetricsNotFound, fakeAppName))
+								Expect(session).To(gbytes.Say(ui.AggregatedMetricsNotFound, metricName, fakeAppName))
 								Expect(session.ExitCode()).To(Equal(0))
 
 							})
@@ -1632,8 +1632,8 @@ var _ = Describe("App-AutoScaler Commands", func() {
 									Expect(err).NotTo(HaveOccurred())
 									session.Wait()
 
-									Expect(session.Out).To(gbytes.Say(ui.ShowAggregatedMetricsHint, fakeAppName))
-									metricsRaw := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.ShowAggregatedMetricsHint+"\n", fakeAppName)))
+									Expect(session.Out).To(gbytes.Say(ui.ShowAggregatedMetricsHint, metricName, fakeAppName))
+									metricsRaw := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.ShowAggregatedMetricsHint+"\n", metricName, fakeAppName)))
 									metricsTable := strings.Split(string(bytes.TrimRight(metricsRaw, "\n")), "\n")
 									Expect(len(metricsTable)).To(Equal(11))
 									for i, row := range metricsTable {
@@ -1712,8 +1712,8 @@ var _ = Describe("App-AutoScaler Commands", func() {
 									Expect(err).NotTo(HaveOccurred())
 									session.Wait()
 
-									Expect(session.Out).To(gbytes.Say(ui.ShowAggregatedMetricsHint, fakeAppName))
-									metricsRaw := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.ShowAggregatedMetricsHint+"\n", fakeAppName)))
+									Expect(session.Out).To(gbytes.Say(ui.ShowAggregatedMetricsHint, metricName, fakeAppName))
+									metricsRaw := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.ShowAggregatedMetricsHint+"\n", metricName, fakeAppName)))
 									metricsTable := strings.Split(string(bytes.TrimRight(metricsRaw, "\n")), "\n")
 									Expect(len(metricsTable)).To(Equal(31))
 									for i, row := range metricsTable {
@@ -1794,8 +1794,8 @@ var _ = Describe("App-AutoScaler Commands", func() {
 									Expect(err).NotTo(HaveOccurred())
 									session.Wait()
 
-									Expect(session.Out).To(gbytes.Say(ui.ShowAggregatedMetricsHint, fakeAppName))
-									metricsRaw := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.ShowAggregatedMetricsHint+"\n", fakeAppName)))
+									Expect(session.Out).To(gbytes.Say(ui.ShowAggregatedMetricsHint, metricName, fakeAppName))
+									metricsRaw := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.ShowAggregatedMetricsHint+"\n", metricName, fakeAppName)))
 									metricsTable := strings.Split(string(bytes.TrimRight(metricsRaw, "\n")), "\n")
 									Expect(len(metricsTable)).To(Equal(31))
 									for i, row := range metricsTable {
@@ -1867,8 +1867,8 @@ var _ = Describe("App-AutoScaler Commands", func() {
 										Expect(err).NotTo(HaveOccurred())
 										session.Wait()
 
-										Expect(session.Out).To(gbytes.Say(ui.ShowAggregatedMetricsHint, fakeAppName))
-										metricsRaw := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.ShowAggregatedMetricsHint+"\n", fakeAppName)))
+										Expect(session.Out).To(gbytes.Say(ui.ShowAggregatedMetricsHint, metricName, fakeAppName))
+										metricsRaw := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.ShowAggregatedMetricsHint+"\n", metricName, fakeAppName)))
 										metricsTable := strings.Split(string(bytes.TrimRight(metricsRaw, "\n")), "\n")
 										Expect(len(metricsTable)).To(Equal(16))
 										for i, row := range metricsTable {
@@ -1947,8 +1947,8 @@ var _ = Describe("App-AutoScaler Commands", func() {
 										Expect(err).NotTo(HaveOccurred())
 										session.Wait()
 
-										Expect(session.Out).To(gbytes.Say(ui.ShowAggregatedMetricsHint, fakeAppName))
-										metricsRaw := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.ShowAggregatedMetricsHint+"\n", fakeAppName)))
+										Expect(session.Out).To(gbytes.Say(ui.ShowAggregatedMetricsHint, metricName, fakeAppName))
+										metricsRaw := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.ShowAggregatedMetricsHint+"\n", metricName, fakeAppName)))
 										metricsTable := strings.Split(string(bytes.TrimRight(metricsRaw, "\n")), "\n")
 										Expect(len(metricsTable)).To(Equal(16))
 										for i, row := range metricsTable {
@@ -2027,8 +2027,8 @@ var _ = Describe("App-AutoScaler Commands", func() {
 										Expect(err).NotTo(HaveOccurred())
 										session.Wait()
 
-										Expect(session.Out).To(gbytes.Say(ui.ShowAggregatedMetricsHint, fakeAppName))
-										metricsRaw := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.ShowAggregatedMetricsHint+"\n", fakeAppName)))
+										Expect(session.Out).To(gbytes.Say(ui.ShowAggregatedMetricsHint, metricName, fakeAppName))
+										metricsRaw := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.ShowAggregatedMetricsHint+"\n", metricName, fakeAppName)))
 										metricsTable := strings.Split(string(bytes.TrimRight(metricsRaw, "\n")), "\n")
 										Expect(len(metricsTable)).To(Equal(31))
 										for i, row := range metricsTable {
@@ -2113,7 +2113,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 
 		var (
 			urlpath               = "/v1/apps/" + fakeAppId + "/scaling_histories"
-			now                   = time.Now()
+			now                      = time.Now()
 			lowPrecisionNowInNano = (now.UnixNano() / 1E9) * 1E9
 		)
 
