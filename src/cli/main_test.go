@@ -573,7 +573,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 							Expect(err).NotTo(HaveOccurred())
 							session.Wait()
 
-							Expect(session).To(gbytes.Say("Failed to access AutoScaler API Endpoint"))
+							Expect(session).To(gbytes.Say("Failed to access AutoScaler API endpoint"))
 							Expect(session.ExitCode()).To(Equal(1))
 						})
 					})
@@ -963,7 +963,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 								Expect(err).NotTo(HaveOccurred())
 								session.Wait()
 
-								Expect(session).To(gbytes.Say("Failed to access AutoScaler API Endpoint"))
+								Expect(session).To(gbytes.Say("Failed to access AutoScaler API endpoint"))
 								Expect(session.ExitCode()).To(Equal(1))
 							})
 						})
@@ -1208,7 +1208,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 							Expect(err).NotTo(HaveOccurred())
 							session.Wait()
 
-							Expect(session).To(gbytes.Say("Failed to access AutoScaler API Endpoint"))
+							Expect(session).To(gbytes.Say("Failed to access AutoScaler API endpoint"))
 							Expect(session.ExitCode()).To(Equal(1))
 						})
 					})
@@ -1323,7 +1323,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 					Expect(err).NotTo(HaveOccurred())
 					session.Wait()
 
-					Expect(session).To(gbytes.Say("Unrecognized date time input"))
+					Expect(session).To(gbytes.Say("Unrecognized date time format"))
 					Expect(session.ExitCode()).To(Equal(1))
 
 					args = []string{ts.Port(), "autoscaling-metrics", fakeAppName, metricName, "--end", invalidTime}
@@ -1331,7 +1331,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 					Expect(err).NotTo(HaveOccurred())
 					session.Wait()
 
-					Expect(session).To(gbytes.Say("Unrecognized date time input"))
+					Expect(session).To(gbytes.Say("Unrecognized date time format"))
 					Expect(session.ExitCode()).To(Equal(1))
 				})
 
@@ -1344,7 +1344,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 					Expect(err).NotTo(HaveOccurred())
 					session.Wait()
 
-					Expect(session).To(gbytes.Say("Unrecognized date time input"))
+					Expect(session).To(gbytes.Say("Unrecognized date time format"))
 					Expect(session.ExitCode()).To(Equal(1))
 				})
 
@@ -1533,7 +1533,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 							Expect(err).NotTo(HaveOccurred())
 							session.Wait()
 
-							Expect(session).To(gbytes.Say("Failed to access AutoScaler API Endpoint"))
+							Expect(session).To(gbytes.Say("Failed to access AutoScaler API endpoint"))
 							Expect(session.ExitCode()).To(Equal(1))
 						})
 					})
@@ -1571,7 +1571,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 								session.Wait()
 
 								Expect(session).To(gbytes.Say("OK"))
-								Expect(session).To(gbytes.Say(ui.AggregatedMetricsNotFound, fakeAppName))
+								Expect(session).To(gbytes.Say(ui.AggregatedMetricsNotFound, metricName, fakeAppName))
 								Expect(session.ExitCode()).To(Equal(0))
 
 							})
@@ -1632,8 +1632,8 @@ var _ = Describe("App-AutoScaler Commands", func() {
 									Expect(err).NotTo(HaveOccurred())
 									session.Wait()
 
-									Expect(session.Out).To(gbytes.Say(ui.ShowAggregatedMetricsHint, fakeAppName))
-									metricsRaw := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.ShowAggregatedMetricsHint+"\n", fakeAppName)))
+									Expect(session.Out).To(gbytes.Say(ui.ShowAggregatedMetricsHint, metricName, fakeAppName))
+									metricsRaw := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.ShowAggregatedMetricsHint+"\n", metricName, fakeAppName)))
 									metricsTable := strings.Split(string(bytes.TrimRight(metricsRaw, "\n")), "\n")
 									Expect(len(metricsTable)).To(Equal(11))
 									for i, row := range metricsTable {
@@ -1712,8 +1712,8 @@ var _ = Describe("App-AutoScaler Commands", func() {
 									Expect(err).NotTo(HaveOccurred())
 									session.Wait()
 
-									Expect(session.Out).To(gbytes.Say(ui.ShowAggregatedMetricsHint, fakeAppName))
-									metricsRaw := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.ShowAggregatedMetricsHint+"\n", fakeAppName)))
+									Expect(session.Out).To(gbytes.Say(ui.ShowAggregatedMetricsHint, metricName, fakeAppName))
+									metricsRaw := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.ShowAggregatedMetricsHint+"\n", metricName, fakeAppName)))
 									metricsTable := strings.Split(string(bytes.TrimRight(metricsRaw, "\n")), "\n")
 									Expect(len(metricsTable)).To(Equal(31))
 									for i, row := range metricsTable {
@@ -1794,8 +1794,8 @@ var _ = Describe("App-AutoScaler Commands", func() {
 									Expect(err).NotTo(HaveOccurred())
 									session.Wait()
 
-									Expect(session.Out).To(gbytes.Say(ui.ShowAggregatedMetricsHint, fakeAppName))
-									metricsRaw := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.ShowAggregatedMetricsHint+"\n", fakeAppName)))
+									Expect(session.Out).To(gbytes.Say(ui.ShowAggregatedMetricsHint, metricName, fakeAppName))
+									metricsRaw := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.ShowAggregatedMetricsHint+"\n", metricName, fakeAppName)))
 									metricsTable := strings.Split(string(bytes.TrimRight(metricsRaw, "\n")), "\n")
 									Expect(len(metricsTable)).To(Equal(31))
 									for i, row := range metricsTable {
@@ -1867,8 +1867,8 @@ var _ = Describe("App-AutoScaler Commands", func() {
 										Expect(err).NotTo(HaveOccurred())
 										session.Wait()
 
-										Expect(session.Out).To(gbytes.Say(ui.ShowAggregatedMetricsHint, fakeAppName))
-										metricsRaw := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.ShowAggregatedMetricsHint+"\n", fakeAppName)))
+										Expect(session.Out).To(gbytes.Say(ui.ShowAggregatedMetricsHint, metricName, fakeAppName))
+										metricsRaw := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.ShowAggregatedMetricsHint+"\n", metricName, fakeAppName)))
 										metricsTable := strings.Split(string(bytes.TrimRight(metricsRaw, "\n")), "\n")
 										Expect(len(metricsTable)).To(Equal(16))
 										for i, row := range metricsTable {
@@ -1947,8 +1947,8 @@ var _ = Describe("App-AutoScaler Commands", func() {
 										Expect(err).NotTo(HaveOccurred())
 										session.Wait()
 
-										Expect(session.Out).To(gbytes.Say(ui.ShowAggregatedMetricsHint, fakeAppName))
-										metricsRaw := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.ShowAggregatedMetricsHint+"\n", fakeAppName)))
+										Expect(session.Out).To(gbytes.Say(ui.ShowAggregatedMetricsHint, metricName, fakeAppName))
+										metricsRaw := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.ShowAggregatedMetricsHint+"\n", metricName, fakeAppName)))
 										metricsTable := strings.Split(string(bytes.TrimRight(metricsRaw, "\n")), "\n")
 										Expect(len(metricsTable)).To(Equal(16))
 										for i, row := range metricsTable {
@@ -2027,8 +2027,8 @@ var _ = Describe("App-AutoScaler Commands", func() {
 										Expect(err).NotTo(HaveOccurred())
 										session.Wait()
 
-										Expect(session.Out).To(gbytes.Say(ui.ShowAggregatedMetricsHint, fakeAppName))
-										metricsRaw := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.ShowAggregatedMetricsHint+"\n", fakeAppName)))
+										Expect(session.Out).To(gbytes.Say(ui.ShowAggregatedMetricsHint, metricName, fakeAppName))
+										metricsRaw := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.ShowAggregatedMetricsHint+"\n", metricName, fakeAppName)))
 										metricsTable := strings.Split(string(bytes.TrimRight(metricsRaw, "\n")), "\n")
 										Expect(len(metricsTable)).To(Equal(31))
 										for i, row := range metricsTable {
@@ -2138,7 +2138,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 					Expect(err).NotTo(HaveOccurred())
 					session.Wait()
 
-					Expect(session).To(gbytes.Say("Unrecognized date time input"))
+					Expect(session).To(gbytes.Say("Unrecognized date time format"))
 					Expect(session.ExitCode()).To(Equal(1))
 
 					args = []string{ts.Port(), "autoscaling-history", fakeAppName, "--end", invalidTime}
@@ -2146,7 +2146,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 					Expect(err).NotTo(HaveOccurred())
 					session.Wait()
 
-					Expect(session).To(gbytes.Say("Unrecognized date time input"))
+					Expect(session).To(gbytes.Say("Unrecognized date time format"))
 					Expect(session.ExitCode()).To(Equal(1))
 				})
 
@@ -2159,7 +2159,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 					Expect(err).NotTo(HaveOccurred())
 					session.Wait()
 
-					Expect(session).To(gbytes.Say("Unrecognized date time input"))
+					Expect(session).To(gbytes.Say("Unrecognized date time format"))
 					Expect(session.ExitCode()).To(Equal(1))
 				})
 
@@ -2348,7 +2348,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 							Expect(err).NotTo(HaveOccurred())
 							session.Wait()
 
-							Expect(session).To(gbytes.Say("Failed to access AutoScaler API Endpoint"))
+							Expect(session).To(gbytes.Say("Failed to access AutoScaler API endpoint"))
 							Expect(session.ExitCode()).To(Equal(1))
 						})
 					})

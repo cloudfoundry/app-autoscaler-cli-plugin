@@ -186,7 +186,7 @@ func (helper *APIHelper) GetPolicy() ([]byte, error) {
 		var errorMsg string
 		switch resp.StatusCode {
 		case 401:
-			errorMsg = fmt.Sprintf(ui.Unauthorized, baseURL, helper.Client.CCAPIEndpoint)
+			errorMsg = fmt.Sprintf(ui.Unauthorized, baseURL)
 		case 404:
 			errorMsg = fmt.Sprintf(ui.PolicyNotFound, helper.Client.AppName)
 		default:
@@ -246,7 +246,7 @@ func (helper *APIHelper) CreatePolicy(data interface{}) error {
 		var errorMsg string
 		switch resp.StatusCode {
 		case 401:
-			errorMsg = fmt.Sprintf(ui.Unauthorized, baseURL, helper.Client.CCAPIEndpoint)
+			errorMsg = fmt.Sprintf(ui.Unauthorized, baseURL)
 		case 400:
 			errorMsg = fmt.Sprintf(ui.InvalidPolicy, parseErrResponse(raw))
 		default:
@@ -281,7 +281,7 @@ func (helper *APIHelper) DeletePolicy() error {
 		var errorMsg string
 		switch resp.StatusCode {
 		case 401:
-			errorMsg = fmt.Sprintf(ui.Unauthorized, baseURL, helper.Client.CCAPIEndpoint)
+			errorMsg = fmt.Sprintf(ui.Unauthorized, baseURL)
 		case 404:
 			errorMsg = fmt.Sprintf(ui.PolicyNotFound, helper.Client.AppName)
 		default:
@@ -336,7 +336,7 @@ func (helper *APIHelper) GetAggregatedMetrics(metricName string, startTime, endT
 		var errorMsg string
 		switch resp.StatusCode {
 		case 401:
-			errorMsg = fmt.Sprintf(ui.Unauthorized, baseURL, helper.Client.CCAPIEndpoint)
+			errorMsg = fmt.Sprintf(ui.Unauthorized, baseURL)
 		default:
 			errorMsg = parseErrResponse(raw)
 		}
@@ -402,7 +402,7 @@ func (helper *APIHelper) GetHistory(startTime, endTime int64, desc bool, page ui
 		var errorMsg string
 		switch resp.StatusCode {
 		case 401:
-			errorMsg = fmt.Sprintf(ui.Unauthorized, baseURL, helper.Client.CCAPIEndpoint)
+			errorMsg = fmt.Sprintf(ui.Unauthorized, baseURL)
 		default:
 			errorMsg = parseErrResponse(raw)
 		}

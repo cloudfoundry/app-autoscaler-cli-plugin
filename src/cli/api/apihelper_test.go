@@ -219,7 +219,7 @@ var _ = Describe("API Helper Test", func() {
 				It("Fail with 401 error", func() {
 					_, err = apihelper.GetPolicy()
 					Expect(err).Should(HaveOccurred())
-					Expect(err).Should(MatchError(fmt.Sprintf(ui.Unauthorized, apihelper.Endpoint.URL, apihelper.Client.CCAPIEndpoint)))
+					Expect(err).Should(MatchError(fmt.Sprintf(ui.Unauthorized, apihelper.Endpoint.URL)))
 				})
 			})
 
@@ -311,7 +311,7 @@ var _ = Describe("API Helper Test", func() {
 				It("Fail with 401 error", func() {
 					err = apihelper.CreatePolicy(fakePolicy)
 					Expect(err).Should(HaveOccurred())
-					Expect(err).Should(MatchError(fmt.Sprintf(ui.Unauthorized, apihelper.Endpoint.URL, apihelper.Client.CCAPIEndpoint)))
+					Expect(err).Should(MatchError(fmt.Sprintf(ui.Unauthorized, apihelper.Endpoint.URL)))
 				})
 			})
 
@@ -388,7 +388,7 @@ var _ = Describe("API Helper Test", func() {
 				It("Fail with 401 error", func() {
 					err = apihelper.DeletePolicy()
 					Expect(err).Should(HaveOccurred())
-					Expect(err).Should(MatchError(fmt.Sprintf(ui.Unauthorized, apihelper.Endpoint.URL, apihelper.Client.CCAPIEndpoint)))
+					Expect(err).Should(MatchError(fmt.Sprintf(ui.Unauthorized, apihelper.Endpoint.URL)))
 				})
 			})
 
@@ -692,7 +692,7 @@ var _ = Describe("API Helper Test", func() {
 				It("Fail with 401 error", func() {
 					_, _, err = apihelper.GetAggregatedMetrics("memoryused", 0, 0, false, uint64(1))
 					Expect(err).Should(HaveOccurred())
-					Expect(err).Should(MatchError(fmt.Sprintf(ui.Unauthorized, apihelper.Endpoint.URL, apihelper.Client.CCAPIEndpoint)))
+					Expect(err).Should(MatchError(fmt.Sprintf(ui.Unauthorized, apihelper.Endpoint.URL)))
 				})
 			})
 
@@ -1124,7 +1124,7 @@ var _ = Describe("API Helper Test", func() {
 				It("Fail with 401 error", func() {
 					_, _, err := apihelper.GetHistory(0, 0, false, uint64(1))
 					Expect(err).Should(HaveOccurred())
-					Expect(err).Should(MatchError(fmt.Sprintf(ui.Unauthorized, apihelper.Endpoint.URL, apihelper.Client.CCAPIEndpoint)))
+					Expect(err).Should(MatchError(fmt.Sprintf(ui.Unauthorized, apihelper.Endpoint.URL)))
 				})
 			})
 

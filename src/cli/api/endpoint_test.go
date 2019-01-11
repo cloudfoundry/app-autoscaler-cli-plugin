@@ -87,7 +87,6 @@ var _ = Describe("Endpoint Helper Test", func() {
 			It("it fails", func() {
 				err = SetEndpoint(cfclient, apiServer.URL(), false)
 				Expect(err).To(HaveOccurred())
-				fmt.Println(err)
 			})
 		})
 

@@ -1,6 +1,6 @@
 # Cloud Foundry CLI AutoScaler Plug-in [![Build Status](https://travis-ci.org/cloudfoundry-incubator/app-autoscaler-cli-plugin.svg?branch=master)](https://travis-ci.org/cloudfoundry-incubator/app-autoscaler-cli-plugin)
 
-App-AutoScaler plug-in provides the command line interface to manage [App AutoScaler](https://github.com/cloudfoundry-incubator/app-autoscaler) service policies, retrieve metrics and scaling history.
+App-AutoScaler plug-in provides the command line interface to manage [App AutoScaler](https://github.com/cloudfoundry-incubator/app-autoscaler) policies, retrieve metrics and scaling event history.
 
 
 ## Install plugin
@@ -59,35 +59,34 @@ cf autoscaling-api [URL] [--unset] [--skip-ssl-validation]
 #### EXAMPLES:
 
 - Set AutoScaler API endpoint, replace `DOMAIN` with the domain of your Cloud Foundry environment:
+
 ```
 $ cf autoscaling-api https://autoscaler.<DOMAIN>
-
 Setting AutoScaler api endpoint to https://autoscaler.<DOMAIN>
 OK
 ```
+
 - View AutoScaler API endpoint:
+
 ```
 $ cf autoscaling-api
-
 Autoscaler api endpoint: https://autoscaler.<DOMAIN>
 ```
+
 - Unset AutoScaler API endpoint:
 
-(you will get a error prompt if the AutoScaler API endpoint is not set when you execute other commands. )
+Note you will get a error prompt if the AutoScaler API endpoint is not set when you execute other commands.
+
 ```
 $ cf autoscaling-api --unset
-
 Unsetting AutoScaler api endpoint.
 OK
 
 $ cf autoscaling-api
-
 No api endpoint set. Use 'cf autoscaling-api' to set an endpoint.
 
 $ cf autoscaling-policy APP_NAME
-
 FAILED
-
 Error: No api endpoint set. Use 'cf autoscaling-api' to set an endpoint.
 ```
 
@@ -138,7 +137,7 @@ Showing policy for app APP_NAME...
 ```
 - Dump the scaling policy to a file in JSON format:
 ```
-$ cf asp testScalingPython --output PATH_TO_FILE
+$ cf asp APP_NAME --output PATH_TO_FILE
 
 Showing policy for app APP_NAME...
 OK
@@ -146,7 +145,8 @@ OK
 
 ### `cf attach-autoscaling-policy` 
 
-Attach a scaling policy to an application, the policy file must be a well-formated JSON file, refer to [policy specification](http://cdlliuy.github.io/app-autoscaler/policy.html#allsample) for details.
+Attach a scaling policy to an application, the policy file must be a JSON file, refer to [policy specification](https://github.com/cloudfoundry-incubator/blob/master/docs/policy.md) for the policy format.
+
 ```
 cf attach-autoscaling-policy APP_NAME PATH_TO_POLICY_FILE
 ```
@@ -164,7 +164,8 @@ OK
 
 ### `cf detach-autoscaling-policy` 
 
-Detach the scaling policy from an application, the policy will be **deleted** when detached, make sure to have a copy of the policy before detach it id you would like to reuse it in the future.
+Detach the scaling policy from an application, the policy will be **deleted** when detached.
+
 ```
 cf detach-as-policy APP_NAME
 ```
@@ -181,7 +182,7 @@ OK
 
 ### `cf autoscaling-metrics`
 
-Retrieve the aggregated metrics of an application, you can specify the start time and end time, or the  number of the latest records you want to return and the order of the outputs. The metrics will be shown in a table.
+Retrieve the aggregated metrics of an application. You can specify the start/end time or the number of the returned query result,  and the display order(ascending or descending). The metrics will be shown in a table.
 
 ```
 cf autoscaling-metrics APP_NAME METRIC_NAME [--number RECORD_NUMBER] [--start START_TIME] [--end END_TIME] [--desc] [--output PATH_TO_FILE]
@@ -191,9 +192,9 @@ cf autoscaling-metrics APP_NAME METRIC_NAME [--number RECORD_NUMBER] [--start ST
 
 #### OPTIONS:
 - `METRIC_NAME` : available metric supported: memoryused, memoryutil, responsetime, throughput and cpu.
-- `--start` : start time of metrics collected with format "yyyy-MM-ddTHH:mm:ss+/-HH:mm" or "yyyy-MM-ddTHH:mm:ssZ", default to very beginning if not specified.
-- `--end` : end time of the metrics collected with format "yyyy-MM-ddTHH:mm:ss+/-HH:mm" or "yyyy-MM-ddTHH:mm:ssZ", default to current time if not speficied.
-- `--number|-n` : the number of the latest records to return, will be ignored if both start time and end time are specified.
+- `--start` : start time of metrics collected with format `yyyy-MM-ddTHH:mm:ss+/-HH:mm` or `yyyy-MM-ddTHH:mm:ssZ`, default to very beginning if not specified.
+- `--end` : end time of the metrics collected with format `yyyy-MM-ddTHH:mm:ss+/-HH:mm` or `yyyy-MM-ddTHH:mm:ssZ`, default to current time if not speficied.
+- `--number|-n` : the number of the records to return, will be ignored if both start time and end time are specified.
 - `--desc` : display in descending order, default to ascending order if not specified
 - `--output` : dump the metrics to a file
 
@@ -215,7 +216,7 @@ memoryused       	62MB      	2018-12-27T11:51:40+08:00
 
 ###  `cf autoscaling-history`
 
-Retrieve the scaling history of an application, you can specify the start time and end time, or the  number of the latest records you want to return and the order of the outputs. The scaling history will be shown in a table.
+Retrieve the scaling event history of an application. You can specify the start/end time or the number of the returned query result,  and the display order(ascending or descending). The scaling event history will be shown in a table.
 ```
 cf autoscaling-history APP_NAME [--number RECORD_NUMBER] [--start START_TIME] [--end END_TIME] [--desc] [--output PATH_TO_FILE]
 ```
@@ -223,9 +224,9 @@ cf autoscaling-history APP_NAME [--number RECORD_NUMBER] [--start START_TIME] [-
 #### ALIAS: ash
 
 #### OPTIONS:
-- `--start` : start time of the scaling history with format "yyyy-MM-ddTHH:mm:ss+/-HH:mm" or "yyyy-MM-ddTHH:mm:ssZ", default to very beginning if not specified.
-- `--end` : end time of the scaling history with format "yyyy-MM-ddTHH:mm:ss+/-HH:mm" or "yyyy-MM-ddTHH:mm:ssZ", default to current time if not speficied.
-- `--number|-n` : the number of the latest records to return, will be ignored if both start time and end time are specified.
+- `--start` : start time of the scaling history with format `yyyy-MM-ddTHH:mm:ss+/-HH:mm` or `yyyy-MM-ddTHH:mm:ssZ`, default to very beginning if not specified.
+- `--end` : end time of the scaling history with format `yyyy-MM-ddTHH:mm:ss+/-HH:mm` or `yyyy-MM-ddTHH:mm:ssZ`, default to current time if not speficied.
+- `--number|-n` : the number of the records to return, will be ignored if both start time and end time are specified.
 - `--desc` : display in descending order, default to ascending order if not specified
 - `--output` : dump the scaling history to a file
 
