@@ -573,7 +573,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 							Expect(err).NotTo(HaveOccurred())
 							session.Wait()
 
-							Expect(session).To(gbytes.Say("Failed to access AutoScaler API Endpoint"))
+							Expect(session).To(gbytes.Say("Failed to access AutoScaler API endpoint"))
 							Expect(session.ExitCode()).To(Equal(1))
 						})
 					})
@@ -963,7 +963,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 								Expect(err).NotTo(HaveOccurred())
 								session.Wait()
 
-								Expect(session).To(gbytes.Say("Failed to access AutoScaler API Endpoint"))
+								Expect(session).To(gbytes.Say("Failed to access AutoScaler API endpoint"))
 								Expect(session.ExitCode()).To(Equal(1))
 							})
 						})
@@ -1208,7 +1208,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 							Expect(err).NotTo(HaveOccurred())
 							session.Wait()
 
-							Expect(session).To(gbytes.Say("Failed to access AutoScaler API Endpoint"))
+							Expect(session).To(gbytes.Say("Failed to access AutoScaler API endpoint"))
 							Expect(session.ExitCode()).To(Equal(1))
 						})
 					})
@@ -1323,7 +1323,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 					Expect(err).NotTo(HaveOccurred())
 					session.Wait()
 
-					Expect(session).To(gbytes.Say("Unrecognized date time input"))
+					Expect(session).To(gbytes.Say("Unrecognized date time format"))
 					Expect(session.ExitCode()).To(Equal(1))
 
 					args = []string{ts.Port(), "autoscaling-metrics", fakeAppName, metricName, "--end", invalidTime}
@@ -1331,7 +1331,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 					Expect(err).NotTo(HaveOccurred())
 					session.Wait()
 
-					Expect(session).To(gbytes.Say("Unrecognized date time input"))
+					Expect(session).To(gbytes.Say("Unrecognized date time format"))
 					Expect(session.ExitCode()).To(Equal(1))
 				})
 
@@ -1344,7 +1344,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 					Expect(err).NotTo(HaveOccurred())
 					session.Wait()
 
-					Expect(session).To(gbytes.Say("Unrecognized date time input"))
+					Expect(session).To(gbytes.Say("Unrecognized date time format"))
 					Expect(session.ExitCode()).To(Equal(1))
 				})
 
@@ -1533,7 +1533,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 							Expect(err).NotTo(HaveOccurred())
 							session.Wait()
 
-							Expect(session).To(gbytes.Say("Failed to access AutoScaler API Endpoint"))
+							Expect(session).To(gbytes.Say("Failed to access AutoScaler API endpoint"))
 							Expect(session.ExitCode()).To(Equal(1))
 						})
 					})
@@ -2113,7 +2113,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 
 		var (
 			urlpath               = "/v1/apps/" + fakeAppId + "/scaling_histories"
-			now                      = time.Now()
+			now                   = time.Now()
 			lowPrecisionNowInNano = (now.UnixNano() / 1E9) * 1E9
 		)
 
@@ -2138,7 +2138,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 					Expect(err).NotTo(HaveOccurred())
 					session.Wait()
 
-					Expect(session).To(gbytes.Say("Unrecognized date time input"))
+					Expect(session).To(gbytes.Say("Unrecognized date time format"))
 					Expect(session.ExitCode()).To(Equal(1))
 
 					args = []string{ts.Port(), "autoscaling-history", fakeAppName, "--end", invalidTime}
@@ -2146,7 +2146,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 					Expect(err).NotTo(HaveOccurred())
 					session.Wait()
 
-					Expect(session).To(gbytes.Say("Unrecognized date time input"))
+					Expect(session).To(gbytes.Say("Unrecognized date time format"))
 					Expect(session.ExitCode()).To(Equal(1))
 				})
 
@@ -2159,7 +2159,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 					Expect(err).NotTo(HaveOccurred())
 					session.Wait()
 
-					Expect(session).To(gbytes.Say("Unrecognized date time input"))
+					Expect(session).To(gbytes.Say("Unrecognized date time format"))
 					Expect(session.ExitCode()).To(Equal(1))
 				})
 
@@ -2348,7 +2348,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 							Expect(err).NotTo(HaveOccurred())
 							session.Wait()
 
-							Expect(session).To(gbytes.Say("Failed to access AutoScaler API Endpoint"))
+							Expect(session).To(gbytes.Say("Failed to access AutoScaler API endpoint"))
 							Expect(session.ExitCode()).To(Equal(1))
 						})
 					})
