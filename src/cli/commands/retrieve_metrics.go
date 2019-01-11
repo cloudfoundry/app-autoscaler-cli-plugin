@@ -17,7 +17,7 @@ type MetricsCommand struct {
 	RequiredlArgs MetricsPositionalArgs `positional-args:"yes"`
 	StartTime     string                `long:"start" description:"start time of metrics collected with format \"yyyy-MM-ddTHH:mm:ss+/-HH:mm\" or \"yyyy-MM-ddTHH:mm:ssZ\", default to very beginning if not specified."`
 	EndTime       string                `long:"end" description:"end time of the metrics collected with format \"yyyy-MM-ddTHH:mm:ss+/-HH:mm\" or \"yyyy-MM-ddTHH:mm:ssZ\", default to current time if not speficied."`
-	RecordNumber  string                `long:"number" short:"n" description:"the number of the records to return, will be ignored if both start time and end time are specified."`
+	RecordNumber  string                `long:"number" short:"n" description:"number of the records will be returned, default one page if not speficied, will be ignored if both start time and end time are specified."`
 	Desc          bool                  `long:"desc" description:"display in descending order, default to ascending order if not specified."`
 	Output        string                `long:"output" description:"dump the policy to a file in JSON format"`
 }
