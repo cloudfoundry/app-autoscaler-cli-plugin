@@ -422,8 +422,10 @@ func (helper *APIHelper) GetHistory(startTime, endTime int64, desc bool, page ui
 			scalingType = "scheduled"
 		}
 		status := "succeeded"
+		instanceChange := strconv.Itoa(entry.OldInstances) + "->" + strconv.Itoa(entry.NewInstances)
 		if entry.Status == 1 {
 			status = "failed"
+			instanceChange = ""
 		}
 
 		var adjustment = entry.NewInstances - entry.OldInstances
@@ -434,8 +436,7 @@ func (helper *APIHelper) GetHistory(startTime, endTime int64, desc bool, page ui
 				entry.Reason = fmt.Sprintf("%d instance(s) because %s", adjustment, entry.Message)
 			}
 		}
-		data = append(data, []string{scalingType, status,
-			strconv.Itoa(entry.OldInstances) + "->" + strconv.Itoa(entry.NewInstances),
+		data = append(data, []string{scalingType, status, instanceChange,
 			time.Unix(0, entry.Timestamp).Format(time.RFC3339),
 			entry.Reason, entry.Error,
 		})
