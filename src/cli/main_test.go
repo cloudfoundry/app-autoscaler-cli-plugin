@@ -2583,7 +2583,6 @@ var _ = Describe("App-AutoScaler Commands", func() {
 											//header line
 										} else {
 											//use (i-1) to skip header
-											Expect(strings.Trim(colomns[2], " ")).To(Equal(strconv.Itoa(i-1+1) + "->" + strconv.Itoa(i-1+2)))
 											Expect(strings.Trim(colomns[3], " ")).To(Equal(time.Unix(0, now.UnixNano()+int64((i-1)*120*1E9)).Format(time.RFC3339)))
 											Expect(strings.Trim(colomns[4], " ")).To(Equal("fakeReason"))
 											Expect(strings.Trim(colomns[5], " ")).To(Equal("fakeError"))
@@ -2591,12 +2590,15 @@ var _ = Describe("App-AutoScaler Commands", func() {
 											if i < 11 {
 												Expect(strings.Trim(colomns[0], " ")).To(Equal("dynamic"))
 												Expect(strings.Trim(colomns[1], " ")).To(Equal("succeeded"))
+												Expect(strings.Trim(colomns[2], " ")).To(Equal(strconv.Itoa(i-1+1) + "->" + strconv.Itoa(i-1+2)))
 											} else if i < 21 {
 												Expect(strings.Trim(colomns[0], " ")).To(Equal("scheduled"))
 												Expect(strings.Trim(colomns[1], " ")).To(Equal("succeeded"))
+												Expect(strings.Trim(colomns[2], " ")).To(Equal(strconv.Itoa(i-1+1) + "->" + strconv.Itoa(i-1+2)))
 											} else {
 												Expect(strings.Trim(colomns[0], " ")).To(Equal("scheduled"))
 												Expect(strings.Trim(colomns[1], " ")).To(Equal("failed"))
+												Expect(strings.Trim(colomns[2], " ")).To(Equal(""))
 											}
 										}
 									}
@@ -2681,19 +2683,21 @@ var _ = Describe("App-AutoScaler Commands", func() {
 											Expect(strings.Trim(colomns[5], " ")).To(Equal("Error"))
 										} else {
 											//use "29-(i-1)" to simulate the expected output in desc order
-											Expect(strings.Trim(colomns[2], " ")).To(Equal(strconv.Itoa(29-(i-1)+1) + "->" + strconv.Itoa(29-(i-1)+2)))
 											Expect(strings.Trim(colomns[3], " ")).To(Equal(time.Unix(0, now.UnixNano()+int64((29-(i-1))*120*1E9)).Format(time.RFC3339)))
 											Expect(strings.Trim(colomns[4], " ")).To(Equal("fakeReason"))
 											Expect(strings.Trim(colomns[5], " ")).To(Equal("fakeError"))
 											if i < 11 {
 												Expect(strings.Trim(colomns[0], " ")).To(Equal("scheduled"))
 												Expect(strings.Trim(colomns[1], " ")).To(Equal("failed"))
+												Expect(strings.Trim(colomns[2], " ")).To(Equal(""))
 											} else if i < 21 {
 												Expect(strings.Trim(colomns[0], " ")).To(Equal("scheduled"))
 												Expect(strings.Trim(colomns[1], " ")).To(Equal("succeeded"))
+												Expect(strings.Trim(colomns[2], " ")).To(Equal(strconv.Itoa(29-(i-1)+1) + "->" + strconv.Itoa(29-(i-1)+2)))
 											} else {
 												Expect(strings.Trim(colomns[0], " ")).To(Equal("dynamic"))
 												Expect(strings.Trim(colomns[1], " ")).To(Equal("succeeded"))
+												Expect(strings.Trim(colomns[2], " ")).To(Equal(strconv.Itoa(29-(i-1)+1) + "->" + strconv.Itoa(29-(i-1)+2)))
 											}
 										}
 									}
@@ -2769,7 +2773,6 @@ var _ = Describe("App-AutoScaler Commands", func() {
 												//header line
 											} else {
 												//use (i-1) to skip header
-												Expect(strings.Trim(colomns[2], " ")).To(Equal(strconv.Itoa(i-1+1) + "->" + strconv.Itoa(i-1+2)))
 												Expect(strings.Trim(colomns[3], " ")).To(Equal(time.Unix(0, now.UnixNano()+int64((i-1)*120*1E9)).Format(time.RFC3339)))
 												Expect(strings.Trim(colomns[4], " ")).To(Equal("fakeReason"))
 												Expect(strings.Trim(colomns[5], " ")).To(Equal("fakeError"))
@@ -2777,12 +2780,18 @@ var _ = Describe("App-AutoScaler Commands", func() {
 												if i < 11 {
 													Expect(strings.Trim(colomns[0], " ")).To(Equal("dynamic"))
 													Expect(strings.Trim(colomns[1], " ")).To(Equal("succeeded"))
+													Expect(strings.Trim(colomns[2], " ")).To(Equal(strconv.Itoa(i-1+1) + "->" + strconv.Itoa(i-1+2)))
+
 												} else if i < 21 {
 													Expect(strings.Trim(colomns[0], " ")).To(Equal("scheduled"))
 													Expect(strings.Trim(colomns[1], " ")).To(Equal("succeeded"))
+													Expect(strings.Trim(colomns[2], " ")).To(Equal(strconv.Itoa(i-1+1) + "->" + strconv.Itoa(i-1+2)))
+
 												} else {
 													Expect(strings.Trim(colomns[0], " ")).To(Equal("scheduled"))
 													Expect(strings.Trim(colomns[1], " ")).To(Equal("failed"))
+													Expect(strings.Trim(colomns[2], " ")).To(Equal(""))
+
 												}
 											}
 										}
@@ -2866,7 +2875,6 @@ var _ = Describe("App-AutoScaler Commands", func() {
 												//header line
 											} else {
 												//use (i-1) to skip header
-												Expect(strings.Trim(colomns[2], " ")).To(Equal(strconv.Itoa(i-1+1) + "->" + strconv.Itoa(i-1+2)))
 												Expect(strings.Trim(colomns[3], " ")).To(Equal(time.Unix(0, now.UnixNano()+int64((i-1)*120*1E9)).Format(time.RFC3339)))
 												Expect(strings.Trim(colomns[4], " ")).To(Equal("fakeReason"))
 												Expect(strings.Trim(colomns[5], " ")).To(Equal("fakeError"))
@@ -2874,12 +2882,18 @@ var _ = Describe("App-AutoScaler Commands", func() {
 												if i < 11 {
 													Expect(strings.Trim(colomns[0], " ")).To(Equal("dynamic"))
 													Expect(strings.Trim(colomns[1], " ")).To(Equal("succeeded"))
+													Expect(strings.Trim(colomns[2], " ")).To(Equal(strconv.Itoa(i-1+1) + "->" + strconv.Itoa(i-1+2)))
+
 												} else if i < 21 {
 													Expect(strings.Trim(colomns[0], " ")).To(Equal("scheduled"))
 													Expect(strings.Trim(colomns[1], " ")).To(Equal("succeeded"))
+													Expect(strings.Trim(colomns[2], " ")).To(Equal(strconv.Itoa(i-1+1) + "->" + strconv.Itoa(i-1+2)))
+
 												} else {
 													Expect(strings.Trim(colomns[0], " ")).To(Equal("scheduled"))
 													Expect(strings.Trim(colomns[1], " ")).To(Equal("failed"))
+													Expect(strings.Trim(colomns[2], " ")).To(Equal(""))
+
 												}
 											}
 										}
@@ -2963,7 +2977,6 @@ var _ = Describe("App-AutoScaler Commands", func() {
 												//header line
 											} else {
 												//use (i-1) to skip header
-												Expect(strings.Trim(colomns[2], " ")).To(Equal(strconv.Itoa(i-1+1) + "->" + strconv.Itoa(i-1+2)))
 												Expect(strings.Trim(colomns[3], " ")).To(Equal(time.Unix(0, now.UnixNano()+int64((i-1)*120*1E9)).Format(time.RFC3339)))
 												Expect(strings.Trim(colomns[4], " ")).To(Equal("fakeReason"))
 												Expect(strings.Trim(colomns[5], " ")).To(Equal("fakeError"))
@@ -2971,12 +2984,18 @@ var _ = Describe("App-AutoScaler Commands", func() {
 												if i < 11 {
 													Expect(strings.Trim(colomns[0], " ")).To(Equal("dynamic"))
 													Expect(strings.Trim(colomns[1], " ")).To(Equal("succeeded"))
+													Expect(strings.Trim(colomns[2], " ")).To(Equal(strconv.Itoa(i-1+1) + "->" + strconv.Itoa(i-1+2)))
+
 												} else if i < 21 {
 													Expect(strings.Trim(colomns[0], " ")).To(Equal("scheduled"))
 													Expect(strings.Trim(colomns[1], " ")).To(Equal("succeeded"))
+													Expect(strings.Trim(colomns[2], " ")).To(Equal(strconv.Itoa(i-1+1) + "->" + strconv.Itoa(i-1+2)))
+
 												} else {
 													Expect(strings.Trim(colomns[0], " ")).To(Equal("scheduled"))
 													Expect(strings.Trim(colomns[1], " ")).To(Equal("failed"))
+													Expect(strings.Trim(colomns[2], " ")).To(Equal(""))
+
 												}
 											}
 										}

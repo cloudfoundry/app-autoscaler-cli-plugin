@@ -952,7 +952,7 @@ var _ = Describe("API Helper Test", func() {
 						for i, row := range data {
 							Expect(row[0]).To(Equal("scheduled"))
 							Expect(row[1]).To(Equal("failed"))
-							Expect(row[2]).To(Equal(strconv.Itoa(i+20+1) + "->" + strconv.Itoa(i+20+2)))
+							Expect(row[2]).To(Equal(""))
 							Expect(row[3]).To(Equal(time.Unix(0, now+int64((i+20)*120*1E9)).Format(time.RFC3339)))
 							Expect(row[4]).To(Equal("fakeReason"))
 							Expect(row[5]).To(Equal("fakeError"))
@@ -1013,7 +1013,7 @@ var _ = Describe("API Helper Test", func() {
 						for i, row := range data {
 							Expect(row[0]).To(Equal("scheduled"))
 							Expect(row[1]).To(Equal("failed"))
-							Expect(row[2]).To(Equal(strconv.Itoa(29-i+1) + "->" + strconv.Itoa(29-i+2)))
+							Expect(row[2]).To(Equal(""))
 							Expect(row[3]).To(Equal(time.Unix(0, now+int64((29-i)*120*1E9)).Format(time.RFC3339)))
 							Expect(row[4]).To(Equal("fakeReason"))
 							Expect(row[5]).To(Equal("fakeError"))
