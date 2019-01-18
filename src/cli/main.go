@@ -65,7 +65,7 @@ OPTIONS:
 				Alias:    "asm",
 				HelpText: "Retrieve the metrics of an application",
 				UsageDetails: plugin.Usage{
-					Usage: `cf autoscaling-metrics APP_NAME METRIC_NAME [--start START_TIME] [--end END_TIME] [--desc] [--output PATH_TO_FILE]
+					Usage: `cf autoscaling-metrics APP_NAME METRIC_NAME [--start START_TIME] [--end END_TIME] [--number NUMBER] [--desc] [--output PATH_TO_FILE]
 
 METRIC_NAME: 
 	memoryused, memoryutil, responsetime, throughput, cpu.	
@@ -84,7 +84,7 @@ OPTIONS:
 				Alias:    "ash",
 				HelpText: "Retrieve the scaling history of an application",
 				UsageDetails: plugin.Usage{
-					Usage: `cf autoscaling-history APP_NAME [--start START_TIME] [--end END_TIME] [--desc] [--output PATH_TO_FILE]
+					Usage: `cf autoscaling-history APP_NAME [--start START_TIME] [--end END_TIME] [--number NUMBER] [--desc] [--output PATH_TO_FILE] 
 
 OPTIONS:
 	--start		Start time of the scaling history with format "yyyy-MM-ddTHH:mm:ss+/-HH:mm" or "yyyy-MM-ddTHH:mm:ssZ", default to very beginning if not specified.
