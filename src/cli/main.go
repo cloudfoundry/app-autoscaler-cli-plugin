@@ -17,7 +17,7 @@ func (as *AutoScaler) GetMetadata() plugin.PluginMetadata {
 		Name: "AutoScaler",
 		Version: plugin.VersionType{
 			Major: 1,
-			Minor: 0,
+			Minor: 1,
 			Build: 0,
 		},
 		Commands: []plugin.Command{
