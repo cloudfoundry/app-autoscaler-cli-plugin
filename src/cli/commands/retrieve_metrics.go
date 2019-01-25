@@ -66,6 +66,8 @@ func (command MetricsCommand) Execute([]string) error {
 		if rn <= 0 || err != nil {
 			return errors.New(fmt.Sprintf(ui.InvalidRecordNumber, command.RecordNumber))
 		}
+	} else if command.StartTime != "" || command.EndTime != "" {
+		rn = math.MaxInt64
 	}
 	if command.StartTime != "" && command.EndTime != "" {
 		rn = math.MaxInt64
@@ -119,6 +121,7 @@ func RetrieveAggregatedMetrics(cliConnection api.Connection, appName, metricName
 		currentNumber int64  = 0
 		next          bool   = true
 		noResult      bool   = true
+		moreResult    bool   = false
 		data          [][]string
 	)
 	for true {
@@ -139,6 +142,9 @@ func RetrieveAggregatedMetrics(cliConnection api.Connection, appName, metricName
 		}
 
 		if !next || currentNumber >= recordNumber {
+			if next && recordNumber == 0 {
+				moreResult = true
+			}
 			break
 		}
 		page += 1
@@ -153,6 +159,9 @@ func RetrieveAggregatedMetrics(cliConnection api.Connection, appName, metricName
 		if writer != os.Stdout {
 			ui.SayOK()
 		}
+	}
+	if moreResult {
+		ui.SayWarningMessage(ui.MoreRecordsWarning)
 	}
 
 	return nil

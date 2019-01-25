@@ -38,4 +38,6 @@ const (
 
 	AggregatedMetricsNotFound = "No aggregated %s metrics were found for app %s."
 	HistoryNotFound           = "No event history were found for app %s."
+
+	MoreRecordsWarning = "There are more records, and only first page were displayed currently."
 )

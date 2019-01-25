@@ -55,6 +55,8 @@ func (command HistoryCommand) Execute([]string) error {
 		if rn <= 0 || err != nil {
 			return errors.New(fmt.Sprintf(ui.InvalidRecordNumber, command.RecordNumber))
 		}
+	} else if command.StartTime != "" || command.EndTime != "" {
+		rn = math.MaxInt64
 	}
 	if command.StartTime != "" && command.EndTime != "" {
 		rn = math.MaxInt64
@@ -108,6 +110,7 @@ func RetrieveHistory(cliConnection api.Connection, appName string, startTime, en
 		currentNumber int64  = 0
 		next          bool   = true
 		noResult      bool   = true
+		moreResult    bool   = false
 		data          [][]string
 	)
 
@@ -129,6 +132,9 @@ func RetrieveHistory(cliConnection api.Connection, appName string, startTime, en
 		}
 
 		if !next || currentNumber >= recordNumber {
+			if next && recordNumber == 0 {
+				moreResult = true
+			}
 			break
 		}
 		page += 1
@@ -141,6 +147,9 @@ func RetrieveHistory(cliConnection api.Connection, appName string, startTime, en
 		if outputfile != "" {
 			ui.SayOK()
 		}
+	}
+	if moreResult {
+		ui.SayWarningMessage(ui.MoreRecordsWarning)
 	}
 
 	return nil
