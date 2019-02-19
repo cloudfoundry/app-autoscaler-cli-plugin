@@ -39,5 +39,5 @@ const (
 	AggregatedMetricsNotFound = "No aggregated %s metrics were found for app %s."
 	HistoryNotFound           = "No event history were found for app %s."
 
-	MoreRecordsWarning = "There are more records, and only first page were displayed currently."
+	MoreRecordsWarning = "More records available for app %s. Please re-run the command with --start, --end or --number option to fetch more."
 )

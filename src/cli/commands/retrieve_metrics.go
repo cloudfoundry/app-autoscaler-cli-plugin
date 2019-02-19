@@ -42,7 +42,8 @@ func (command MetricsCommand) Execute([]string) error {
 	var (
 		st     int64 = 0
 		et     int64 = time.Now().UnixNano()
-		rn     int64 = 0
+		rn     int64 = math.MaxInt64
+		fpo    bool  = false
 		err    error
 		writer *os.File
 	)
@@ -61,17 +62,13 @@ func (command MetricsCommand) Execute([]string) error {
 	if st > et {
 		return errors.New(fmt.Sprintf(ui.InvalidTimeRange, command.StartTime, command.EndTime))
 	}
-	if command.RecordNumber != "" {
+	if command.RecordNumber != "" && (command.StartTime == "" || command.EndTime == "") {
 		rn, err = strconv.ParseInt(command.RecordNumber, 10, 64)
 		if rn <= 0 || err != nil {
 			return errors.New(fmt.Sprintf(ui.InvalidRecordNumber, command.RecordNumber))
 		}
-	} else if command.StartTime != "" || command.EndTime != "" {
-		rn = math.MaxInt64
 	}
-	if command.StartTime != "" && command.EndTime != "" {
-		rn = math.MaxInt64
-	}
+	fpo = command.RecordNumber == "" && command.StartTime == "" && command.EndTime == ""
 
 	if command.Output != "" {
 		writer, err = os.OpenFile(command.Output, os.O_CREATE|os.O_WRONLY, 0666)
@@ -84,10 +81,10 @@ func (command MetricsCommand) Execute([]string) error {
 	}
 	return RetrieveAggregatedMetrics(AutoScaler.CLIConnection,
 		command.RequiredlArgs.AppName, command.RequiredlArgs.MetricName,
-		st, et, rn, command.Desc, writer, command.Output)
+		st, et, rn, fpo, command.Desc, writer, command.Output)
 }
 
-func RetrieveAggregatedMetrics(cliConnection api.Connection, appName, metricName string, startTime, endTime, recordNumber int64, desc bool, writer io.Writer, outputfile string) error {
+func RetrieveAggregatedMetrics(cliConnection api.Connection, appName, metricName string, startTime, endTime, recordNumber int64, firstPageOnly bool, desc bool, writer io.Writer, outputfile string) error {
 
 	cfclient, err := api.NewCFClient(cliConnection)
 	if err != nil {
@@ -131,7 +128,7 @@ func RetrieveAggregatedMetrics(cliConnection api.Connection, appName, metricName
 		}
 
 		for _, row := range data {
-			if recordNumber == 0 || currentNumber < recordNumber {
+			if currentNumber < recordNumber {
 				table.Add(row)
 				currentNumber++
 			}
@@ -141,10 +138,8 @@ func RetrieveAggregatedMetrics(cliConnection api.Connection, appName, metricName
 			table.Print()
 		}
 
-		if !next || currentNumber >= recordNumber {
-			if next && recordNumber == 0 {
-				moreResult = true
-			}
+		moreResult = next && firstPageOnly
+		if !next || currentNumber >= recordNumber || firstPageOnly {
 			break
 		}
 		page += 1
