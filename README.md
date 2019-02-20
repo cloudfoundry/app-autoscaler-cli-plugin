@@ -182,10 +182,10 @@ OK
 
 ### `cf autoscaling-metrics`
 
-Retrieve the aggregated metrics of an application. You can specify the start/end time or the number of the returned query result,  and the display order(ascending or descending). The metrics will be shown in a table.
+Retrieve the aggregated metrics of an application. You can specify the start/end time of the returned query result,  and the display order(ascending or descending). The metrics will be shown in a table.
 
 ```
-cf autoscaling-metrics APP_NAME METRIC_NAME [--number RECORD_NUMBER] [--start START_TIME] [--end END_TIME] [--desc] [--output PATH_TO_FILE]
+cf autoscaling-metrics APP_NAME METRIC_NAME [--start START_TIME] [--end END_TIME] [--desc] [--output PATH_TO_FILE]
 ```
 #### ALIAS: asm
 
@@ -194,7 +194,6 @@ cf autoscaling-metrics APP_NAME METRIC_NAME [--number RECORD_NUMBER] [--start ST
 - `METRIC_NAME` : available metric supported: memoryused, memoryutil, responsetime, throughput and cpu.
 - `--start` : start time of metrics collected with format `yyyy-MM-ddTHH:mm:ss+/-HH:mm` or `yyyy-MM-ddTHH:mm:ssZ`, default to very beginning if not specified.
 - `--end` : end time of the metrics collected with format `yyyy-MM-ddTHH:mm:ss+/-HH:mm` or `yyyy-MM-ddTHH:mm:ssZ`, default to current time if not speficied.
-- `--number|-n` : the number of the records to return, will be ignored if both start time and end time are specified.
 - `--desc` : display in descending order, default to ascending order if not specified
 - `--output` : dump the metrics to a file
 
@@ -216,9 +215,9 @@ memoryused       	62MB      	2018-12-27T11:51:40+08:00
 
 ###  `cf autoscaling-history`
 
-Retrieve the scaling event history of an application. You can specify the start/end time or the number of the returned query result,  and the display order(ascending or descending). The scaling event history will be shown in a table.
+Retrieve the scaling event history of an application. You can specify the start/end time of the returned query result,  and the display order(ascending or descending). The scaling event history will be shown in a table.
 ```
-cf autoscaling-history APP_NAME [--number RECORD_NUMBER] [--start START_TIME] [--end END_TIME] [--desc] [--output PATH_TO_FILE]
+cf autoscaling-history APP_NAME [--start START_TIME] [--end END_TIME] [--desc] [--output PATH_TO_FILE]
 ```
 
 #### ALIAS: ash
@@ -226,13 +225,12 @@ cf autoscaling-history APP_NAME [--number RECORD_NUMBER] [--start START_TIME] [-
 #### OPTIONS:
 - `--start` : start time of the scaling history with format `yyyy-MM-ddTHH:mm:ss+/-HH:mm` or `yyyy-MM-ddTHH:mm:ssZ`, default to very beginning if not specified.
 - `--end` : end time of the scaling history with format `yyyy-MM-ddTHH:mm:ss+/-HH:mm` or `yyyy-MM-ddTHH:mm:ssZ`, default to current time if not speficied.
-- `--number|-n` : the number of the records to return, will be ignored if both start time and end time are specified.
 - `--desc` : display in descending order, default to ascending order if not specified
 - `--output` : dump the scaling history to a file
 
 #### EXAMPLES:
 ```
-$ cf autoscaling-history APP_NAME --start 2018-08-16T17:58:53+08:00 --end 2018-08-16T18:01:00+08:00 --number 3 --desc
+$ cf autoscaling-history APP_NAME --start 2018-08-16T17:58:53+08:00 --end 2018-08-16T18:01:00+08:00 --desc
 
 Showing history for app APP_NAME...
 Scaling Type     	Status        	Instance Changes     	Time                          	Action                                                        	Error

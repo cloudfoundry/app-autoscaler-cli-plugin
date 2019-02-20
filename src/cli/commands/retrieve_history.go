@@ -7,9 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"math"
 	"os"
-	"strconv"
 	"time"
 )
 
@@ -17,7 +15,6 @@ type HistoryCommand struct {
 	RequiredlArgs HistoryPositionalArgs `positional-args:"yes"`
 	StartTime     string                `long:"start" description:"start time of metrics collected with format \"yyyy-MM-ddTHH:mm:ss+/-HH:mm\" or \"yyyy-MM-ddTHH:mm:ssZ\", default to very beginning if not specified."`
 	EndTime       string                `long:"end" description:"end time of the metrics collected with format \"yyyy-MM-ddTHH:mm:ss+/-HH:mm\" or \"yyyy-MM-ddTHH:mm:ssZ\", default to current time if not speficied."`
-	RecordNumber  string                `long:"number" short:"n" description:"the number of the records to return, will be ignored if both start time and end time are specified."`
 	Desc          bool                  `long:"desc" description:"display in descending order, default to ascending order if not specified."`
 	Output        string                `long:"output" description:"dump the policy to a file in JSON format"`
 }
@@ -31,7 +28,7 @@ func (command HistoryCommand) Execute([]string) error {
 	var (
 		st     int64 = 0
 		et     int64 = time.Now().UnixNano()
-		rn     int64 = 0
+		fpo    bool  = false
 		err    error
 		writer *os.File
 	)
@@ -50,15 +47,7 @@ func (command HistoryCommand) Execute([]string) error {
 	if st > et {
 		return errors.New(fmt.Sprintf(ui.InvalidTimeRange, command.StartTime, command.EndTime))
 	}
-	if command.RecordNumber != "" {
-		rn, err = strconv.ParseInt(command.RecordNumber, 10, 64)
-		if rn <= 0 || err != nil {
-			return errors.New(fmt.Sprintf(ui.InvalidRecordNumber, command.RecordNumber))
-		}
-	}
-	if command.StartTime != "" && command.EndTime != "" {
-		rn = math.MaxInt64
-	}
+	fpo = command.StartTime == "" && command.EndTime == ""
 
 	if command.Output != "" {
 		writer, err = os.OpenFile(command.Output, os.O_CREATE|os.O_WRONLY, 0666)
@@ -72,10 +61,10 @@ func (command HistoryCommand) Execute([]string) error {
 
 	return RetrieveHistory(AutoScaler.CLIConnection,
 		command.RequiredlArgs.AppName,
-		st, et, rn, command.Desc, writer, command.Output)
+		st, et, fpo, command.Desc, writer, command.Output)
 }
 
-func RetrieveHistory(cliConnection api.Connection, appName string, startTime, endTime, recordNumber int64, desc bool, writer io.Writer, outputfile string) error {
+func RetrieveHistory(cliConnection api.Connection, appName string, startTime, endTime int64, firstPageOnly bool, desc bool, writer io.Writer, outputfile string) error {
 
 	cfclient, err := api.NewCFClient(cliConnection)
 	if err != nil {
@@ -104,11 +93,11 @@ func RetrieveHistory(cliConnection api.Connection, appName string, startTime, en
 
 	table := ui.NewTable(writer, []string{"Scaling Type", "Status", "Instance Changes", "Time", "Action", "Error"})
 	var (
-		page          uint64 = 1
-		currentNumber int64  = 0
-		next          bool   = true
-		noResult      bool   = true
-		data          [][]string
+		page       uint64 = 1
+		next       bool   = true
+		noResult   bool   = true
+		moreResult bool   = false
+		data       [][]string
 	)
 
 	for true {
@@ -118,17 +107,15 @@ func RetrieveHistory(cliConnection api.Connection, appName string, startTime, en
 		}
 
 		for _, row := range data {
-			if recordNumber == 0 || currentNumber < recordNumber {
-				table.Add(row)
-				currentNumber++
-			}
+			table.Add(row)
 		}
 		if len(data) > 0 {
 			noResult = false
 			table.Print()
 		}
 
-		if !next || currentNumber >= recordNumber {
+		moreResult = next && firstPageOnly
+		if !next || firstPageOnly {
 			break
 		}
 		page += 1
@@ -141,6 +128,9 @@ func RetrieveHistory(cliConnection api.Connection, appName string, startTime, en
 		if outputfile != "" {
 			ui.SayOK()
 		}
+	}
+	if moreResult {
+		ui.SayWarningMessage(ui.MoreRecordsWarning)
 	}
 
 	return nil
