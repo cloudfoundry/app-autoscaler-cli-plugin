@@ -44,6 +44,10 @@ var _ = Describe("API Helper Test", func() {
 				},
 			},
 		}
+		fakeCredential CustomMetricCredentials = CustomMetricCredentials{
+			Username: "fake-user",
+			Password: "fake-password",
+		}
 	)
 
 	BeforeEach(func() {
@@ -445,6 +449,162 @@ var _ = Describe("API Helper Test", func() {
 
 				It("Fail with 502 error", func() {
 					err = apihelper.DeletePolicy()
+					Expect(err).Should(HaveOccurred())
+					Expect(err).Should(MatchError("502 bad gateway"))
+				})
+			})
+
+		})
+
+		Context("Create Credential", func() {
+			var urlpath string = "/v1/apps/" + fakeAppId + "/custom_metrics_credential"
+
+			Context("201 Created with valid auth token", func() {
+				BeforeEach(func() {
+					apiServer.RouteToHandler("PUT", urlpath,
+						ghttp.CombineHandlers(
+							ghttp.RespondWith(http.StatusCreated, ""),
+							ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
+						),
+					)
+				})
+
+				It("succeed", func() {
+					err = apihelper.CreateCredential()
+					Expect(err).NotTo(HaveOccurred())
+				})
+			})
+
+			Context("200 OK with valid auth token", func() {
+				BeforeEach(func() {
+					apiServer.RouteToHandler("PUT", urlpath,
+						ghttp.CombineHandlers(
+							ghttp.RespondWith(http.StatusOK, ""),
+							ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
+						),
+					)
+				})
+
+				It("succeed", func() {
+					err = apihelper.CreateCredential()
+					Expect(err).NotTo(HaveOccurred())
+				})
+			})
+
+			Context("Unauthorized Access", func() {
+				BeforeEach(func() {
+					apiServer.RouteToHandler("PUT", urlpath,
+						ghttp.RespondWith(http.StatusUnauthorized, ""),
+					)
+				})
+
+				It("Fail with 401 error", func() {
+					err = apihelper.CreateCredential()
+					Expect(err).Should(HaveOccurred())
+					Expect(err).Should(MatchError(fmt.Sprintf(ui.Unauthorized, apihelper.Endpoint.URL)))
+				})
+			})
+
+			Context("Default error handling", func() {
+				BeforeEach(func() {
+					apiServer.RouteToHandler("PUT", urlpath,
+						ghttp.RespondWith(http.StatusInternalServerError, `{"success":false,"error":{"message":"Internal error","statusCode":500},"result":null}`),
+					)
+				})
+
+				It("Fail with 500 error", func() {
+					err = apihelper.CreateCredential()
+					Expect(err).Should(HaveOccurred())
+					Expect(err).Should(MatchError("Internal error"))
+				})
+			})
+
+			Context("When error msg is a plain text", func() {
+				BeforeEach(func() {
+					apiServer.RouteToHandler("PUT", urlpath,
+						ghttp.RespondWith(http.StatusBadGateway, "502 bad gateway"),
+					)
+				})
+
+				It("Fail with 502 error", func() {
+					err = apihelper.CreateCredential()
+					Expect(err).Should(HaveOccurred())
+					Expect(err).Should(MatchError("502 bad gateway"))
+				})
+			})
+
+		})
+
+		Context("Delete Credential", func() {
+			var urlpath string = "/v1/apps/" + fakeAppId + "/custom_metrics_credential"
+
+			Context("Succeed with valid auth token", func() {
+				BeforeEach(func() {
+					apiServer.RouteToHandler("DELETE", urlpath,
+						ghttp.CombineHandlers(
+							ghttp.RespondWith(http.StatusOK, ""),
+							ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
+						),
+					)
+				})
+
+				It("succeed", func() {
+					err = apihelper.DeleteCredential()
+					Expect(err).NotTo(HaveOccurred())
+				})
+			})
+
+			Context("Unauthorized Access", func() {
+				BeforeEach(func() {
+					apiServer.RouteToHandler("DELETE", urlpath,
+						ghttp.RespondWith(http.StatusUnauthorized, ""),
+					)
+				})
+
+				It("Fail with 401 error", func() {
+					err = apihelper.DeleteCredential()
+					Expect(err).Should(HaveOccurred())
+					Expect(err).Should(MatchError(fmt.Sprintf(ui.Unauthorized, apihelper.Endpoint.URL)))
+				})
+			})
+
+			Context("Credential not found", func() {
+				BeforeEach(func() {
+					apiServer.RouteToHandler("DELETE", urlpath,
+						ghttp.RespondWith(http.StatusNotFound, `{"success":false,"error":{"message":"No credential bound with application","statusCode":404},"result":null}`),
+					)
+				})
+
+				It("Fail with 404 error", func() {
+					err = apihelper.DeleteCredential()
+					Expect(err).Should(HaveOccurred())
+					Expect(err).Should(MatchError(fmt.Sprintf(ui.CredentialNotFound, apihelper.Client.AppName)))
+				})
+			})
+
+			Context("Default error handling", func() {
+				BeforeEach(func() {
+					apiServer.RouteToHandler("DELETE", urlpath,
+						ghttp.RespondWith(http.StatusInternalServerError, `{"success":false,"error":{"message":"Internal error","statusCode":500},"result":null}`),
+					)
+				})
+
+				It("Fail with 500 error", func() {
+					err = apihelper.DeleteCredential()
+					Expect(err).Should(HaveOccurred())
+					Expect(err).Should(MatchError("Internal error"))
+				})
+			})
+
+			Context("When error msg is a plain text", func() {
+				BeforeEach(func() {
+					apiServer.RouteToHandler("DELETE", urlpath,
+						ghttp.RespondWith(http.StatusBadGateway, "502 bad gateway"),
+					)
+				})
+
+				It("Fail with 502 error", func() {
+					err = apihelper.DeleteCredential()
 					Expect(err).Should(HaveOccurred())
 					Expect(err).Should(MatchError("502 bad gateway"))
 				})

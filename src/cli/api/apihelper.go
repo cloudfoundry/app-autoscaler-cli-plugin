@@ -28,6 +28,7 @@ import (
 const (
 	HealthPath           = "/health"
 	PolicyPath           = "/v1/apps/{appId}/policy"
+	CredentialPath       = "/v1/apps/{appId}/custom_metrics_credential"
 	AggregatedMetricPath = "/v1/apps/{appId}/aggregated_metric_histories/{metric_type}"
 	HistoryPath          = "/v1/apps/{appId}/scaling_histories"
 )
@@ -476,4 +477,77 @@ func (helper *APIHelper) GetHistory(startTime, endTime int64, asc bool, page uin
 		return false, data, nil
 	}
 
+}
+
+func (helper *APIHelper) DeleteCredential() error {
+
+	err := helper.CheckHealth()
+	if err != nil {
+		return err
+	}
+
+	baseURL := helper.Endpoint.URL
+	requestURL := fmt.Sprintf("%s%s", baseURL, strings.Replace(CredentialPath, "{appId}", helper.Client.AppId, -1))
+
+	req, err := http.NewRequest("DELETE", requestURL, nil)
+	req.Header.Add("Authorization", helper.Client.AuthToken)
+
+	resp, err := helper.DoRequest(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	raw, err := ioutil.ReadAll(resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		var errorMsg string
+		switch resp.StatusCode {
+		case 401:
+			errorMsg = fmt.Sprintf(ui.Unauthorized, baseURL)
+		case 404:
+			errorMsg = fmt.Sprintf(ui.CredentialNotFound, helper.Client.AppName)
+		default:
+			errorMsg = parseErrResponse(raw)
+		}
+		return errors.New(errorMsg)
+	}
+
+	return nil
+
+}
+
+func (helper *APIHelper) CreateCredential() error {
+
+	err := helper.CheckHealth()
+	if err != nil {
+		return err
+	}
+
+	baseURL := helper.Endpoint.URL
+	requestURL := fmt.Sprintf("%s%s", baseURL, strings.Replace(CredentialPath, "{appId}", helper.Client.AppId, -1))
+
+	req, err := http.NewRequest("PUT", requestURL, nil)
+	req.Header.Add("Authorization", helper.Client.AuthToken)
+	req.Header.Add("Content-Type", "application/json")
+
+	resp, err := helper.DoRequest(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	raw, err := ioutil.ReadAll(resp.Body)
+
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
+
+		var errorMsg string
+		switch resp.StatusCode {
+		case 401:
+			errorMsg = fmt.Sprintf(ui.Unauthorized, baseURL)
+		default:
+			errorMsg = parseErrResponse(raw)
+		}
+		return errors.New(errorMsg)
+	}
+	return nil
 }

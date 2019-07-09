@@ -28,6 +28,7 @@ const (
 	ShowHistoryHint           = "Retrieving scaling event history for app %s..."
 
 	SavePolicyHint           = "Saving policy for app %s to %s... "
+	SaveCredentialHint       = "Saving custom metric credential for app %s to %s... "
 	SaveAggregatedMetricHint = "Saving aggregated metrics for app %s to %s... "
 	SaveHistoryHint          = "Saving scaling event history for app %s to %s... "
 
@@ -40,4 +41,8 @@ const (
 
 	MoreRecordsWarning    = "TIP: More records available. Please re-run the command with --start or --end option to fetch more."
 	DeprecatedDescWarning = "TIP: The default order is set to descending now. Please remove the DEPRECATED flag '--desc'."
+
+	ShowCredentialHint   = "Retrieving custom metrics credential for app %s..."
+	CreateCredentialHint = "Creating custom metrics credential for app %s..."
+	DeleteCredentialHint = "Deleting custom metrics credential for app %s..."
 )

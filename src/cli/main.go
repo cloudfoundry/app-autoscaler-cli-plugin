@@ -61,6 +61,33 @@ OPTIONS:
 				},
 			},
 			{
+				Name:     "autoscaling-credential",
+				Alias:    "asc",
+				HelpText: "Retrieve the custom metric credential of an application",
+				UsageDetails: plugin.Usage{
+					Usage: `cf autoscaling-credential APP_NAME [--output PATH_TO_FILE]
+
+OPTIONS:
+	--output	Dump the credential to a file in JSON format`,
+				},
+			},
+			{
+				Name:     "create-autoscaling-credential",
+				Alias:    "casc",
+				HelpText: "Create custom metric credential for an application",
+				UsageDetails: plugin.Usage{
+					Usage: `cf create-autoscaling-credential APP_NAME`,
+				},
+			},
+			{
+				Name:     "delete-autoscaling-credential",
+				Alias:    "dasc",
+				HelpText: "Delete the custom metric credential of an application",
+				UsageDetails: plugin.Usage{
+					Usage: `cf delete-autoscaling-credential APP_NAME`,
+				},
+			},
+			{
 				Name:     "autoscaling-metrics",
 				Alias:    "asm",
 				HelpText: "Retrieve the metrics of an application",

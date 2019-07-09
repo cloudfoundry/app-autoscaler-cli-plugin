@@ -93,6 +93,11 @@ var _ = Describe("App-AutoScaler Commands", func() {
 				},
 			},
 		}
+
+		fakeCredential CustomMetricCredentials = CustomMetricCredentials{
+			Username: "fake-user",
+			Password: "fake-password",
+		}
 	)
 
 	BeforeEach(func() {
@@ -1292,6 +1297,424 @@ var _ = Describe("App-AutoScaler Commands", func() {
 								session.Wait()
 
 								Expect(session.Out).To(gbytes.Say(ui.DetachPolicyHint, fakeAppName))
+								Expect(session.Out).To(gbytes.Say("OK"))
+								Expect(session.ExitCode()).To(Equal(0))
+							})
+
+						})
+
+					})
+
+				})
+
+			})
+		})
+	})
+
+	Describe("Commands create-autoscaling-credential, casc", func() {
+
+		var urlpath = "/v1/apps/" + fakeAppId + "/custom_metrics_credential"
+		Context("create-autoscaling-credential", func() {
+
+			Context("when the args are not properly provided", func() {
+				It("Require APP_NAME as argument", func() {
+					args = []string{ts.Port(), "create-autoscaling-credential"}
+					session, err := gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+					Expect(err).NotTo(HaveOccurred())
+					session.Wait()
+
+					Expect(session).To(gbytes.Say("required argument `APP_NAME` was not provided"))
+					Expect(session.ExitCode()).To(Equal(1))
+				})
+			})
+
+			Context("When cf api is not set ", func() {
+				BeforeEach(func() {
+
+					rpcHandlers.ApiEndpointStub = func(_ string, retVal *string) error {
+						*retVal = ""
+						return nil
+					}
+
+					args = []string{ts.Port(), "autoscaling-api", apiEndpoint}
+					session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+
+					rpcHandlers.ApiEndpointStub = func(_ string, retVal *string) error {
+						*retVal = ""
+						return nil
+					}
+				})
+
+				It("Failed with missing cf api setting", func() {
+					args = []string{ts.Port(), "create-autoscaling-credential", fakeAppName}
+					session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+					Expect(err).NotTo(HaveOccurred())
+					session.Wait()
+					Expect(session).To(gbytes.Say(ui.NOCFAPIEndpoint))
+					Expect(session.ExitCode()).To(Equal(1))
+				})
+			})
+
+			Context("When cf api is changed ", func() {
+				BeforeEach(func() {
+					urlConfig := []byte(fmt.Sprintf(`{"URL":"%s"}`, "autoscaler.bosh-lite.com"))
+					err = ioutil.WriteFile(api.ConfigFile(), urlConfig, 0600)
+					Expect(err).NotTo(HaveOccurred())
+
+				})
+
+				Context("When the default endpoint doesn't work", func() {
+
+					BeforeEach(func() {
+						apiServer.RouteToHandler("GET", "/health",
+							ghttp.RespondWith(http.StatusNotFound, ""),
+						)
+					})
+
+					It("Failed with no api endpoint setting", func() {
+						args = []string{ts.Port(), "create-autoscaling-credential", fakeAppName}
+						session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+						Expect(err).NotTo(HaveOccurred())
+						session.Wait()
+						Expect(session).To(gbytes.Say(ui.NoEndpoint))
+						Expect(session.ExitCode()).To(Equal(1))
+					})
+				})
+			})
+
+			Context("when cf not login", func() {
+				It("exits with 'You must be logged in' error ", func() {
+					args = []string{ts.Port(), "create-autoscaling-credential", fakeAppName}
+					session, err := gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+					Expect(err).NotTo(HaveOccurred())
+					session.Wait()
+					Expect(session).To(gbytes.Say("You must be logged in"))
+					Expect(session.ExitCode()).To(Equal(1))
+				})
+			})
+
+			Context("when cf login", func() {
+				BeforeEach(func() {
+					rpcHandlers.IsLoggedInStub = func(args string, retVal *bool) error {
+						*retVal = true
+						return nil
+					}
+				})
+
+				Context("when app not found", func() {
+					BeforeEach(func() {
+						rpcHandlers.GetAppStub = func(_ string, retVal *plugin_models.GetAppModel) error {
+							return errors.New("App fakeApp not found")
+						}
+					})
+
+					It("exits with 'App not found' error ", func() {
+						args = []string{ts.Port(), "create-autoscaling-credential", fakeAppName}
+						session, err := gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+						Expect(err).NotTo(HaveOccurred())
+						session.Wait()
+						Expect(session).To(gbytes.Say("App fakeApp not found"))
+						Expect(session.ExitCode()).To(Equal(1))
+					})
+				})
+
+				Context("when the app is found", func() {
+					BeforeEach(func() {
+						rpcHandlers.GetAppStub = func(_ string, retVal *plugin_models.GetAppModel) error {
+							*retVal = plugin_models.GetAppModel{
+								Guid: fakeAppId,
+							}
+							return nil
+						}
+					})
+
+					JustBeforeEach(func() {
+						args = []string{ts.Port(), "autoscaling-api", apiEndpoint}
+						session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+						Expect(err).NotTo(HaveOccurred())
+						session.Wait()
+					})
+
+					Context("when access token is wrong", func() {
+						BeforeEach(func() {
+							rpcHandlers.AccessTokenStub = func(args string, retVal *string) error {
+								*retVal = "incorrectAccessToken"
+								return nil
+							}
+
+							apiServer.RouteToHandler("PUT", urlpath,
+								ghttp.RespondWith(http.StatusUnauthorized, ""),
+							)
+						})
+
+						It("failed with 401 error", func() {
+							args = []string{ts.Port(), "create-autoscaling-credential", fakeAppName}
+							session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+							Expect(err).NotTo(HaveOccurred())
+							session.Wait()
+
+							Expect(session).To(gbytes.Say("Failed to access AutoScaler API endpoint"))
+							Expect(session.ExitCode()).To(Equal(1))
+						})
+					})
+
+					Context("when access token is correct", func() {
+						BeforeEach(func() {
+							rpcHandlers.AccessTokenStub = func(args string, retVal *string) error {
+								*retVal = fakeAccessToken
+								return nil
+							}
+						})
+
+						Context("when No credential defined previously", func() {
+							BeforeEach(func() {
+								apiServer.RouteToHandler("PUT", urlpath,
+									ghttp.CombineHandlers(
+										ghttp.RespondWith(http.StatusCreated, ""),
+										ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
+									),
+								)
+							})
+
+							It("Succeed with 201", func() {
+								args = []string{ts.Port(), "create-autoscaling-credential", fakeAppName}
+								session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+								Expect(err).NotTo(HaveOccurred())
+								session.Wait()
+
+								Expect(session.Out).To(gbytes.Say(ui.CreateCredentialHint, fakeAppName))
+								Expect(session.Out).To(gbytes.Say("OK"))
+								Expect(session.ExitCode()).To(Equal(0))
+
+							})
+						})
+
+						Context("when credential exist previously ", func() {
+							BeforeEach(func() {
+								apiServer.RouteToHandler("PUT", urlpath,
+									ghttp.CombineHandlers(
+										ghttp.RespondWith(http.StatusOK, ""),
+										ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
+									),
+								)
+							})
+
+							It("Succeed with 200", func() {
+
+								args = []string{ts.Port(), "create-autoscaling-credential", fakeAppName}
+								session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+								Expect(err).NotTo(HaveOccurred())
+								session.Wait()
+
+								Expect(session.Out).To(gbytes.Say(ui.CreateCredentialHint, fakeAppName))
+								Expect(session.Out).To(gbytes.Say("OK"))
+								Expect(session.ExitCode()).To(Equal(0))
+
+							})
+
+						})
+
+					})
+
+				})
+
+			})
+		})
+	})
+
+	Describe("Commands delete-autoscaling-credential, dasc", func() {
+
+		var urlpath = "/v1/apps/" + fakeAppId + "/custom_metrics_credential"
+		Context("delete-autoscaling-credential", func() {
+
+			Context("when the args are not properly provided", func() {
+				It("Require APP_NAME as argument", func() {
+					args = []string{ts.Port(), "delete-autoscaling-credential"}
+					session, err := gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+					Expect(err).NotTo(HaveOccurred())
+					session.Wait()
+
+					Expect(session).To(gbytes.Say("required argument `APP_NAME` was not provided"))
+					Expect(session.ExitCode()).To(Equal(1))
+				})
+			})
+
+			Context("When cf api is not set ", func() {
+				BeforeEach(func() {
+
+					rpcHandlers.ApiEndpointStub = func(_ string, retVal *string) error {
+						*retVal = ""
+						return nil
+					}
+
+					args = []string{ts.Port(), "autoscaling-api", apiEndpoint}
+					session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+
+					rpcHandlers.ApiEndpointStub = func(_ string, retVal *string) error {
+						*retVal = ""
+						return nil
+					}
+				})
+
+				It("Failed with missing cf api setting", func() {
+					args = []string{ts.Port(), "delete-autoscaling-credential", fakeAppName}
+					session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+					Expect(err).NotTo(HaveOccurred())
+					session.Wait()
+					Expect(session).To(gbytes.Say(ui.NOCFAPIEndpoint))
+					Expect(session.ExitCode()).To(Equal(1))
+				})
+			})
+
+			Context("When cf api is changed ", func() {
+				BeforeEach(func() {
+					urlConfig := []byte(fmt.Sprintf(`{"URL":"%s"}`, "autoscaler.bosh-lite.com"))
+					err = ioutil.WriteFile(api.ConfigFile(), urlConfig, 0600)
+					Expect(err).NotTo(HaveOccurred())
+
+				})
+
+				Context("When the default endpoint doesn't work", func() {
+
+					BeforeEach(func() {
+						apiServer.RouteToHandler("GET", "/health",
+							ghttp.RespondWith(http.StatusNotFound, ""),
+						)
+					})
+
+					It("Failed with no api endpoint setting", func() {
+						args = []string{ts.Port(), "delete-autoscaling-credential", fakeAppName}
+						session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+						Expect(err).NotTo(HaveOccurred())
+						session.Wait()
+						Expect(session).To(gbytes.Say(ui.NoEndpoint))
+						Expect(session.ExitCode()).To(Equal(1))
+					})
+				})
+			})
+
+			Context("when cf not login", func() {
+				It("exits with 'You must be logged in' error ", func() {
+					args = []string{ts.Port(), "delete-autoscaling-credential", fakeAppName}
+					session, err := gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+					Expect(err).NotTo(HaveOccurred())
+					session.Wait()
+					Expect(session).To(gbytes.Say("You must be logged in"))
+					Expect(session.ExitCode()).To(Equal(1))
+				})
+			})
+
+			Context("when cf login", func() {
+				BeforeEach(func() {
+					rpcHandlers.IsLoggedInStub = func(args string, retVal *bool) error {
+						*retVal = true
+						return nil
+					}
+				})
+
+				Context("when app not found", func() {
+					BeforeEach(func() {
+						rpcHandlers.GetAppStub = func(_ string, retVal *plugin_models.GetAppModel) error {
+							return errors.New("App fakeApp not found")
+						}
+					})
+
+					It("exits with 'App not found' error ", func() {
+						args = []string{ts.Port(), "delete-autoscaling-credential", fakeAppName}
+						session, err := gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+						Expect(err).NotTo(HaveOccurred())
+						session.Wait()
+						Expect(session).To(gbytes.Say("App fakeApp not found"))
+						Expect(session.ExitCode()).To(Equal(1))
+					})
+				})
+
+				Context("when the app is found", func() {
+					BeforeEach(func() {
+						rpcHandlers.GetAppStub = func(_ string, retVal *plugin_models.GetAppModel) error {
+							*retVal = plugin_models.GetAppModel{
+								Guid: fakeAppId,
+							}
+							return nil
+						}
+					})
+
+					JustBeforeEach(func() {
+						args = []string{ts.Port(), "autoscaling-api", apiEndpoint}
+						session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+						Expect(err).NotTo(HaveOccurred())
+						session.Wait()
+					})
+
+					Context("when access token is wrong", func() {
+						BeforeEach(func() {
+							rpcHandlers.AccessTokenStub = func(args string, retVal *string) error {
+								*retVal = "incorrectAccessToken"
+								return nil
+							}
+
+							apiServer.RouteToHandler("DELETE", urlpath,
+								ghttp.RespondWith(http.StatusUnauthorized, ""),
+							)
+						})
+
+						It("failed with 401 error", func() {
+							args = []string{ts.Port(), "delete-autoscaling-credential", fakeAppName}
+							session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+							Expect(err).NotTo(HaveOccurred())
+							session.Wait()
+
+							Expect(session).To(gbytes.Say("Failed to access AutoScaler API endpoint"))
+							Expect(session.ExitCode()).To(Equal(1))
+						})
+					})
+
+					Context("when access token is correct", func() {
+						BeforeEach(func() {
+							rpcHandlers.AccessTokenStub = func(args string, retVal *string) error {
+								*retVal = fakeAccessToken
+								return nil
+							}
+						})
+
+						Context("when credential not found", func() {
+							BeforeEach(func() {
+								apiServer.RouteToHandler("DELETE", urlpath,
+									ghttp.RespondWith(http.StatusNotFound, ""),
+								)
+							})
+
+							It("404 returned", func() {
+								args = []string{ts.Port(), "delete-autoscaling-credential", fakeAppName}
+								session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+								Expect(err).NotTo(HaveOccurred())
+								session.Wait()
+
+								Expect(session.Out).To(gbytes.Say(ui.DeleteCredentialHint, fakeAppName))
+								Expect(session).To(gbytes.Say(ui.CredentialNotFound, fakeAppName))
+								Expect(session.ExitCode()).To(Equal(1))
+
+							})
+						})
+
+						Context("when credential exist ", func() {
+							BeforeEach(func() {
+								apiServer.RouteToHandler("DELETE", urlpath,
+									ghttp.CombineHandlers(
+										ghttp.RespondWith(http.StatusOK, ""),
+										ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
+									),
+								)
+							})
+
+							It("succeed", func() {
+
+								args = []string{ts.Port(), "delete-autoscaling-credential", fakeAppName}
+								session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+								Expect(err).NotTo(HaveOccurred())
+								session.Wait()
+
+								Expect(session.Out).To(gbytes.Say(ui.DeleteCredentialHint, fakeAppName))
 								Expect(session.Out).To(gbytes.Say("OK"))
 								Expect(session.ExitCode()).To(Equal(0))
 							})
