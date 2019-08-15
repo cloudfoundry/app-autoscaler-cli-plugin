@@ -1364,26 +1364,6 @@ var _ = Describe("App-AutoScaler Commands", func() {
 					Expect(session.ExitCode()).To(Equal(1))
 				})
 
-				It("Failed when record number is not an integer", func() {
-					By("long")
-					args = []string{ts.Port(), "autoscaling-metrics", fakeAppName, metricName, "--number", "not-integer"}
-					session, err := gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
-					Expect(err).NotTo(HaveOccurred())
-					session.Wait()
-
-					Expect(session).To(gbytes.Say(fmt.Sprintf(ui.InvalidRecordNumber, "not-integer")))
-					Expect(session.ExitCode()).To(Equal(1))
-
-					By("short")
-					args = []string{ts.Port(), "autoscaling-metrics", fakeAppName, metricName, "-n", "0"}
-					session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
-					Expect(err).NotTo(HaveOccurred())
-					session.Wait()
-
-					Expect(session).To(gbytes.Say(fmt.Sprintf(ui.InvalidRecordNumber, "0")))
-					Expect(session.ExitCode()).To(Equal(1))
-				})
-
 				It("Failed when --desc is wrong spelled", func() {
 					args = []string{ts.Port(), "autoscaling-metrics", fakeAppName, metricName, "--dddesc"}
 					session, err := gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
@@ -1635,14 +1615,14 @@ var _ = Describe("App-AutoScaler Commands", func() {
 									Expect(session.Out).To(gbytes.Say(ui.ShowAggregatedMetricsHint, metricName, fakeAppName))
 									metricsRaw := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.ShowAggregatedMetricsHint+"\n", metricName, fakeAppName)))
 									metricsTable := strings.Split(string(bytes.TrimRight(metricsRaw, "\n")), "\n")
-									Expect(len(metricsTable)).To(Equal(11))
+									Expect(len(metricsTable)).To(Equal(12))
 									for i, row := range metricsTable {
 										colomns := strings.Split(row, "\t")
 										if i == 0 {
 											Expect(strings.Trim(colomns[0], " ")).To(Equal("Metrics Name"))
 											Expect(strings.Trim(colomns[1], " ")).To(Equal("Value"))
 											Expect(strings.Trim(colomns[2], " ")).To(Equal("Timestamp"))
-										} else {
+										} else if i != len(metricsTable)-1 {
 											Expect(strings.Trim(colomns[0], " ")).To(Equal("memoryused"))
 											Expect(strings.Trim(colomns[1], " ")).To(Equal("100MB"))
 											Expect(strings.Trim(colomns[2], " ")).To(Equal(time.Unix(0, now.UnixNano()+int64((i-1)*30*1E9)).Format(time.RFC3339)))
@@ -1655,82 +1635,160 @@ var _ = Describe("App-AutoScaler Commands", func() {
 
 							Context("Query multiple pages with asc order ", func() {
 
-								BeforeEach(func() {
-									//simulate the asc response from api server
-									apiServer.AppendHandlers(
-										ghttp.CombineHandlers(
-											ghttp.RespondWithJSONEncoded(http.StatusOK, &AggregatedMetricsResults{
-												TotalResults: 30,
-												TotalPages:   3,
-												Page:         1,
-												Metrics:      metrics[0:10],
-											}),
-											ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-											ghttp.VerifyRequest("GET", aggregatedMetricsUrlPath,
-												fmt.Sprintf("order=asc&page=1&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*30*1E9)),
+								Context("specifiy --start and --end both ", func() {
+									BeforeEach(func() {
+										//simulate the asc response from api server
+										apiServer.AppendHandlers(
+											ghttp.CombineHandlers(
+												ghttp.RespondWithJSONEncoded(http.StatusOK, &AggregatedMetricsResults{
+													TotalResults: 30,
+													TotalPages:   3,
+													Page:         1,
+													Metrics:      metrics[0:10],
+												}),
+												ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
+												ghttp.VerifyRequest("GET", aggregatedMetricsUrlPath,
+													fmt.Sprintf("order=asc&page=1&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*30*1E9)),
+												),
 											),
-										),
-									)
-									apiServer.AppendHandlers(
-										ghttp.CombineHandlers(
-											ghttp.RespondWithJSONEncoded(http.StatusOK, &AggregatedMetricsResults{
-												TotalResults: 30,
-												TotalPages:   3,
-												Page:         2,
-												Metrics:      metrics[10:20],
-											}),
-											ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-											ghttp.VerifyRequest("GET", aggregatedMetricsUrlPath,
-												fmt.Sprintf("order=asc&page=2&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*30*1E9)),
+										)
+										apiServer.AppendHandlers(
+											ghttp.CombineHandlers(
+												ghttp.RespondWithJSONEncoded(http.StatusOK, &AggregatedMetricsResults{
+													TotalResults: 30,
+													TotalPages:   3,
+													Page:         2,
+													Metrics:      metrics[10:20],
+												}),
+												ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
+												ghttp.VerifyRequest("GET", aggregatedMetricsUrlPath,
+													fmt.Sprintf("order=asc&page=2&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*30*1E9)),
+												),
 											),
-										),
-									)
-									apiServer.AppendHandlers(
-										ghttp.CombineHandlers(
-											ghttp.RespondWithJSONEncoded(http.StatusOK, &AggregatedMetricsResults{
-												TotalResults: 30,
-												TotalPages:   3,
-												Page:         3,
-												Metrics:      metrics[20:30],
-											}),
-											ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-											ghttp.VerifyRequest("GET", aggregatedMetricsUrlPath,
-												fmt.Sprintf("order=asc&page=3&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*30*1E9)),
+										)
+										apiServer.AppendHandlers(
+											ghttp.CombineHandlers(
+												ghttp.RespondWithJSONEncoded(http.StatusOK, &AggregatedMetricsResults{
+													TotalResults: 30,
+													TotalPages:   3,
+													Page:         3,
+													Metrics:      metrics[20:30],
+												}),
+												ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
+												ghttp.VerifyRequest("GET", aggregatedMetricsUrlPath,
+													fmt.Sprintf("order=asc&page=3&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*30*1E9)),
+												),
 											),
-										),
-									)
+										)
 
-								})
+									})
 
-								It("Succeed to print all pages of the metrics to stdout with asc order", func() {
+									It("Succeed to print all pages of the metrics to stdout with asc order", func() {
 
-									args = []string{ts.Port(), "autoscaling-metrics", fakeAppName, metricName,
-										"--start", now.Format(time.RFC3339),
-										"--end", time.Unix(0, lowPrecisionNowInNano+int64(29*30*1E9)).Format(time.RFC3339)}
+										args = []string{ts.Port(), "autoscaling-metrics", fakeAppName, metricName,
+											"--start", now.Format(time.RFC3339),
+											"--end", time.Unix(0, lowPrecisionNowInNano+int64(29*30*1E9)).Format(time.RFC3339)}
 
-									session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
-									Expect(err).NotTo(HaveOccurred())
-									session.Wait()
+										session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+										Expect(err).NotTo(HaveOccurred())
+										session.Wait()
 
-									Expect(session.Out).To(gbytes.Say(ui.ShowAggregatedMetricsHint, metricName, fakeAppName))
-									metricsRaw := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.ShowAggregatedMetricsHint+"\n", metricName, fakeAppName)))
-									metricsTable := strings.Split(string(bytes.TrimRight(metricsRaw, "\n")), "\n")
-									Expect(len(metricsTable)).To(Equal(31))
-									for i, row := range metricsTable {
-										colomns := strings.Split(row, "\t")
-										if i == 0 {
-											Expect(strings.Trim(colomns[0], " ")).To(Equal("Metrics Name"))
-											Expect(strings.Trim(colomns[1], " ")).To(Equal("Value"))
-											Expect(strings.Trim(colomns[2], " ")).To(Equal("Timestamp"))
-										} else {
-											Expect(strings.Trim(colomns[0], " ")).To(Equal("memoryused"))
-											Expect(strings.Trim(colomns[1], " ")).To(Equal("100MB"))
-											Expect(strings.Trim(colomns[2], " ")).To(Equal(time.Unix(0, now.UnixNano()+int64((i-1)*30*1E9)).Format(time.RFC3339)))
+										Expect(session.Out).To(gbytes.Say(ui.ShowAggregatedMetricsHint, metricName, fakeAppName))
+										metricsRaw := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.ShowAggregatedMetricsHint+"\n", metricName, fakeAppName)))
+										metricsTable := strings.Split(string(bytes.TrimRight(metricsRaw, "\n")), "\n")
+										Expect(len(metricsTable)).To(Equal(31))
+										for i, row := range metricsTable {
+											colomns := strings.Split(row, "\t")
+											if i == 0 {
+												Expect(strings.Trim(colomns[0], " ")).To(Equal("Metrics Name"))
+												Expect(strings.Trim(colomns[1], " ")).To(Equal("Value"))
+												Expect(strings.Trim(colomns[2], " ")).To(Equal("Timestamp"))
+											} else {
+												Expect(strings.Trim(colomns[0], " ")).To(Equal("memoryused"))
+												Expect(strings.Trim(colomns[1], " ")).To(Equal("100MB"))
+												Expect(strings.Trim(colomns[2], " ")).To(Equal(time.Unix(0, now.UnixNano()+int64((i-1)*30*1E9)).Format(time.RFC3339)))
+											}
 										}
-									}
-									Expect(session.ExitCode()).To(Equal(0))
+										Expect(session.ExitCode()).To(Equal(0))
+									})
 								})
 
+								Context("specifiy --end only ", func() {
+									BeforeEach(func() {
+										//simulate the asc response from api server
+										apiServer.AppendHandlers(
+											ghttp.CombineHandlers(
+												ghttp.RespondWithJSONEncoded(http.StatusOK, &AggregatedMetricsResults{
+													TotalResults: 30,
+													TotalPages:   3,
+													Page:         1,
+													Metrics:      metrics[0:10],
+												}),
+												ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
+												ghttp.VerifyRequest("GET", aggregatedMetricsUrlPath,
+													fmt.Sprintf("order=asc&page=1&end-time=%v", lowPrecisionNowInNano+int64(29*30*1E9)),
+												),
+											),
+										)
+										apiServer.AppendHandlers(
+											ghttp.CombineHandlers(
+												ghttp.RespondWithJSONEncoded(http.StatusOK, &AggregatedMetricsResults{
+													TotalResults: 30,
+													TotalPages:   3,
+													Page:         2,
+													Metrics:      metrics[10:20],
+												}),
+												ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
+												ghttp.VerifyRequest("GET", aggregatedMetricsUrlPath,
+													fmt.Sprintf("order=asc&page=2&end-time=%v", lowPrecisionNowInNano+int64(29*30*1E9)),
+												),
+											),
+										)
+										apiServer.AppendHandlers(
+											ghttp.CombineHandlers(
+												ghttp.RespondWithJSONEncoded(http.StatusOK, &AggregatedMetricsResults{
+													TotalResults: 30,
+													TotalPages:   3,
+													Page:         3,
+													Metrics:      metrics[20:30],
+												}),
+												ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
+												ghttp.VerifyRequest("GET", aggregatedMetricsUrlPath,
+													fmt.Sprintf("order=asc&page=3&end-time=%v", lowPrecisionNowInNano+int64(29*30*1E9)),
+												),
+											),
+										)
+
+									})
+
+									It("Succeed to print all pages of the metrics to stdout with asc order", func() {
+
+										args = []string{ts.Port(), "autoscaling-metrics", fakeAppName, metricName,
+											"--end", time.Unix(0, lowPrecisionNowInNano+int64(29*30*1E9)).Format(time.RFC3339)}
+
+										session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+										Expect(err).NotTo(HaveOccurred())
+										session.Wait()
+
+										Expect(session.Out).To(gbytes.Say(ui.ShowAggregatedMetricsHint, metricName, fakeAppName))
+										metricsRaw := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.ShowAggregatedMetricsHint+"\n", metricName, fakeAppName)))
+										metricsTable := strings.Split(string(bytes.TrimRight(metricsRaw, "\n")), "\n")
+										Expect(len(metricsTable)).To(Equal(31))
+										for i, row := range metricsTable {
+											colomns := strings.Split(row, "\t")
+											if i == 0 {
+												Expect(strings.Trim(colomns[0], " ")).To(Equal("Metrics Name"))
+												Expect(strings.Trim(colomns[1], " ")).To(Equal("Value"))
+												Expect(strings.Trim(colomns[2], " ")).To(Equal("Timestamp"))
+											} else {
+												Expect(strings.Trim(colomns[0], " ")).To(Equal("memoryused"))
+												Expect(strings.Trim(colomns[1], " ")).To(Equal("100MB"))
+												Expect(strings.Trim(colomns[2], " ")).To(Equal(time.Unix(0, now.UnixNano()+int64((i-1)*30*1E9)).Format(time.RFC3339)))
+											}
+										}
+										Expect(session.ExitCode()).To(Equal(0))
+									})
+								})
 							})
 
 							Context("Query multiple pages with desc order ", func() {
@@ -1812,239 +1870,6 @@ var _ = Describe("App-AutoScaler Commands", func() {
 										}
 									}
 									Expect(session.ExitCode()).To(Equal(0))
-								})
-
-							})
-
-							Context("Query multiple pages with specified record number ", func() {
-
-								Context("not specify starttime and entime ", func() {
-
-									BeforeEach(func() {
-										//simulate the asc response from api server
-										apiServer.AppendHandlers(
-											ghttp.CombineHandlers(
-												ghttp.RespondWithJSONEncoded(http.StatusOK, &AggregatedMetricsResults{
-													TotalResults: 30,
-													TotalPages:   3,
-													Page:         1,
-													Metrics:      metrics[0:10],
-												}),
-												ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-											),
-										)
-										apiServer.AppendHandlers(
-											ghttp.CombineHandlers(
-												ghttp.RespondWithJSONEncoded(http.StatusOK, &AggregatedMetricsResults{
-													TotalResults: 30,
-													TotalPages:   3,
-													Page:         2,
-													Metrics:      metrics[10:20],
-												}),
-												ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-											),
-										)
-										apiServer.AppendHandlers(
-											ghttp.CombineHandlers(
-												ghttp.RespondWithJSONEncoded(http.StatusOK, &AggregatedMetricsResults{
-													TotalResults: 30,
-													TotalPages:   3,
-													Page:         3,
-													Metrics:      metrics[20:30],
-												}),
-												ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-											),
-										)
-
-									})
-
-									It("Succeed to print limited number of the metrics to stdout with asc order ", func() {
-
-										args = []string{ts.Port(), "autoscaling-metrics", fakeAppName, metricName,
-											"--number", "15"}
-
-										session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
-										Expect(err).NotTo(HaveOccurred())
-										session.Wait()
-
-										Expect(session.Out).To(gbytes.Say(ui.ShowAggregatedMetricsHint, metricName, fakeAppName))
-										metricsRaw := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.ShowAggregatedMetricsHint+"\n", metricName, fakeAppName)))
-										metricsTable := strings.Split(string(bytes.TrimRight(metricsRaw, "\n")), "\n")
-										Expect(len(metricsTable)).To(Equal(16))
-										for i, row := range metricsTable {
-											colomns := strings.Split(row, "\t")
-											if i == 0 {
-												Expect(strings.Trim(colomns[0], " ")).To(Equal("Metrics Name"))
-												Expect(strings.Trim(colomns[1], " ")).To(Equal("Value"))
-												Expect(strings.Trim(colomns[2], " ")).To(Equal("Timestamp"))
-											} else {
-												Expect(strings.Trim(colomns[0], " ")).To(Equal("memoryused"))
-												Expect(strings.Trim(colomns[1], " ")).To(Equal("100MB"))
-												Expect(strings.Trim(colomns[2], " ")).To(Equal(time.Unix(0, now.UnixNano()+int64((i-1)*30*1E9)).Format(time.RFC3339)))
-											}
-										}
-										Expect(session.ExitCode()).To(Equal(0))
-									})
-
-								})
-
-								Context("specifiy endtime only ", func() {
-
-									BeforeEach(func() {
-										//simulate the asc response from api server
-										apiServer.AppendHandlers(
-											ghttp.CombineHandlers(
-												ghttp.RespondWithJSONEncoded(http.StatusOK, &AggregatedMetricsResults{
-													TotalResults: 30,
-													TotalPages:   3,
-													Page:         1,
-													Metrics:      metrics[0:10],
-												}),
-												ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-												ghttp.VerifyRequest("GET", aggregatedMetricsUrlPath,
-													fmt.Sprintf("order=asc&page=1&end-time=%v", lowPrecisionNowInNano+int64(29*30*1E9)),
-												),
-											),
-										)
-										apiServer.AppendHandlers(
-											ghttp.CombineHandlers(
-												ghttp.RespondWithJSONEncoded(http.StatusOK, &AggregatedMetricsResults{
-													TotalResults: 30,
-													TotalPages:   3,
-													Page:         2,
-													Metrics:      metrics[10:20],
-												}),
-												ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-												ghttp.VerifyRequest("GET", aggregatedMetricsUrlPath,
-													fmt.Sprintf("order=asc&page=2&end-time=%v", lowPrecisionNowInNano+int64(29*30*1E9)),
-												),
-											),
-										)
-										apiServer.AppendHandlers(
-											ghttp.CombineHandlers(
-												ghttp.RespondWithJSONEncoded(http.StatusOK, &AggregatedMetricsResults{
-													TotalResults: 30,
-													TotalPages:   3,
-													Page:         3,
-													Metrics:      metrics[20:30],
-												}),
-												ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-												ghttp.VerifyRequest("GET", aggregatedMetricsUrlPath,
-													fmt.Sprintf("order=asc&page=3&end-time=%v", lowPrecisionNowInNano+int64(29*30*1E9)),
-												),
-											),
-										)
-
-									})
-
-									It("Succeed to print limited number of the metrics to stdout with asc order ", func() {
-
-										args = []string{ts.Port(), "autoscaling-metrics", fakeAppName, metricName,
-											"--number", "15",
-											"--end", time.Unix(0, lowPrecisionNowInNano+int64(29*30*1E9)).Format(time.RFC3339)}
-
-										session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
-										Expect(err).NotTo(HaveOccurred())
-										session.Wait()
-
-										Expect(session.Out).To(gbytes.Say(ui.ShowAggregatedMetricsHint, metricName, fakeAppName))
-										metricsRaw := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.ShowAggregatedMetricsHint+"\n", metricName, fakeAppName)))
-										metricsTable := strings.Split(string(bytes.TrimRight(metricsRaw, "\n")), "\n")
-										Expect(len(metricsTable)).To(Equal(16))
-										for i, row := range metricsTable {
-											colomns := strings.Split(row, "\t")
-											if i == 0 {
-												Expect(strings.Trim(colomns[0], " ")).To(Equal("Metrics Name"))
-												Expect(strings.Trim(colomns[1], " ")).To(Equal("Value"))
-												Expect(strings.Trim(colomns[2], " ")).To(Equal("Timestamp"))
-											} else {
-												Expect(strings.Trim(colomns[0], " ")).To(Equal("memoryused"))
-												Expect(strings.Trim(colomns[1], " ")).To(Equal("100MB"))
-												Expect(strings.Trim(colomns[2], " ")).To(Equal(time.Unix(0, now.UnixNano()+int64((i-1)*30*1E9)).Format(time.RFC3339)))
-											}
-										}
-										Expect(session.ExitCode()).To(Equal(0))
-									})
-
-								})
-
-								Context("specifiy start time and endtime ", func() {
-									BeforeEach(func() {
-										//simulate the asc response from api server
-										apiServer.AppendHandlers(
-											ghttp.CombineHandlers(
-												ghttp.RespondWithJSONEncoded(http.StatusOK, &AggregatedMetricsResults{
-													TotalResults: 30,
-													TotalPages:   3,
-													Page:         1,
-													Metrics:      metrics[0:10],
-												}),
-												ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-												ghttp.VerifyRequest("GET", aggregatedMetricsUrlPath,
-													fmt.Sprintf("order=asc&page=1&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*30*1E9)),
-												),
-											),
-										)
-										apiServer.AppendHandlers(
-											ghttp.CombineHandlers(
-												ghttp.RespondWithJSONEncoded(http.StatusOK, &AggregatedMetricsResults{
-													TotalResults: 30,
-													TotalPages:   3,
-													Page:         2,
-													Metrics:      metrics[10:20],
-												}),
-												ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-												ghttp.VerifyRequest("GET", aggregatedMetricsUrlPath,
-													fmt.Sprintf("order=asc&page=2&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*30*1E9)),
-												),
-											),
-										)
-										apiServer.AppendHandlers(
-											ghttp.CombineHandlers(
-												ghttp.RespondWithJSONEncoded(http.StatusOK, &AggregatedMetricsResults{
-													TotalResults: 30,
-													TotalPages:   3,
-													Page:         3,
-													Metrics:      metrics[20:30],
-												}),
-												ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-												ghttp.VerifyRequest("GET", aggregatedMetricsUrlPath,
-													fmt.Sprintf("order=asc&page=3&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*30*1E9)),
-												),
-											),
-										)
-
-									})
-
-									It("Succeed to ignore the record number limit and print all pages of the metrics in specified duration to stdout with asc order ", func() {
-
-										args = []string{ts.Port(), "autoscaling-metrics", fakeAppName, metricName,
-											"--number", "15",
-											"--start", now.Format(time.RFC3339),
-											"--end", time.Unix(0, lowPrecisionNowInNano+int64(29*30*1E9)).Format(time.RFC3339)}
-
-										session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
-										Expect(err).NotTo(HaveOccurred())
-										session.Wait()
-
-										Expect(session.Out).To(gbytes.Say(ui.ShowAggregatedMetricsHint, metricName, fakeAppName))
-										metricsRaw := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.ShowAggregatedMetricsHint+"\n", metricName, fakeAppName)))
-										metricsTable := strings.Split(string(bytes.TrimRight(metricsRaw, "\n")), "\n")
-										Expect(len(metricsTable)).To(Equal(31))
-										for i, row := range metricsTable {
-											colomns := strings.Split(row, "\t")
-											if i == 0 {
-												Expect(strings.Trim(colomns[0], " ")).To(Equal("Metrics Name"))
-												Expect(strings.Trim(colomns[1], " ")).To(Equal("Value"))
-												Expect(strings.Trim(colomns[2], " ")).To(Equal("Timestamp"))
-											} else {
-												Expect(strings.Trim(colomns[0], " ")).To(Equal("memoryused"))
-												Expect(strings.Trim(colomns[1], " ")).To(Equal("100MB"))
-												Expect(strings.Trim(colomns[2], " ")).To(Equal(time.Unix(0, now.UnixNano()+int64((i-1)*30*1E9)).Format(time.RFC3339)))
-											}
-										}
-										Expect(session.ExitCode()).To(Equal(0))
-									})
 								})
 
 							})
@@ -2176,26 +2001,6 @@ var _ = Describe("App-AutoScaler Commands", func() {
 					for _, expect := range expects {
 						Expect(session).To(gbytes.Say(expect))
 					}
-					Expect(session.ExitCode()).To(Equal(1))
-				})
-
-				It("Failed when record number is not an integer", func() {
-					By("long")
-					args = []string{ts.Port(), "autoscaling-history", fakeAppName, "--number", "not-integer"}
-					session, err := gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
-					Expect(err).NotTo(HaveOccurred())
-					session.Wait()
-
-					Expect(session).To(gbytes.Say(fmt.Sprintf(ui.InvalidRecordNumber, "not-integer")))
-					Expect(session.ExitCode()).To(Equal(1))
-
-					By("short")
-					args = []string{ts.Port(), "autoscaling-history", fakeAppName, "-n", "0"}
-					session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
-					Expect(err).NotTo(HaveOccurred())
-					session.Wait()
-
-					Expect(session).To(gbytes.Say(fmt.Sprintf(ui.InvalidRecordNumber, "0")))
 					Expect(session.ExitCode()).To(Equal(1))
 				})
 
@@ -2483,7 +2288,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 									Expect(session.Out).To(gbytes.Say(ui.ShowHistoryHint, fakeAppName))
 									historyRaw := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.ShowHistoryHint+"\n", fakeAppName)))
 									historyTable := strings.Split(string(bytes.TrimRight(historyRaw, "\n")), "\n")
-									Expect(len(historyTable)).To(Equal(11))
+									Expect(len(historyTable)).To(Equal(12))
 									for i, row := range historyTable {
 										colomns := strings.Split(row, "\t")
 										if i == 0 {
@@ -2494,7 +2299,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 											Expect(strings.Trim(colomns[4], " ")).To(Equal("Action"))
 											Expect(strings.Trim(colomns[5], " ")).To(Equal("Error"))
 
-										} else {
+										} else if i != len(historyTable)-1 {
 											Expect(strings.Trim(colomns[0], " ")).To(Equal("dynamic"))
 											Expect(strings.Trim(colomns[1], " ")).To(Equal("succeeded"))
 											Expect(strings.Trim(colomns[2], " ")).To(Equal(strconv.Itoa(i-1+1) + "->" + strconv.Itoa(i-1+2)))
@@ -2510,99 +2315,197 @@ var _ = Describe("App-AutoScaler Commands", func() {
 
 							Context("Query multiple pages with asc order ", func() {
 
-								BeforeEach(func() {
-									//simulate the asc response from api server
-									apiServer.AppendHandlers(
-										ghttp.CombineHandlers(
-											ghttp.RespondWithJSONEncoded(http.StatusOK, &HistoryResults{
-												TotalResults: 30,
-												TotalPages:   3,
-												Page:         1,
-												Histories:    histories[0:10],
-											}),
-											ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-											ghttp.VerifyRequest("GET", urlpath,
-												fmt.Sprintf("order=asc&page=1&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*120*1E9)),
+								Context("specifiy --start and --end both ", func() {
+									BeforeEach(func() {
+										//simulate the asc response from api server
+										apiServer.AppendHandlers(
+											ghttp.CombineHandlers(
+												ghttp.RespondWithJSONEncoded(http.StatusOK, &HistoryResults{
+													TotalResults: 30,
+													TotalPages:   3,
+													Page:         1,
+													Histories:    histories[0:10],
+												}),
+												ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
+												ghttp.VerifyRequest("GET", urlpath,
+													fmt.Sprintf("order=asc&page=1&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*120*1E9)),
+												),
 											),
-										),
-									)
-									apiServer.AppendHandlers(
-										ghttp.CombineHandlers(
-											ghttp.RespondWithJSONEncoded(http.StatusOK, &HistoryResults{
-												TotalResults: 30,
-												TotalPages:   3,
-												Page:         2,
-												Histories:    histories[10:20],
-											}),
-											ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-											ghttp.VerifyRequest("GET", urlpath,
-												fmt.Sprintf("order=asc&page=2&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*120*1E9)),
+										)
+										apiServer.AppendHandlers(
+											ghttp.CombineHandlers(
+												ghttp.RespondWithJSONEncoded(http.StatusOK, &HistoryResults{
+													TotalResults: 30,
+													TotalPages:   3,
+													Page:         2,
+													Histories:    histories[10:20],
+												}),
+												ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
+												ghttp.VerifyRequest("GET", urlpath,
+													fmt.Sprintf("order=asc&page=2&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*120*1E9)),
+												),
 											),
-										),
-									)
-									apiServer.AppendHandlers(
-										ghttp.CombineHandlers(
-											ghttp.RespondWithJSONEncoded(http.StatusOK, &HistoryResults{
-												TotalResults: 30,
-												TotalPages:   3,
-												Page:         3,
-												Histories:    histories[20:30],
-											}),
-											ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-											ghttp.VerifyRequest("GET", urlpath,
-												fmt.Sprintf("order=asc&page=3&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*120*1E9)),
+										)
+										apiServer.AppendHandlers(
+											ghttp.CombineHandlers(
+												ghttp.RespondWithJSONEncoded(http.StatusOK, &HistoryResults{
+													TotalResults: 30,
+													TotalPages:   3,
+													Page:         3,
+													Histories:    histories[20:30],
+												}),
+												ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
+												ghttp.VerifyRequest("GET", urlpath,
+													fmt.Sprintf("order=asc&page=3&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*120*1E9)),
+												),
 											),
-										),
-									)
+										)
 
-								})
+									})
 
-								It("Succeed to print all pages of the history to stdout with asc order", func() {
+									It("Succeed to print all pages of the history to stdout", func() {
 
-									args = []string{ts.Port(), "autoscaling-history", fakeAppName,
-										"--start", now.Format(time.RFC3339),
-										"--end", time.Unix(0, lowPrecisionNowInNano+int64(29*120*1E9)).Format(time.RFC3339)}
+										args = []string{ts.Port(), "autoscaling-history", fakeAppName,
+											"--start", now.Format(time.RFC3339),
+											"--end", time.Unix(0, lowPrecisionNowInNano+int64(29*120*1E9)).Format(time.RFC3339)}
 
-									session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
-									Expect(err).NotTo(HaveOccurred())
-									session.Wait()
+										session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+										Expect(err).NotTo(HaveOccurred())
+										session.Wait()
 
-									Expect(session.Out).To(gbytes.Say(ui.ShowHistoryHint, fakeAppName))
-									historyRaw := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.ShowHistoryHint+"\n", fakeAppName)))
-									historyTable := strings.Split(string(bytes.TrimRight(historyRaw, "\n")), "\n")
-									Expect(len(historyTable)).To(Equal(31))
-									for i, row := range historyTable {
-										colomns := strings.Split(row, "\t")
-										if i == 0 {
-											Expect(strings.Trim(colomns[0], " ")).To(Equal("Scaling Type"))
-											Expect(strings.Trim(colomns[1], " ")).To(Equal("Status"))
-											Expect(strings.Trim(colomns[2], " ")).To(Equal("Instance Changes"))
-											Expect(strings.Trim(colomns[3], " ")).To(Equal("Time"))
-											Expect(strings.Trim(colomns[4], " ")).To(Equal("Action"))
-											Expect(strings.Trim(colomns[5], " ")).To(Equal("Error"))
-											//header line
-										} else {
-											//use (i-1) to skip header
-											Expect(strings.Trim(colomns[3], " ")).To(Equal(time.Unix(0, now.UnixNano()+int64((i-1)*120*1E9)).Format(time.RFC3339)))
-											Expect(strings.Trim(colomns[4], " ")).To(Equal("fakeReason"))
-											Expect(strings.Trim(colomns[5], " ")).To(Equal("fakeError"))
-
-											if i < 11 {
-												Expect(strings.Trim(colomns[0], " ")).To(Equal("dynamic"))
-												Expect(strings.Trim(colomns[1], " ")).To(Equal("succeeded"))
-												Expect(strings.Trim(colomns[2], " ")).To(Equal(strconv.Itoa(i-1+1) + "->" + strconv.Itoa(i-1+2)))
-											} else if i < 21 {
-												Expect(strings.Trim(colomns[0], " ")).To(Equal("scheduled"))
-												Expect(strings.Trim(colomns[1], " ")).To(Equal("succeeded"))
-												Expect(strings.Trim(colomns[2], " ")).To(Equal(strconv.Itoa(i-1+1) + "->" + strconv.Itoa(i-1+2)))
+										Expect(session.Out).To(gbytes.Say(ui.ShowHistoryHint, fakeAppName))
+										historyRaw := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.ShowHistoryHint+"\n", fakeAppName)))
+										historyTable := strings.Split(string(bytes.TrimRight(historyRaw, "\n")), "\n")
+										Expect(len(historyTable)).To(Equal(31))
+										for i, row := range historyTable {
+											colomns := strings.Split(row, "\t")
+											if i == 0 {
+												Expect(strings.Trim(colomns[0], " ")).To(Equal("Scaling Type"))
+												Expect(strings.Trim(colomns[1], " ")).To(Equal("Status"))
+												Expect(strings.Trim(colomns[2], " ")).To(Equal("Instance Changes"))
+												Expect(strings.Trim(colomns[3], " ")).To(Equal("Time"))
+												Expect(strings.Trim(colomns[4], " ")).To(Equal("Action"))
+												Expect(strings.Trim(colomns[5], " ")).To(Equal("Error"))
+												//header line
 											} else {
-												Expect(strings.Trim(colomns[0], " ")).To(Equal("scheduled"))
-												Expect(strings.Trim(colomns[1], " ")).To(Equal("failed"))
-												Expect(strings.Trim(colomns[2], " ")).To(Equal(""))
+												//use (i-1) to skip header
+												Expect(strings.Trim(colomns[3], " ")).To(Equal(time.Unix(0, now.UnixNano()+int64((i-1)*120*1E9)).Format(time.RFC3339)))
+												Expect(strings.Trim(colomns[4], " ")).To(Equal("fakeReason"))
+												Expect(strings.Trim(colomns[5], " ")).To(Equal("fakeError"))
+
+												if i < 11 {
+													Expect(strings.Trim(colomns[0], " ")).To(Equal("dynamic"))
+													Expect(strings.Trim(colomns[1], " ")).To(Equal("succeeded"))
+													Expect(strings.Trim(colomns[2], " ")).To(Equal(strconv.Itoa(i-1+1) + "->" + strconv.Itoa(i-1+2)))
+												} else if i < 21 {
+													Expect(strings.Trim(colomns[0], " ")).To(Equal("scheduled"))
+													Expect(strings.Trim(colomns[1], " ")).To(Equal("succeeded"))
+													Expect(strings.Trim(colomns[2], " ")).To(Equal(strconv.Itoa(i-1+1) + "->" + strconv.Itoa(i-1+2)))
+												} else {
+													Expect(strings.Trim(colomns[0], " ")).To(Equal("scheduled"))
+													Expect(strings.Trim(colomns[1], " ")).To(Equal("failed"))
+													Expect(strings.Trim(colomns[2], " ")).To(Equal(""))
+												}
 											}
 										}
-									}
-									Expect(session.ExitCode()).To(Equal(0))
+										Expect(session.ExitCode()).To(Equal(0))
+									})
+								})
+
+								Context("specify --end only ", func() {
+									BeforeEach(func() {
+										//simulate the asc response from api server
+										apiServer.AppendHandlers(
+											ghttp.CombineHandlers(
+												ghttp.RespondWithJSONEncoded(http.StatusOK, &HistoryResults{
+													TotalResults: 30,
+													TotalPages:   3,
+													Page:         1,
+													Histories:    histories[0:10],
+												}),
+												ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
+												ghttp.VerifyRequest("GET", urlpath,
+													fmt.Sprintf("order=asc&page=1&end-time=%v", lowPrecisionNowInNano+int64(29*120*1E9)),
+												),
+											),
+										)
+										apiServer.AppendHandlers(
+											ghttp.CombineHandlers(
+												ghttp.RespondWithJSONEncoded(http.StatusOK, &HistoryResults{
+													TotalResults: 30,
+													TotalPages:   3,
+													Page:         2,
+													Histories:    histories[10:20],
+												}),
+												ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
+												ghttp.VerifyRequest("GET", urlpath,
+													fmt.Sprintf("order=asc&page=2&end-time=%v", lowPrecisionNowInNano+int64(29*120*1E9)),
+												),
+											),
+										)
+										apiServer.AppendHandlers(
+											ghttp.CombineHandlers(
+												ghttp.RespondWithJSONEncoded(http.StatusOK, &HistoryResults{
+													TotalResults: 30,
+													TotalPages:   3,
+													Page:         3,
+													Histories:    histories[20:30],
+												}),
+												ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
+												ghttp.VerifyRequest("GET", urlpath,
+													fmt.Sprintf("order=asc&page=3&end-time=%v", lowPrecisionNowInNano+int64(29*120*1E9)),
+												),
+											),
+										)
+
+									})
+
+									It("Succeed to print all pages of the history to stdout", func() {
+
+										args = []string{ts.Port(), "autoscaling-history", fakeAppName,
+											"--end", time.Unix(0, lowPrecisionNowInNano+int64(29*120*1E9)).Format(time.RFC3339)}
+
+										session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+										Expect(err).NotTo(HaveOccurred())
+										session.Wait()
+
+										Expect(session.Out).To(gbytes.Say(ui.ShowHistoryHint, fakeAppName))
+										historyRaw := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.ShowHistoryHint+"\n", fakeAppName)))
+										historyTable := strings.Split(string(bytes.TrimRight(historyRaw, "\n")), "\n")
+										Expect(len(historyTable)).To(Equal(31))
+										for i, row := range historyTable {
+											colomns := strings.Split(row, "\t")
+											if i == 0 {
+												Expect(strings.Trim(colomns[0], " ")).To(Equal("Scaling Type"))
+												Expect(strings.Trim(colomns[1], " ")).To(Equal("Status"))
+												Expect(strings.Trim(colomns[2], " ")).To(Equal("Instance Changes"))
+												Expect(strings.Trim(colomns[3], " ")).To(Equal("Time"))
+												Expect(strings.Trim(colomns[4], " ")).To(Equal("Action"))
+												Expect(strings.Trim(colomns[5], " ")).To(Equal("Error"))
+												//header line
+											} else {
+												//use (i-1) to skip header
+												Expect(strings.Trim(colomns[3], " ")).To(Equal(time.Unix(0, now.UnixNano()+int64((i-1)*120*1E9)).Format(time.RFC3339)))
+												Expect(strings.Trim(colomns[4], " ")).To(Equal("fakeReason"))
+												Expect(strings.Trim(colomns[5], " ")).To(Equal("fakeError"))
+
+												if i < 11 {
+													Expect(strings.Trim(colomns[0], " ")).To(Equal("dynamic"))
+													Expect(strings.Trim(colomns[1], " ")).To(Equal("succeeded"))
+													Expect(strings.Trim(colomns[2], " ")).To(Equal(strconv.Itoa(i-1+1) + "->" + strconv.Itoa(i-1+2)))
+												} else if i < 21 {
+													Expect(strings.Trim(colomns[0], " ")).To(Equal("scheduled"))
+													Expect(strings.Trim(colomns[1], " ")).To(Equal("succeeded"))
+													Expect(strings.Trim(colomns[2], " ")).To(Equal(strconv.Itoa(i-1+1) + "->" + strconv.Itoa(i-1+2)))
+												} else {
+													Expect(strings.Trim(colomns[0], " ")).To(Equal("scheduled"))
+													Expect(strings.Trim(colomns[1], " ")).To(Equal("failed"))
+													Expect(strings.Trim(colomns[2], " ")).To(Equal(""))
+												}
+											}
+										}
+										Expect(session.ExitCode()).To(Equal(0))
+									})
 								})
 
 							})
@@ -2702,305 +2605,6 @@ var _ = Describe("App-AutoScaler Commands", func() {
 										}
 									}
 									Expect(session.ExitCode()).To(Equal(0))
-								})
-
-							})
-
-							Context("Query multiple pages with specified record number ", func() {
-
-								Context("not specify starttime and entime ", func() {
-
-									BeforeEach(func() {
-										//simulate the asc response from api server
-										apiServer.AppendHandlers(
-											ghttp.CombineHandlers(
-												ghttp.RespondWithJSONEncoded(http.StatusOK, &HistoryResults{
-													TotalResults: 30,
-													TotalPages:   3,
-													Page:         1,
-													Histories:    histories[0:10],
-												}),
-												ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-											),
-										)
-										apiServer.AppendHandlers(
-											ghttp.CombineHandlers(
-												ghttp.RespondWithJSONEncoded(http.StatusOK, &HistoryResults{
-													TotalResults: 30,
-													TotalPages:   3,
-													Page:         2,
-													Histories:    histories[10:20],
-												}),
-												ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-											),
-										)
-										apiServer.AppendHandlers(
-											ghttp.CombineHandlers(
-												ghttp.RespondWithJSONEncoded(http.StatusOK, &HistoryResults{
-													TotalResults: 30,
-													TotalPages:   3,
-													Page:         3,
-													Histories:    histories[20:30],
-												}),
-												ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-											),
-										)
-
-									})
-
-									It("Succeed to print limited number of the history to stdout with asc order ", func() {
-
-										args = []string{ts.Port(), "autoscaling-history", fakeAppName,
-											"--number", "15"}
-
-										session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
-										Expect(err).NotTo(HaveOccurred())
-										session.Wait()
-
-										Expect(session.Out).To(gbytes.Say(ui.ShowHistoryHint, fakeAppName))
-										historyRaw := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.ShowHistoryHint+"\n", fakeAppName)))
-										historyTable := strings.Split(string(bytes.TrimRight(historyRaw, "\n")), "\n")
-										Expect(len(historyTable)).To(Equal(16))
-										for i, row := range historyTable {
-											colomns := strings.Split(row, "\t")
-											if i == 0 {
-												Expect(strings.Trim(colomns[0], " ")).To(Equal("Scaling Type"))
-												Expect(strings.Trim(colomns[1], " ")).To(Equal("Status"))
-												Expect(strings.Trim(colomns[2], " ")).To(Equal("Instance Changes"))
-												Expect(strings.Trim(colomns[3], " ")).To(Equal("Time"))
-												Expect(strings.Trim(colomns[4], " ")).To(Equal("Action"))
-												Expect(strings.Trim(colomns[5], " ")).To(Equal("Error"))
-												//header line
-											} else {
-												//use (i-1) to skip header
-												Expect(strings.Trim(colomns[3], " ")).To(Equal(time.Unix(0, now.UnixNano()+int64((i-1)*120*1E9)).Format(time.RFC3339)))
-												Expect(strings.Trim(colomns[4], " ")).To(Equal("fakeReason"))
-												Expect(strings.Trim(colomns[5], " ")).To(Equal("fakeError"))
-
-												if i < 11 {
-													Expect(strings.Trim(colomns[0], " ")).To(Equal("dynamic"))
-													Expect(strings.Trim(colomns[1], " ")).To(Equal("succeeded"))
-													Expect(strings.Trim(colomns[2], " ")).To(Equal(strconv.Itoa(i-1+1) + "->" + strconv.Itoa(i-1+2)))
-
-												} else if i < 21 {
-													Expect(strings.Trim(colomns[0], " ")).To(Equal("scheduled"))
-													Expect(strings.Trim(colomns[1], " ")).To(Equal("succeeded"))
-													Expect(strings.Trim(colomns[2], " ")).To(Equal(strconv.Itoa(i-1+1) + "->" + strconv.Itoa(i-1+2)))
-
-												} else {
-													Expect(strings.Trim(colomns[0], " ")).To(Equal("scheduled"))
-													Expect(strings.Trim(colomns[1], " ")).To(Equal("failed"))
-													Expect(strings.Trim(colomns[2], " ")).To(Equal(""))
-
-												}
-											}
-										}
-										Expect(session.ExitCode()).To(Equal(0))
-									})
-
-								})
-
-								Context("specifiy endtime only ", func() {
-
-									BeforeEach(func() {
-										//simulate the asc response from api server
-										apiServer.AppendHandlers(
-											ghttp.CombineHandlers(
-												ghttp.RespondWithJSONEncoded(http.StatusOK, &HistoryResults{
-													TotalResults: 30,
-													TotalPages:   3,
-													Page:         1,
-													Histories:    histories[0:10],
-												}),
-												ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-												ghttp.VerifyRequest("GET", urlpath,
-													fmt.Sprintf("order=asc&page=1&end-time=%v", lowPrecisionNowInNano),
-												),
-											),
-										)
-										apiServer.AppendHandlers(
-											ghttp.CombineHandlers(
-												ghttp.RespondWithJSONEncoded(http.StatusOK, &HistoryResults{
-													TotalResults: 30,
-													TotalPages:   3,
-													Page:         2,
-													Histories:    histories[10:20],
-												}),
-												ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-												ghttp.VerifyRequest("GET", urlpath,
-													fmt.Sprintf("order=asc&page=2&end-time=%v", lowPrecisionNowInNano),
-												),
-											),
-										)
-										apiServer.AppendHandlers(
-											ghttp.CombineHandlers(
-												ghttp.RespondWithJSONEncoded(http.StatusOK, &HistoryResults{
-													TotalResults: 30,
-													TotalPages:   3,
-													Page:         3,
-													Histories:    histories[20:30],
-												}),
-												ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-												ghttp.VerifyRequest("GET", urlpath,
-													fmt.Sprintf("order=asc&page=3&end-time=%v", lowPrecisionNowInNano),
-												),
-											),
-										)
-
-									})
-
-									It("Succeed to print limited number of the history to stdout with asc order ", func() {
-
-										args = []string{ts.Port(), "autoscaling-history", fakeAppName,
-											"--number", "15",
-											"--end", time.Unix(0, lowPrecisionNowInNano).Format(time.RFC3339)}
-
-										session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
-										Expect(err).NotTo(HaveOccurred())
-										session.Wait()
-
-										Expect(session.Out).To(gbytes.Say(ui.ShowHistoryHint, fakeAppName))
-										historyRaw := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.ShowHistoryHint+"\n", fakeAppName)))
-										historyTable := strings.Split(string(bytes.TrimRight(historyRaw, "\n")), "\n")
-										Expect(len(historyTable)).To(Equal(16))
-										for i, row := range historyTable {
-											colomns := strings.Split(row, "\t")
-											if i == 0 {
-												Expect(strings.Trim(colomns[0], " ")).To(Equal("Scaling Type"))
-												Expect(strings.Trim(colomns[1], " ")).To(Equal("Status"))
-												Expect(strings.Trim(colomns[2], " ")).To(Equal("Instance Changes"))
-												Expect(strings.Trim(colomns[3], " ")).To(Equal("Time"))
-												Expect(strings.Trim(colomns[4], " ")).To(Equal("Action"))
-												Expect(strings.Trim(colomns[5], " ")).To(Equal("Error"))
-												//header line
-											} else {
-												//use (i-1) to skip header
-												Expect(strings.Trim(colomns[3], " ")).To(Equal(time.Unix(0, now.UnixNano()+int64((i-1)*120*1E9)).Format(time.RFC3339)))
-												Expect(strings.Trim(colomns[4], " ")).To(Equal("fakeReason"))
-												Expect(strings.Trim(colomns[5], " ")).To(Equal("fakeError"))
-
-												if i < 11 {
-													Expect(strings.Trim(colomns[0], " ")).To(Equal("dynamic"))
-													Expect(strings.Trim(colomns[1], " ")).To(Equal("succeeded"))
-													Expect(strings.Trim(colomns[2], " ")).To(Equal(strconv.Itoa(i-1+1) + "->" + strconv.Itoa(i-1+2)))
-
-												} else if i < 21 {
-													Expect(strings.Trim(colomns[0], " ")).To(Equal("scheduled"))
-													Expect(strings.Trim(colomns[1], " ")).To(Equal("succeeded"))
-													Expect(strings.Trim(colomns[2], " ")).To(Equal(strconv.Itoa(i-1+1) + "->" + strconv.Itoa(i-1+2)))
-
-												} else {
-													Expect(strings.Trim(colomns[0], " ")).To(Equal("scheduled"))
-													Expect(strings.Trim(colomns[1], " ")).To(Equal("failed"))
-													Expect(strings.Trim(colomns[2], " ")).To(Equal(""))
-
-												}
-											}
-										}
-										Expect(session.ExitCode()).To(Equal(0))
-									})
-
-								})
-
-								Context("specifiy start time and endtime ", func() {
-									BeforeEach(func() {
-										//simulate the asc response from api server
-										apiServer.AppendHandlers(
-											ghttp.CombineHandlers(
-												ghttp.RespondWithJSONEncoded(http.StatusOK, &HistoryResults{
-													TotalResults: 30,
-													TotalPages:   3,
-													Page:         1,
-													Histories:    histories[0:10],
-												}),
-												ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-												ghttp.VerifyRequest("GET", urlpath,
-													fmt.Sprintf("order=asc&page=1&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*120*1E9)),
-												),
-											),
-										)
-										apiServer.AppendHandlers(
-											ghttp.CombineHandlers(
-												ghttp.RespondWithJSONEncoded(http.StatusOK, &HistoryResults{
-													TotalResults: 30,
-													TotalPages:   3,
-													Page:         2,
-													Histories:    histories[10:20],
-												}),
-												ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-												ghttp.VerifyRequest("GET", urlpath,
-													fmt.Sprintf("order=asc&page=2&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*120*1E9)),
-												),
-											),
-										)
-										apiServer.AppendHandlers(
-											ghttp.CombineHandlers(
-												ghttp.RespondWithJSONEncoded(http.StatusOK, &HistoryResults{
-													TotalResults: 30,
-													TotalPages:   3,
-													Page:         3,
-													Histories:    histories[20:30],
-												}),
-												ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-												ghttp.VerifyRequest("GET", urlpath,
-													fmt.Sprintf("order=asc&page=3&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*120*1E9)),
-												),
-											),
-										)
-
-									})
-
-									It("Succeed to ignore the record number limit and print all pages of the history in specified duration to stdout with asc order ", func() {
-
-										args = []string{ts.Port(), "autoscaling-history", fakeAppName,
-											"--number", "15",
-											"--start", now.Format(time.RFC3339),
-											"--end", time.Unix(0, lowPrecisionNowInNano+int64(29*120*1E9)).Format(time.RFC3339)}
-
-										session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
-										Expect(err).NotTo(HaveOccurred())
-										session.Wait()
-
-										Expect(session.Out).To(gbytes.Say(ui.ShowHistoryHint, fakeAppName))
-										historyRaw := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.ShowHistoryHint+"\n", fakeAppName)))
-										historyTable := strings.Split(string(bytes.TrimRight(historyRaw, "\n")), "\n")
-										Expect(len(historyTable)).To(Equal(31))
-										for i, row := range historyTable {
-											colomns := strings.Split(row, "\t")
-											if i == 0 {
-												Expect(strings.Trim(colomns[0], " ")).To(Equal("Scaling Type"))
-												Expect(strings.Trim(colomns[1], " ")).To(Equal("Status"))
-												Expect(strings.Trim(colomns[2], " ")).To(Equal("Instance Changes"))
-												Expect(strings.Trim(colomns[3], " ")).To(Equal("Time"))
-												Expect(strings.Trim(colomns[4], " ")).To(Equal("Action"))
-												Expect(strings.Trim(colomns[5], " ")).To(Equal("Error"))
-												//header line
-											} else {
-												//use (i-1) to skip header
-												Expect(strings.Trim(colomns[3], " ")).To(Equal(time.Unix(0, now.UnixNano()+int64((i-1)*120*1E9)).Format(time.RFC3339)))
-												Expect(strings.Trim(colomns[4], " ")).To(Equal("fakeReason"))
-												Expect(strings.Trim(colomns[5], " ")).To(Equal("fakeError"))
-
-												if i < 11 {
-													Expect(strings.Trim(colomns[0], " ")).To(Equal("dynamic"))
-													Expect(strings.Trim(colomns[1], " ")).To(Equal("succeeded"))
-													Expect(strings.Trim(colomns[2], " ")).To(Equal(strconv.Itoa(i-1+1) + "->" + strconv.Itoa(i-1+2)))
-
-												} else if i < 21 {
-													Expect(strings.Trim(colomns[0], " ")).To(Equal("scheduled"))
-													Expect(strings.Trim(colomns[1], " ")).To(Equal("succeeded"))
-													Expect(strings.Trim(colomns[2], " ")).To(Equal(strconv.Itoa(i-1+1) + "->" + strconv.Itoa(i-1+2)))
-
-												} else {
-													Expect(strings.Trim(colomns[0], " ")).To(Equal("scheduled"))
-													Expect(strings.Trim(colomns[1], " ")).To(Equal("failed"))
-													Expect(strings.Trim(colomns[2], " ")).To(Equal(""))
-
-												}
-											}
-										}
-										Expect(session.ExitCode()).To(Equal(0))
-									})
 								})
 
 							})
