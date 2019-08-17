@@ -316,16 +316,32 @@ var _ = Describe("API Helper Test", func() {
 			})
 
 			Context("Invalid Policy Format", func() {
-				BeforeEach(func() {
-					apiServer.RouteToHandler("PUT", urlpath,
-						ghttp.RespondWith(http.StatusBadRequest, `{"success":false,"error":[{"property":"instance_min_count","message":"instance_min_count and instance_max_count values are not compatible","instance":{"instance_max_count":2,"instance_min_count":10,"scaling_rules":[{"adjustment":"+1","breach_duration_secs":600,"cool_down_secs":300,"metric_type":"memoryused","operator":">","stat_window_secs":300,"threshold":100},{"adjustment":"-1","breach_duration_secs":600,"cool_down_secs":300,"metric_type":"memoryused","operator":"<=","stat_window_secs":300,"threshold":5}]},"stack":"instance_min_count 10 is higher or equal to instance_max_count 2 in policy_json"}],"result":null}`),
-					)
+				Context("Received error object", func() {
+					BeforeEach(func() {
+						apiServer.RouteToHandler("PUT", urlpath,
+							ghttp.RespondWith(http.StatusBadRequest, `{"success":false,"error":[{"property":"instance_min_count","message":"instance_min_count and instance_max_count values are not compatible","instance":{"instance_max_count":2,"instance_min_count":10,"scaling_rules":[{"adjustment":"+1","breach_duration_secs":600,"cool_down_secs":300,"metric_type":"memoryused","operator":">","stat_window_secs":300,"threshold":100},{"adjustment":"-1","breach_duration_secs":600,"cool_down_secs":300,"metric_type":"memoryused","operator":"<=","stat_window_secs":300,"threshold":5}]},"stack":"instance_min_count 10 is higher or equal to instance_max_count 2 in policy_json"}],"result":null}`),
+						)
+					})
+
+					It("Fail with 400 error", func() {
+						err = apihelper.CreatePolicy(fakePolicy)
+						Expect(err).Should(HaveOccurred())
+						Expect(err).Should(MatchError(fmt.Sprintf(ui.InvalidPolicy, "\n"+"instance_min_count 10 is higher or equal to instance_max_count 2 in policy_json")))
+					})
 				})
 
-				It("Fail with 400 error", func() {
-					err = apihelper.CreatePolicy(fakePolicy)
-					Expect(err).Should(HaveOccurred())
-					Expect(err).Should(MatchError(fmt.Sprintf(ui.InvalidPolicy, "\n"+"instance_min_count 10 is higher or equal to instance_max_count 2 in policy_json")))
+				Context("Received error array", func() {
+					BeforeEach(func() {
+						apiServer.RouteToHandler("PUT", urlpath,
+							ghttp.RespondWith(http.StatusBadRequest, `[{"context":"(root).scaling_rules.0.operator","description":"scaling_rules.0.operator must be one of the following: \"\\u003c\", \"\\u003e\", \"\\u003c=\", \"\\u003e=\""},{"context":"(root).schedules.recurring_schedule.0.start_time","description":"Does not match pattern '^(2[0-3]|1[0-9]|0[0-9]):([0-5][0-9])$'"}]`),
+						)
+					})
+
+					It("Fail with 400 error", func() {
+						err = apihelper.CreatePolicy(fakePolicy)
+						Expect(err).Should(HaveOccurred())
+						Expect(err).Should(MatchError(fmt.Sprintf(ui.InvalidPolicy, "\nscaling_rules.0.operator must be one of the following: \"<\", \">\", \"<=\", \">=\"\nschedules.recurring_schedule.0.start_time Does not match pattern '^(2[0-3]|1[0-9]|0[0-9]):([0-5][0-9])$'")))
+					})
 				})
 			})
 
