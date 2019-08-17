@@ -95,16 +95,27 @@ func (helper *APIHelper) DoRequest(req *http.Request) (*http.Response, error) {
 
 }
 
-func parseErrResponse(raw []byte) string {
-
-	var f interface{}
-	err := json.Unmarshal(raw, &f)
-	if err != nil {
-		return string(raw)
+func parseErrArrayResponse(a []interface{}) string {
+	retMsg := ""
+	for _, entry := range a {
+		mentry := entry.(map[string]interface{})
+		var context, description string
+		for ik, iv := range mentry {
+			if ik == "context" {
+				context = strings.Replace(iv.(string), "(root).", "", 1)
+			} else if ik == "description" {
+				description,_ = strconv.Unquote(strings.Replace(strconv.Quote(iv.(string)), `\\u`, `\u`, -1))
+			}
+		}
+		if !strings.Contains(description, context) {
+			description = context + " " + description
+		}
+		retMsg = retMsg + "\n" + fmt.Sprintf("%v", description)
 	}
+	return retMsg
+}
 
-	m := f.(map[string]interface{})
-
+func parseErrObjectResponse(m map[string]interface{}) string {
 	retMsg := ""
 	for k, v := range m {
 		if k == "error" {
@@ -131,10 +142,30 @@ func parseErrResponse(raw []byte) string {
 				retMsg = fmt.Sprintf("%v", v)
 			}
 
+		} else if k == "message" {
+			retMsg = fmt.Sprintf("%v", v)
 		}
 	}
 
 	return retMsg
+}
+
+func parseErrResponse(raw []byte) string {
+
+	var f interface{}
+	err := json.Unmarshal(raw, &f)
+	if err != nil {
+		return string(raw)
+	}
+
+	switch f.(type) {
+	case map[string]interface{}:
+		return parseErrObjectResponse(f.(map[string]interface{}))
+	case []interface{}:
+		return parseErrArrayResponse(f.([]interface{}))
+	default:
+		return ""
+	}
 }
 
 func (helper *APIHelper) CheckHealth() error {
