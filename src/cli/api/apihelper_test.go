@@ -340,7 +340,7 @@ var _ = Describe("API Helper Test", func() {
 					It("Fail with 400 error", func() {
 						err = apihelper.CreatePolicy(fakePolicy)
 						Expect(err).Should(HaveOccurred())
-						Expect(err).Should(MatchError(fmt.Sprintf(ui.InvalidPolicy, "\nscaling_rules.0.operator must be one of the following: \"<\", \">\", \"<=\", \">=\"\nschedules.recurring_schedule.0.start_time Does not match pattern '^(2[0-3]|1[0-9]|0[0-9]):([0-5][0-9])$'")))
+						Expect(err).Should(MatchError(fmt.Sprintf(ui.InvalidPolicy, "\n(root).scaling_rules.0.operator: scaling_rules.0.operator must be one of the following: \"<\", \">\", \"<=\", \">=\"\n(root).schedules.recurring_schedule.0.start_time: Does not match pattern '^(2[0-3]|1[0-9]|0[0-9]):([0-5][0-9])$'")))
 					})
 				})
 			})

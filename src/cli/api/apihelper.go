@@ -102,15 +102,12 @@ func parseErrArrayResponse(a []interface{}) string {
 		var context, description string
 		for ik, iv := range mentry {
 			if ik == "context" {
-				context = strings.Replace(iv.(string), "(root).", "", 1)
+				context = iv.(string)
 			} else if ik == "description" {
 				description,_ = strconv.Unquote(strings.Replace(strconv.Quote(iv.(string)), `\\u`, `\u`, -1))
 			}
 		}
-		if !strings.Contains(description, context) {
-			description = context + " " + description
-		}
-		retMsg = retMsg + "\n" + fmt.Sprintf("%v", description)
+		retMsg = retMsg + "\n" + fmt.Sprintf("%v: %v", context, description)
 	}
 	return retMsg
 }

@@ -976,7 +976,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 								}
 							})
 
-							Context("when attached policy definition is invalid ", func() {
+							Context("when attached policy definition is invalid with error object response", func() {
 								BeforeEach(func() {
 									apiServer.RouteToHandler("PUT", urlpath,
 										ghttp.CombineHandlers(
@@ -1004,6 +1004,39 @@ var _ = Describe("App-AutoScaler Commands", func() {
 									Expect(session.Out).To(gbytes.Say(ui.AttachPolicyHint, fakeAppName))
 									Expect(session).To(gbytes.Say("FAILED"))
 									Expect(session).To(gbytes.Say(ui.InvalidPolicy, "\n"+"instance_min_count 10 is higher or equal to instance_max_count 2 in policy_json"))
+									Expect(session.ExitCode()).To(Equal(1))
+
+								})
+							})
+
+							Context("when attached policy definition is invalid with error array response", func() {
+								BeforeEach(func() {
+									apiServer.RouteToHandler("PUT", urlpath,
+										ghttp.CombineHandlers(
+											ghttp.RespondWith(http.StatusBadRequest, `[{"context":"(root).instance_min_count","description":"instance_min_count 10 is higher or equal to instance_max_count 2"}]`),
+											ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
+										),
+									)
+
+									fakePolicy.InstanceMin = 10
+									fakePolicy.InstanceMax = 2
+									policyBytes, err := cjson.MarshalWithoutHTMLEscape(fakePolicy)
+									Expect(err).NotTo(HaveOccurred())
+									err = ioutil.WriteFile(outputFile, policyBytes, 0666)
+									Expect(err).NotTo(HaveOccurred())
+
+								})
+
+								It("Failed with 400", func() {
+
+									args = []string{ts.Port(), "attach-autoscaling-policy", fakeAppName, outputFile}
+									session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+									Expect(err).NotTo(HaveOccurred())
+									session.Wait()
+
+									Expect(session.Out).To(gbytes.Say(ui.AttachPolicyHint, fakeAppName))
+									Expect(session).To(gbytes.Say("FAILED"))
+									Expect(session).To(gbytes.Say(ui.InvalidPolicy, "\n"+`\(root\)\.instance_min_count: instance_min_count 10 is higher or equal to instance_max_count 2`))
 									Expect(session.ExitCode()).To(Equal(1))
 
 								})
