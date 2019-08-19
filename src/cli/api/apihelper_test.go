@@ -44,7 +44,7 @@ var _ = Describe("API Helper Test", func() {
 				},
 			},
 		}
-		fakeCredential CustomMetricCredentials = CustomMetricCredentials{
+		fakeCredential Credential = Credential{
 			Username: "fake-user",
 			Password: "fake-password",
 		}
@@ -457,21 +457,28 @@ var _ = Describe("API Helper Test", func() {
 		})
 
 		Context("Create Credential", func() {
-			var urlpath string = "/v1/apps/" + fakeAppId + "/custom_metrics_credential"
+			var urlpath string = "/v1/apps/" + fakeAppId + "/credential"
 
 			Context("201 Created with valid auth token", func() {
 				BeforeEach(func() {
 					apiServer.RouteToHandler("PUT", urlpath,
 						ghttp.CombineHandlers(
-							ghttp.RespondWith(http.StatusCreated, ""),
+							ghttp.RespondWithJSONEncoded(http.StatusCreated, &fakeCredential),
 							ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
 						),
 					)
 				})
 
 				It("succeed", func() {
-					err = apihelper.CreateCredential()
+					response, err := apihelper.CreateCredential(fakeCredential)
 					Expect(err).NotTo(HaveOccurred())
+
+					var actualCredential Credential
+					_ = json.Unmarshal([]byte(response), &actualCredential)
+					Expect(actualCredential).To(MatchFields(IgnoreExtras, Fields{
+						"Username": Equal(fakeCredential.Username),
+						"Password": Equal(fakeCredential.Password),
+					}))
 				})
 			})
 
@@ -479,15 +486,36 @@ var _ = Describe("API Helper Test", func() {
 				BeforeEach(func() {
 					apiServer.RouteToHandler("PUT", urlpath,
 						ghttp.CombineHandlers(
-							ghttp.RespondWith(http.StatusOK, ""),
+							ghttp.RespondWithJSONEncoded(http.StatusCreated, &fakeCredential),
 							ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
 						),
 					)
 				})
 
 				It("succeed", func() {
-					err = apihelper.CreateCredential()
+					response, err := apihelper.CreateCredential(fakeCredential)
 					Expect(err).NotTo(HaveOccurred())
+
+					var actualCredential Credential
+					_ = json.Unmarshal([]byte(response), &actualCredential)
+					Expect(actualCredential).To(MatchFields(IgnoreExtras, Fields{
+						"Username": Equal(fakeCredential.Username),
+						"Password": Equal(fakeCredential.Password),
+					}))
+				})
+			})
+
+			Context("Forbidden Request", func() {
+				BeforeEach(func() {
+					apiServer.RouteToHandler("PUT", urlpath,
+						ghttp.RespondWith(http.StatusForbidden, `{"code":"Forbidden","message":"This command is only valid for build-in auto-scaling capacity. Please operate service credential with \"cf bind/unbind-service\" command."}`),
+					)
+				})
+
+				It("Fail with 403 error", func() {
+					_, err = apihelper.CreateCredential(fakeCredential)
+					Expect(err).Should(HaveOccurred())
+					Expect(err).Should(MatchError(fmt.Sprintf(ui.ForbiddenCredentialRequest, `This command is only valid for build-in auto-scaling capacity. Please operate service credential with "cf bind/unbind-service" command.`)))
 				})
 			})
 
@@ -499,9 +527,23 @@ var _ = Describe("API Helper Test", func() {
 				})
 
 				It("Fail with 401 error", func() {
-					err = apihelper.CreateCredential()
+					_, err = apihelper.CreateCredential(fakeCredential)
 					Expect(err).Should(HaveOccurred())
 					Expect(err).Should(MatchError(fmt.Sprintf(ui.Unauthorized, apihelper.Endpoint.URL)))
+				})
+			})
+
+			Context("Invalid Credential Format", func() {
+				BeforeEach(func() {
+					apiServer.RouteToHandler("PUT", urlpath,
+						ghttp.RespondWith(http.StatusBadRequest, `{"code":"Bad Request","message":"Username and password are both required"}`),
+					)
+				})
+
+				It("Fail with 400 error", func() {
+					_, err = apihelper.CreateCredential(fakeCredential)
+					Expect(err).Should(HaveOccurred())
+					Expect(err).Should(MatchError(fmt.Sprintf(ui.InvalidCredential, "Username and password are both required")))
 				})
 			})
 
@@ -513,7 +555,7 @@ var _ = Describe("API Helper Test", func() {
 				})
 
 				It("Fail with 500 error", func() {
-					err = apihelper.CreateCredential()
+					_, err = apihelper.CreateCredential(fakeCredential)
 					Expect(err).Should(HaveOccurred())
 					Expect(err).Should(MatchError("Internal error"))
 				})
@@ -527,7 +569,7 @@ var _ = Describe("API Helper Test", func() {
 				})
 
 				It("Fail with 502 error", func() {
-					err = apihelper.CreateCredential()
+					_, err = apihelper.CreateCredential(fakeCredential)
 					Expect(err).Should(HaveOccurred())
 					Expect(err).Should(MatchError("502 bad gateway"))
 				})
@@ -536,7 +578,7 @@ var _ = Describe("API Helper Test", func() {
 		})
 
 		Context("Delete Credential", func() {
-			var urlpath string = "/v1/apps/" + fakeAppId + "/custom_metrics_credential"
+			var urlpath string = "/v1/apps/" + fakeAppId + "/credential"
 
 			Context("Succeed with valid auth token", func() {
 				BeforeEach(func() {
@@ -565,20 +607,6 @@ var _ = Describe("API Helper Test", func() {
 					err = apihelper.DeleteCredential()
 					Expect(err).Should(HaveOccurred())
 					Expect(err).Should(MatchError(fmt.Sprintf(ui.Unauthorized, apihelper.Endpoint.URL)))
-				})
-			})
-
-			Context("Credential not found", func() {
-				BeforeEach(func() {
-					apiServer.RouteToHandler("DELETE", urlpath,
-						ghttp.RespondWith(http.StatusNotFound, `{"success":false,"error":{"message":"No credential bound with application","statusCode":404},"result":null}`),
-					)
-				})
-
-				It("Fail with 404 error", func() {
-					err = apihelper.DeleteCredential()
-					Expect(err).Should(HaveOccurred())
-					Expect(err).Should(MatchError(fmt.Sprintf(ui.CredentialNotFound, apihelper.Client.AppName)))
 				})
 			})
 

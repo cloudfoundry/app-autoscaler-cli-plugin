@@ -191,7 +191,6 @@ cf autoscaling-metrics APP_NAME METRIC_NAME [--start START_TIME] [--end END_TIME
 
 
 #### OPTIONS:
-- `METRIC_NAME` : available metric supported: memoryused, memoryutil, responsetime, throughput and cpu.
 - `--start` : start time of metrics collected with format `yyyy-MM-ddTHH:mm:ss+/-HH:mm` or `yyyy-MM-ddTHH:mm:ssZ`, default to very beginning if not specified.
 - `--end` : end time of the metrics collected with format `yyyy-MM-ddTHH:mm:ss+/-HH:mm` or `yyyy-MM-ddTHH:mm:ssZ`, default to current time if not speficied.
 - `--asc` : display in ascending order, default to descending order if not specified

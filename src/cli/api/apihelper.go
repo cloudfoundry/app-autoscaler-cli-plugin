@@ -28,7 +28,7 @@ import (
 const (
 	HealthPath           = "/health"
 	PolicyPath           = "/v1/apps/{appId}/policy"
-	CredentialPath       = "/v1/apps/{appId}/custom_metrics_credential"
+	CredentialPath       = "/v1/apps/{appId}/credential"
 	AggregatedMetricPath = "/v1/apps/{appId}/aggregated_metric_histories/{metric_type}"
 	HistoryPath          = "/v1/apps/{appId}/scaling_histories"
 )
@@ -144,7 +144,6 @@ func parseErrObjectResponse(m map[string]interface{}) string {
 			retMsg = fmt.Sprintf("%v", v)
 		}
 	}
-
 	return retMsg
 }
 
@@ -504,8 +503,6 @@ func (helper *APIHelper) DeleteCredential() error {
 		switch resp.StatusCode {
 		case 401:
 			errorMsg = fmt.Sprintf(ui.Unauthorized, baseURL)
-		case 404:
-			errorMsg = fmt.Sprintf(ui.CredentialNotFound, helper.Client.AppName)
 		default:
 			errorMsg = parseErrResponse(raw)
 		}
@@ -516,23 +513,32 @@ func (helper *APIHelper) DeleteCredential() error {
 
 }
 
-func (helper *APIHelper) CreateCredential() error {
+func (helper *APIHelper) CreateCredential(data interface{}) ([]byte, error) {
 
 	err := helper.CheckHealth()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	baseURL := helper.Endpoint.URL
 	requestURL := fmt.Sprintf("%s%s", baseURL, strings.Replace(CredentialPath, "{appId}", helper.Client.AppId, -1))
 
-	req, err := http.NewRequest("PUT", requestURL, nil)
+	var body io.Reader
+	if data != nil {
+		jsonByte, e := json.Marshal(data)
+		if e != nil {
+			return nil, fmt.Errorf(ui.InvalidCredential, e)
+		}
+		body = bytes.NewBuffer(jsonByte)
+	}
+
+	req, err := http.NewRequest("PUT", requestURL, body)
 	req.Header.Add("Authorization", helper.Client.AuthToken)
 	req.Header.Add("Content-Type", "application/json")
 
 	resp, err := helper.DoRequest(req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer resp.Body.Close()
 
@@ -544,10 +550,26 @@ func (helper *APIHelper) CreateCredential() error {
 		switch resp.StatusCode {
 		case 401:
 			errorMsg = fmt.Sprintf(ui.Unauthorized, baseURL)
+		case 400:
+			errorMsg = fmt.Sprintf(ui.InvalidCredential, parseErrResponse(raw))
+		case 403:
+			errorMsg = fmt.Sprintf(ui.ForbiddenCredentialRequest, parseErrResponse(raw))
 		default:
 			errorMsg = parseErrResponse(raw)
 		}
-		return errors.New(errorMsg)
+		return nil, errors.New(errorMsg)
 	}
-	return nil
+
+	var credential models.CredentialResponse
+	err = json.Unmarshal(raw, &credential)
+	if err != nil {
+		return nil, err
+	}
+
+	prettyCredential, err := cjson.MarshalWithoutHTMLEscape(credential)
+	if err != nil {
+		return nil, err
+	}
+
+	return prettyCredential, nil
 }

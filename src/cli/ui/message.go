@@ -28,12 +28,11 @@ const (
 	ShowHistoryHint           = "Retrieving scaling event history for app %s..."
 
 	SavePolicyHint           = "Saving policy for app %s to %s... "
-	SaveCredentialHint       = "Saving custom metric credential for app %s to %s... "
+	SaveCredentialHint       = "Saving new created credential for app %s to %s..."
 	SaveAggregatedMetricHint = "Saving aggregated metrics for app %s to %s... "
 	SaveHistoryHint          = "Saving scaling event history for app %s to %s... "
 
 	UnrecognizedTimeFormat = "Unrecognized date time format: %s. \nSupported formats are yyyy-MM-ddTHH:mm:ss+/-hhmm, yyyy-MM-ddTHH:mm:ssZ with an input later than 1970-01-01T00:00:00Z."
-	UnrecognizedMetricName = "Unrecognized metric name: %s. \nSupported value: memoryused, memoryutil, responsetime, throughput, cpu."
 	InvalidTimeRange       = "Invalid time range. The start time %s is greater than the end time %s."
 
 	AggregatedMetricsNotFound = "No aggregated %s metrics were found for app %s."
@@ -42,7 +41,9 @@ const (
 	MoreRecordsWarning    = "TIP: More records available. Please re-run the command with --start or --end option to fetch more."
 	DeprecatedDescWarning = "TIP: The default order is set to descending now. Please remove the DEPRECATED flag '--desc'."
 
-	ShowCredentialHint   = "Retrieving custom metrics credential for app %s..."
 	CreateCredentialHint = "Creating custom metrics credential for app %s..."
 	DeleteCredentialHint = "Deleting custom metrics credential for app %s..."
+	FailToLoadCredentialFile = "Failed to read credential file %s."
+	InvalidCredential = "Invalid credential definition: %v."
+	ForbiddenCredentialRequest = "Request is forbidden: %v."
 )

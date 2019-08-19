@@ -61,22 +61,11 @@ OPTIONS:
 				},
 			},
 			{
-				Name:     "autoscaling-credential",
-				Alias:    "asc",
-				HelpText: "Retrieve the custom metric credential of an application",
-				UsageDetails: plugin.Usage{
-					Usage: `cf autoscaling-credential APP_NAME [--output PATH_TO_FILE]
-
-OPTIONS:
-	--output	Dump the credential to a file in JSON format`,
-				},
-			},
-			{
 				Name:     "create-autoscaling-credential",
 				Alias:    "casc",
 				HelpText: "Create custom metric credential for an application",
 				UsageDetails: plugin.Usage{
-					Usage: `cf create-autoscaling-credential APP_NAME`,
+					Usage: `cf create-autoscaling-credential APP_NAME [PATH_TO_CREDENTIAL_FILE] [--output PATH_TO_OUTPUT_FILE]`,
 				},
 			},
 			{
@@ -93,9 +82,6 @@ OPTIONS:
 				HelpText: "Retrieve the metrics of an application",
 				UsageDetails: plugin.Usage{
 					Usage: `cf autoscaling-metrics APP_NAME METRIC_NAME [--start START_TIME] [--end END_TIME] [--asc] [--output PATH_TO_FILE]
-
-METRIC_NAME: 
-	memoryused, memoryutil, responsetime, throughput, cpu.	
 
 OPTIONS:
 	--start		Start time of metrics collected with format "yyyy-MM-ddTHH:mm:ss+/-HH:mm" or "yyyy-MM-ddTHH:mm:ssZ", default to very beginning if not specified.
