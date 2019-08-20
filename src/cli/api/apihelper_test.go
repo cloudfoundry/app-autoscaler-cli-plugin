@@ -461,7 +461,7 @@ var _ = Describe("API Helper Test", func() {
 
 			Context("With valid auth token", func() {
 
-				Context("Query multiple pages with order asc", func() {
+				Context("Query multiple pages with order desc", func() {
 					BeforeEach(func() {
 						apiServer.AppendHandlers(
 							ghttp.CombineHandlers(
@@ -472,7 +472,7 @@ var _ = Describe("API Helper Test", func() {
 									Metrics:      metrics[0:10],
 								}),
 								ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-								ghttp.VerifyRequest("GET", urlpath, "order=asc&page=1"),
+								ghttp.VerifyRequest("GET", urlpath, "order=desc&page=1"),
 							),
 						)
 
@@ -485,7 +485,7 @@ var _ = Describe("API Helper Test", func() {
 									Metrics:      metrics[10:20],
 								}),
 								ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-								ghttp.VerifyRequest("GET", urlpath, "order=asc&page=2"),
+								ghttp.VerifyRequest("GET", urlpath, "order=desc&page=2"),
 							),
 						)
 
@@ -498,7 +498,7 @@ var _ = Describe("API Helper Test", func() {
 									Metrics:      metrics[20:30],
 								}),
 								ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-								ghttp.VerifyRequest("GET", urlpath, "order=asc&page=3"),
+								ghttp.VerifyRequest("GET", urlpath, "order=desc&page=3"),
 							),
 						)
 					})
@@ -541,7 +541,7 @@ var _ = Describe("API Helper Test", func() {
 					})
 				})
 
-				Context("Query multiple pages with order desc", func() {
+				Context("Query multiple pages with order asc", func() {
 					BeforeEach(func() {
 						apiServer.AppendHandlers(
 							ghttp.CombineHandlers(
@@ -552,7 +552,7 @@ var _ = Describe("API Helper Test", func() {
 									Metrics:      reversedMetrics[0:10],
 								}),
 								ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-								ghttp.VerifyRequest("GET", urlpath, "order=desc&page=1"),
+								ghttp.VerifyRequest("GET", urlpath, "order=asc&page=1"),
 							),
 						)
 
@@ -565,7 +565,7 @@ var _ = Describe("API Helper Test", func() {
 									Metrics:      reversedMetrics[10:20],
 								}),
 								ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-								ghttp.VerifyRequest("GET", urlpath, "order=desc&page=2"),
+								ghttp.VerifyRequest("GET", urlpath, "order=asc&page=2"),
 							),
 						)
 
@@ -578,7 +578,7 @@ var _ = Describe("API Helper Test", func() {
 									Metrics:      reversedMetrics[20:30],
 								}),
 								ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-								ghttp.VerifyRequest("GET", urlpath, "order=desc&page=3"),
+								ghttp.VerifyRequest("GET", urlpath, "order=asc&page=3"),
 							),
 						)
 					})
@@ -621,7 +621,7 @@ var _ = Describe("API Helper Test", func() {
 					})
 				})
 
-				Context("Query with asc & start time & end time ", func() {
+				Context("Query with desc & start time & end time ", func() {
 					BeforeEach(func() {
 						apiServer.AppendHandlers(
 							ghttp.CombineHandlers(
@@ -632,7 +632,7 @@ var _ = Describe("API Helper Test", func() {
 									Metrics:      metrics[0:10],
 								}),
 								ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-								ghttp.VerifyRequest("GET", urlpath, fmt.Sprintf("order=asc&page=1&start-time=%v&end-time=%v", now, now+int64(9*30*1E9))),
+								ghttp.VerifyRequest("GET", urlpath, fmt.Sprintf("order=desc&page=1&start-time=%v&end-time=%v", now, now+int64(9*30*1E9))),
 							),
 						)
 					})
@@ -664,7 +664,7 @@ var _ = Describe("API Helper Test", func() {
 									Metrics:      []*AppAggregatedMetric{},
 								}),
 								ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-								ghttp.VerifyRequest("GET", urlpath, fmt.Sprintf("order=asc&page=1&start-time=%v&end-time=%v", now, now+int64(9*30*1E9))),
+								ghttp.VerifyRequest("GET", urlpath, fmt.Sprintf("order=desc&page=1&start-time=%v&end-time=%v", now, now+int64(9*30*1E9))),
 							),
 						)
 					})
@@ -684,7 +684,7 @@ var _ = Describe("API Helper Test", func() {
 					apiServer.AppendHandlers(
 						ghttp.CombineHandlers(
 							ghttp.RespondWith(http.StatusUnauthorized, ""),
-							ghttp.VerifyRequest("GET", urlpath, "order=asc&page=1"),
+							ghttp.VerifyRequest("GET", urlpath, "order=desc&page=1"),
 						),
 					)
 				})
@@ -701,7 +701,7 @@ var _ = Describe("API Helper Test", func() {
 					apiServer.AppendHandlers(
 						ghttp.CombineHandlers(
 							ghttp.RespondWith(http.StatusInternalServerError, `{"success":false,"error":{"message":"Internal error","statusCode":500},"result":null}`),
-							ghttp.VerifyRequest("GET", urlpath, "order=asc&page=1"),
+							ghttp.VerifyRequest("GET", urlpath, "order=desc&page=1"),
 						),
 					)
 				})
@@ -718,7 +718,7 @@ var _ = Describe("API Helper Test", func() {
 					apiServer.AppendHandlers(
 						ghttp.CombineHandlers(
 							ghttp.RespondWith(http.StatusNotFound, "502 bad gateway"),
-							ghttp.VerifyRequest("GET", urlpath, "order=asc&page=1"),
+							ghttp.VerifyRequest("GET", urlpath, "order=desc&page=1"),
 						),
 					)
 				})
@@ -835,7 +835,7 @@ var _ = Describe("API Helper Test", func() {
 									Histories:    histories_ut[0:3],
 								}),
 								ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-								ghttp.VerifyRequest("GET", urlpath, "order=asc&page=1"),
+								ghttp.VerifyRequest("GET", urlpath, "order=desc&page=1"),
 							),
 						)
 
@@ -871,7 +871,7 @@ var _ = Describe("API Helper Test", func() {
 					})
 				})
 
-				Context("Query multiple pages with order asc", func() {
+				Context("Query multiple pages with order desc", func() {
 					BeforeEach(func() {
 						apiServer.AppendHandlers(
 							ghttp.CombineHandlers(
@@ -882,7 +882,7 @@ var _ = Describe("API Helper Test", func() {
 									Histories:    histories[0:10],
 								}),
 								ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-								ghttp.VerifyRequest("GET", urlpath, "order=asc&page=1"),
+								ghttp.VerifyRequest("GET", urlpath, "order=desc&page=1"),
 							),
 						)
 
@@ -895,7 +895,7 @@ var _ = Describe("API Helper Test", func() {
 									Histories:    histories[10:20],
 								}),
 								ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-								ghttp.VerifyRequest("GET", urlpath, "order=asc&page=2"),
+								ghttp.VerifyRequest("GET", urlpath, "order=desc&page=2"),
 							),
 						)
 
@@ -908,7 +908,7 @@ var _ = Describe("API Helper Test", func() {
 									Histories:    histories[20:30],
 								}),
 								ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-								ghttp.VerifyRequest("GET", urlpath, "order=asc&page=3"),
+								ghttp.VerifyRequest("GET", urlpath, "order=desc&page=3"),
 							),
 						)
 
@@ -961,7 +961,7 @@ var _ = Describe("API Helper Test", func() {
 					})
 				})
 
-				Context("Query multiple pages with order desc", func() {
+				Context("Query multiple pages with order asc", func() {
 					BeforeEach(func() {
 						apiServer.AppendHandlers(
 							ghttp.CombineHandlers(
@@ -972,7 +972,7 @@ var _ = Describe("API Helper Test", func() {
 									Histories:    reversedHistories[0:10],
 								}),
 								ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-								ghttp.VerifyRequest("GET", urlpath, "order=desc&page=1"),
+								ghttp.VerifyRequest("GET", urlpath, "order=asc&page=1"),
 							),
 						)
 
@@ -985,7 +985,7 @@ var _ = Describe("API Helper Test", func() {
 									Histories:    reversedHistories[10:20],
 								}),
 								ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-								ghttp.VerifyRequest("GET", urlpath, "order=desc&page=2"),
+								ghttp.VerifyRequest("GET", urlpath, "order=asc&page=2"),
 							),
 						)
 
@@ -998,7 +998,7 @@ var _ = Describe("API Helper Test", func() {
 									Histories:    reversedHistories[20:30],
 								}),
 								ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-								ghttp.VerifyRequest("GET", urlpath, "order=desc&page=3"),
+								ghttp.VerifyRequest("GET", urlpath, "order=asc&page=3"),
 							),
 						)
 					})
@@ -1050,7 +1050,7 @@ var _ = Describe("API Helper Test", func() {
 					})
 				})
 
-				Context("Query with asc & start time & end time ", func() {
+				Context("Query with desc & start time & end time ", func() {
 					BeforeEach(func() {
 						apiServer.AppendHandlers(
 							ghttp.CombineHandlers(
@@ -1061,7 +1061,7 @@ var _ = Describe("API Helper Test", func() {
 									Histories:    histories[0:10],
 								}),
 								ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-								ghttp.VerifyRequest("GET", urlpath, fmt.Sprintf("order=asc&page=1&start-time=%v&end-time=%v", now, now+int64(9*120*1E9))),
+								ghttp.VerifyRequest("GET", urlpath, fmt.Sprintf("order=desc&page=1&start-time=%v&end-time=%v", now, now+int64(9*120*1E9))),
 							),
 						)
 					})
@@ -1096,7 +1096,7 @@ var _ = Describe("API Helper Test", func() {
 									Histories:    []*AppScalingHistory{},
 								}),
 								ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-								ghttp.VerifyRequest("GET", urlpath, fmt.Sprintf("order=asc&page=1&start-time=%v&end-time=%v", now, now+int64(9*120*1E9))),
+								ghttp.VerifyRequest("GET", urlpath, fmt.Sprintf("order=desc&page=1&start-time=%v&end-time=%v", now, now+int64(9*120*1E9))),
 							),
 						)
 					})
@@ -1116,7 +1116,7 @@ var _ = Describe("API Helper Test", func() {
 					apiServer.AppendHandlers(
 						ghttp.CombineHandlers(
 							ghttp.RespondWith(http.StatusUnauthorized, ""),
-							ghttp.VerifyRequest("GET", urlpath, "order=asc&page=1"),
+							ghttp.VerifyRequest("GET", urlpath, "order=desc&page=1"),
 						),
 					)
 				})
@@ -1133,7 +1133,7 @@ var _ = Describe("API Helper Test", func() {
 					apiServer.AppendHandlers(
 						ghttp.CombineHandlers(
 							ghttp.RespondWith(http.StatusInternalServerError, `{"success":false,"error":{"message":"Internal error","statusCode":500},"result":null}`),
-							ghttp.VerifyRequest("GET", urlpath, "order=asc&page=1"),
+							ghttp.VerifyRequest("GET", urlpath, "order=desc&page=1"),
 						),
 					)
 				})
@@ -1150,7 +1150,7 @@ var _ = Describe("API Helper Test", func() {
 					apiServer.AppendHandlers(
 						ghttp.CombineHandlers(
 							ghttp.RespondWith(http.StatusNotFound, "502 bad gateway"),
-							ghttp.VerifyRequest("GET", urlpath, "order=asc&page=1"),
+							ghttp.VerifyRequest("GET", urlpath, "order=desc&page=1"),
 						),
 					)
 				})

@@ -294,7 +294,7 @@ func (helper *APIHelper) DeletePolicy() error {
 
 }
 
-func (helper *APIHelper) GetAggregatedMetrics(metricName string, startTime, endTime int64, desc bool, page uint64) (bool, [][]string, error) {
+func (helper *APIHelper) GetAggregatedMetrics(metricName string, startTime, endTime int64, asc bool, page uint64) (bool, [][]string, error) {
 
 	if page <= 1 {
 		err := helper.CheckHealth()
@@ -317,10 +317,10 @@ func (helper *APIHelper) GetAggregatedMetrics(metricName string, startTime, endT
 	if endTime > 0 {
 		q.Add("end-time", strconv.FormatInt(endTime, 10))
 	}
-	if desc {
-		q.Add("order", "desc")
-	} else {
+	if asc {
 		q.Add("order", "asc")
+	} else {
+		q.Add("order", "desc")
 	}
 	q.Add("page", strconv.FormatUint(page, 10))
 	req.URL.RawQuery = q.Encode()
@@ -362,7 +362,7 @@ func (helper *APIHelper) GetAggregatedMetrics(metricName string, startTime, endT
 
 }
 
-func (helper *APIHelper) GetHistory(startTime, endTime int64, desc bool, page uint64) (bool, [][]string, error) {
+func (helper *APIHelper) GetHistory(startTime, endTime int64, asc bool, page uint64) (bool, [][]string, error) {
 
 	if page <= 1 {
 		err := helper.CheckHealth()
@@ -383,10 +383,10 @@ func (helper *APIHelper) GetHistory(startTime, endTime int64, desc bool, page ui
 	if endTime > 0 {
 		q.Add("end-time", strconv.FormatInt(endTime, 10))
 	}
-	if desc {
-		q.Add("order", "desc")
-	} else {
+	if asc {
 		q.Add("order", "asc")
+	} else {
+		q.Add("order", "desc")
 	}
 	q.Add("page", strconv.FormatUint(page, 10))
 	req.URL.RawQuery = q.Encode()

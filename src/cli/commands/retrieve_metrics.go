@@ -15,7 +15,7 @@ type MetricsCommand struct {
 	RequiredlArgs MetricsPositionalArgs `positional-args:"yes"`
 	StartTime     string                `long:"start" description:"start time of metrics collected with format \"yyyy-MM-ddTHH:mm:ss+/-HH:mm\" or \"yyyy-MM-ddTHH:mm:ssZ\", default to very beginning if not specified."`
 	EndTime       string                `long:"end" description:"end time of the metrics collected with format \"yyyy-MM-ddTHH:mm:ss+/-HH:mm\" or \"yyyy-MM-ddTHH:mm:ssZ\", default to current time if not speficied."`
-	Desc          bool                  `long:"desc" description:"display in descending order, default to ascending order if not specified."`
+	Asc           bool                  `long:"asc" description:"display in ascending order, default to descending order if not specified."`
 	Output        string                `long:"output" description:"dump the policy to a file in JSON format"`
 }
 
@@ -71,10 +71,10 @@ func (command MetricsCommand) Execute([]string) error {
 	}
 	return RetrieveAggregatedMetrics(AutoScaler.CLIConnection,
 		command.RequiredlArgs.AppName, command.RequiredlArgs.MetricName,
-		st, et, fpo, command.Desc, writer, command.Output)
+		st, et, fpo, command.Asc, writer, command.Output)
 }
 
-func RetrieveAggregatedMetrics(cliConnection api.Connection, appName, metricName string, startTime, endTime int64, firstPageOnly bool, desc bool, writer io.Writer, outputfile string) error {
+func RetrieveAggregatedMetrics(cliConnection api.Connection, appName, metricName string, startTime, endTime int64, firstPageOnly bool, asc bool, writer io.Writer, outputfile string) error {
 
 	cfclient, err := api.NewCFClient(cliConnection)
 	if err != nil {
@@ -111,7 +111,7 @@ func RetrieveAggregatedMetrics(cliConnection api.Connection, appName, metricName
 		data       [][]string
 	)
 	for true {
-		next, data, err = apihelper.GetAggregatedMetrics(metricName, startTime, endTime, desc, page)
+		next, data, err = apihelper.GetAggregatedMetrics(metricName, startTime, endTime, asc, page)
 		if err != nil {
 			return err
 		}
