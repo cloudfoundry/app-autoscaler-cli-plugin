@@ -48,5 +48,4 @@ const (
 	InvalidCredentialUsername  = "Custom credential `USERNAME` is required if `PASSOWRD` is provided."
 	InvalidCredentialPassword  = "Custom credential `PASSOWRD` is required if `USERNAME` is provided."
 	InvalidCredential          = "Invalid credential definition: %v."
-	ForbiddenCredentialRequest = "Request is forbidden: %v."
 )

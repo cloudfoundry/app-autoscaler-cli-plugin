@@ -515,7 +515,7 @@ var _ = Describe("API Helper Test", func() {
 				It("Fail with 403 error", func() {
 					_, err = apihelper.CreateCredential(fakeCredential)
 					Expect(err).Should(HaveOccurred())
-					Expect(err).Should(MatchError(fmt.Sprintf(ui.ForbiddenCredentialRequest, `This command is only valid for build-in auto-scaling capacity. Please operate service credential with "cf bind/unbind-service" command.`)))
+					Expect(err).Should(MatchError(fmt.Sprintf(`This command is only valid for build-in auto-scaling capacity. Please operate service credential with "cf bind/unbind-service" command.`)))
 				})
 			})
 
@@ -593,6 +593,20 @@ var _ = Describe("API Helper Test", func() {
 				It("succeed", func() {
 					err = apihelper.DeleteCredential()
 					Expect(err).NotTo(HaveOccurred())
+				})
+			})
+
+			Context("Forbidden Request", func() {
+				BeforeEach(func() {
+					apiServer.RouteToHandler("DELETE", urlpath,
+						ghttp.RespondWith(http.StatusForbidden, `{"code":"Forbidden","message":"This command is only valid for build-in auto-scaling capacity. Please operate service credential with \"cf bind/unbind-service\" command."}`),
+					)
+				})
+
+				It("Fail with 403 error", func() {
+					err = apihelper.DeleteCredential()
+					Expect(err).Should(HaveOccurred())
+					Expect(err).Should(MatchError(fmt.Sprintf(`This command is only valid for build-in auto-scaling capacity. Please operate service credential with "cf bind/unbind-service" command.`)))
 				})
 			})
 

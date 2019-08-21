@@ -1504,7 +1504,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 
 								Expect(session.Out).To(gbytes.Say(ui.CreateCredentialHint, fakeAppName))
 								Expect(session).To(gbytes.Say("FAILED"))
-								Expect(session).To(gbytes.Say(ui.ForbiddenCredentialRequest, `This command is only valid for build-in auto-scaling capacity. Please operate service credential with "cf bind/unbind-service" command.`))
+								Expect(session).To(gbytes.Say(`This command is only valid for build-in auto-scaling capacity. Please operate service credential with "cf bind/unbind-service" command.`))
 								Expect(session.ExitCode()).To(Equal(1))
 							})
 						})
@@ -1831,6 +1831,29 @@ var _ = Describe("App-AutoScaler Commands", func() {
 								*retVal = fakeAccessToken
 								return nil
 							}
+						})
+
+						Context("when request is forbidden", func() {
+							BeforeEach(func() {
+								apiServer.RouteToHandler("DELETE", urlpath,
+									ghttp.CombineHandlers(
+										ghttp.RespondWith(http.StatusForbidden, `{"code":"Forbidden","message":"This command is only valid for build-in auto-scaling capacity. Please operate service credential with \"cf bind/unbind-service\" command."}`),
+										ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
+									),
+								)
+							})
+
+							It("Failed with 403", func() {
+								args = []string{ts.Port(), "delete-autoscaling-credential", fakeAppName}
+								session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+								Expect(err).NotTo(HaveOccurred())
+								session.Wait()
+
+								Expect(session.Out).To(gbytes.Say(ui.DeleteCredentialHint, fakeAppName))
+								Expect(session).To(gbytes.Say("FAILED"))
+								Expect(session).To(gbytes.Say(`This command is only valid for build-in auto-scaling capacity. Please operate service credential with "cf bind/unbind-service" command.`))
+								Expect(session.ExitCode()).To(Equal(1))
+							})
 						})
 
 						Context("when credential exist or not ", func() {

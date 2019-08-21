@@ -552,8 +552,6 @@ func (helper *APIHelper) CreateCredential(data interface{}) ([]byte, error) {
 			errorMsg = fmt.Sprintf(ui.Unauthorized, baseURL)
 		case 400:
 			errorMsg = fmt.Sprintf(ui.InvalidCredential, parseErrResponse(raw))
-		case 403:
-			errorMsg = fmt.Sprintf(ui.ForbiddenCredentialRequest, parseErrResponse(raw))
 		default:
 			errorMsg = parseErrResponse(raw)
 		}
