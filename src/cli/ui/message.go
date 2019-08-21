@@ -24,6 +24,9 @@ const (
 	AttachPolicyHint = "Attaching policy for app %s..."
 	DetachPolicyHint = "Detaching policy for app %s..."
 
+	CreateCredentialHint = "Creating custom metric credential for app %s..."
+	DeleteCredentialHint = "Deleting custom metric credential for app %s..."
+
 	ShowAggregatedMetricsHint = "Retrieving aggregated %s metrics for app %s..."
 	ShowHistoryHint           = "Retrieving scaling event history for app %s..."
 
@@ -41,9 +44,9 @@ const (
 	MoreRecordsWarning    = "TIP: More records available. Please re-run the command with --start or --end option to fetch more."
 	DeprecatedDescWarning = "TIP: The default order is set to descending now. Please remove the DEPRECATED flag '--desc'."
 
-	CreateCredentialHint = "Creating custom metrics credential for app %s..."
-	DeleteCredentialHint = "Deleting custom metrics credential for app %s..."
-	FailToLoadCredentialFile = "Failed to read credential file %s."
-	InvalidCredential = "Invalid credential definition: %v."
+
+	InvalidCredentialUsername  = "Custom credential `USERNAME` is required if `PASSOWRD` is provided."
+	InvalidCredentialPassword  = "Custom credential `PASSOWRD` is required if `USERNAME` is provided."
+	InvalidCredential          = "Invalid credential definition: %v."
 	ForbiddenCredentialRequest = "Request is forbidden: %v."
 )

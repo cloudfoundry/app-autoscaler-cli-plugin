@@ -3,22 +3,23 @@ package commands
 import (
 	"cli/api"
 	"cli/ui"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"io"
 	"os"
+
+	"cli/models"
 )
 
 type CreateCredentialCommand struct {
-	PositionalArgs CreateCredentialPositionalArgs `positional-args:"yes"`
-	Output         string                         `long:"output" description:"dump the policy to a file in JSON format"`
+	RequiredArgs CreateCredentialPositionalArgs `positional-args:"yes"`
+	Username     string                         `short:"u" long:"username" description:"username of the custom metric credential, random username will be set if not specified"`
+	Password     string                         `short:"p" long:"password" description:"password of the custom metric credential, random password will be set if not specified"`
+	Output       string                         `long:"output" description:"dump the credential to a file in JSON format"`
 }
 
 type CreateCredentialPositionalArgs struct {
 	AppName        string `positional-arg-name:"APP_NAME" required:"true" `
-	CredentialFile string `positional-arg-name:"CREDENTIAL_FILE"`
 }
 
 func (command CreateCredentialCommand) Execute([]string) error {
@@ -27,6 +28,12 @@ func (command CreateCredentialCommand) Execute([]string) error {
 		err    error
 		writer *os.File
 	)
+
+	if command.Username == "" && command.Password != "" {
+		return fmt.Errorf(ui.InvalidCredentialUsername)
+	} else if command.Username != "" && command.Password == "" {
+		return fmt.Errorf(ui.InvalidCredentialPassword)
+	}
 
 	if command.Output != "" {
 		writer, err = os.OpenFile(command.Output, os.O_CREATE|os.O_WRONLY, 0666)
@@ -38,10 +45,10 @@ func (command CreateCredentialCommand) Execute([]string) error {
 		writer = os.Stdout
 	}
 
-	return CreateCredential(AutoScaler.CLIConnection, command.PositionalArgs.AppName, command.PositionalArgs.CredentialFile, writer, command.Output)
+	return CreateCredential(AutoScaler.CLIConnection, command.RequiredArgs.AppName, command.Username, command.Password, writer, command.Output)
 }
 
-func CreateCredential(cliConnection api.Connection, appName string, credentialFile string, writer io.Writer, outputfile string) error {
+func CreateCredential(cliConnection api.Connection, appName string, username string, password string, writer io.Writer, outputfile string) error {
 
 	cfclient, err := api.NewCFClient(cliConnection)
 	if err != nil {
@@ -68,16 +75,11 @@ func CreateCredential(cliConnection api.Connection, appName string, credentialFi
 		ui.SayMessage(ui.CreateCredentialHint, appName)
 	}
 
-	var credentialSource map[string]interface{}
 	var credentialResult []byte
-	if credentialFile != "" {
-		contents, err := ioutil.ReadFile(credentialFile)
-		if err != nil {
-			return fmt.Errorf(ui.FailToLoadCredentialFile, credentialFile)
-		}
-		err = json.Unmarshal(contents, &credentialSource)
-		if err != nil {
-			return fmt.Errorf(ui.InvalidCredential, err)
+	if username != "" && password != "" {
+		credentialSource := models.Credential {
+			Username: username,
+			Password: password,
 		}
 		credentialResult, err = apihelper.CreateCredential(credentialSource)
 		if err != nil {
@@ -89,6 +91,7 @@ func CreateCredential(cliConnection api.Connection, appName string, credentialFi
 			return err
 		}
 	}
+
 	fmt.Fprintf(writer, "%v", string(credentialResult))
 
 	if outputfile != "" {

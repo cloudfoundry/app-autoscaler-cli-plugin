@@ -37,6 +37,8 @@ cf uninstall-plugin AutoScaler
 | [autoscaling-policy, asp](#cf-autoscaling-policy) | Retrieve the scaling policy of an application |
 | [attach-autoscaling-policy, aasp](#cf-attach-autoscaling-policy) | Attach a scaling policy to an application |
 | [detach-autoscaling-policy, dasp](#cf-detach-autoscaling-policy) | Detach the scaling policy from an application |
+| [create-autoscaling-credential, casc](#cf-create-autoscaling-credential) | Create custom metric credential for an application |
+| [delete-autoscaling-credential, dasc](#cf-delete-autoscaling-credential) | Delete the custom metric credential of an application |
 | [autoscaling-metrics, asm](#cf-autoscaling-metrics) | Retrieve the metrics of an application |
 | [autoscaling-history, ash](#cf-autoscaling-history) | Retrieve the scaling history of an application|
 
@@ -139,7 +141,7 @@ Showing policy for app APP_NAME...
 ```
 $ cf asp APP_NAME --output PATH_TO_FILE
 
-Showing policy for app APP_NAME...
+Saving policy for app APP_NAME to PATH_TO_FILE...
 OK
 ```
 
@@ -167,7 +169,7 @@ OK
 Detach the scaling policy from an application, the policy will be **deleted** when detached.
 
 ```
-cf detach-as-policy APP_NAME
+cf detach-autoscaling-policy APP_NAME
 ```
 #### ALIAS: dasp
 
@@ -176,6 +178,61 @@ cf detach-as-policy APP_NAME
 $ cf detach-autoscaling-policy APP_NAME
 
 Detaching policy for app APP_NAME...
+OK
+```
+
+
+### `cf create-autoscaling-credential`
+
+Create custom metric credential for an application, the credential will be displayed in JSON format. Random credential pair will be created if username and password are not specified.
+
+```
+cf create-autoscaling-credential APP_NAME [--username USERNAME --password PASSWORD] [--output PATH_TO_FILE]
+```
+#### ALIAS: casc
+
+
+#### OPTIONS:
+- `--username, -u` : username of the custom metric credential, random username will be set if not specified
+- `--password, -p` : password of the custom metric credential, random password will be set if not specified
+- `--output`       : Dump the credential to a file in JSON format
+
+#### EXAMPLES:
+- Create and view custom credential with specified username and password:
+```
+$ cf create-autoscaling-credential APP_NAME --username MY_USERNAME --password MY_PASSWORD
+
+Creating custom metric credential for app APP_NAME...
+{
+	"app_id": "<APP_ID>",
+	"username": "MY_USERNAME",
+	"password": "MY_PASSWORD",
+	"url": "https://autoscalermetrics.<DOMAIN>"
+}
+```
+- Create random username and password and dump the credential to a file:
+```
+$ cf create-autoscaling-credential APP_NAME --output PATH_TO_FILE
+
+Saving new created credential for app APP_NAME to PATH_TO_FILE...
+OK
+```
+
+
+### `cf delete-autoscaling-credential`
+
+Delete the custom metric credential of an application.
+
+```
+cf delete-autoscaling-credential APP_NAME
+```
+#### ALIAS: dasc
+
+#### EXAMPLES:
+```
+$ cf delete-autoscaling-credential APP_NAME
+
+Deleting custom metric credential for app APP_NAME...
 OK
 ```
 

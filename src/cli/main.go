@@ -65,7 +65,13 @@ OPTIONS:
 				Alias:    "casc",
 				HelpText: "Create custom metric credential for an application",
 				UsageDetails: plugin.Usage{
-					Usage: `cf create-autoscaling-credential APP_NAME [PATH_TO_CREDENTIAL_FILE] [--output PATH_TO_OUTPUT_FILE]`,
+					Usage: `cf create-autoscaling-credential APP_NAME [--username USERNAME --password PASSWORD] [--output PATH_TO_FILE]
+
+OPTIONS:
+	--username, -u   Username of the custom metric credential, random username will be set if not specified.
+	--password, -p   Password of the custom metric credential, random password will be set if not specified.
+	--output         Dump the credential to a file in JSON format.
+					`,
 				},
 			},
 			{
