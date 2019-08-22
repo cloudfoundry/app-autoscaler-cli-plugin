@@ -97,5 +97,6 @@ func CreateCredential(cliConnection api.Connection, appName string, username str
 	if outputfile != "" {
 		ui.SayOK()
 	}
+	ui.SayWarningMessage(ui.CreateCredentialWarning, appName)
 	return nil
 }

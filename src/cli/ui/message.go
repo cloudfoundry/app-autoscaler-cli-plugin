@@ -44,8 +44,8 @@ const (
 	MoreRecordsWarning    = "TIP: More records available. Please re-run the command with --start or --end option to fetch more."
 	DeprecatedDescWarning = "TIP: The default order is set to descending now. Please remove the DEPRECATED flag '--desc'."
 
-
 	InvalidCredentialUsername  = "Custom credential `USERNAME` is required if `PASSOWRD` is provided."
 	InvalidCredentialPassword  = "Custom credential `PASSOWRD` is required if `USERNAME` is provided."
 	InvalidCredential          = "Invalid credential definition: %v."
+	CreateCredentialWarning    = "A new credential generated. Please update the credential setting, and use 'cf restart %s' to ensure your env variable changes take effect."
 )

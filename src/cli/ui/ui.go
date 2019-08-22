@@ -20,7 +20,7 @@ func SayMessage(message string, args ...interface{}) {
 	fmt.Printf(message+"\n", args...)
 }
 
-func SayWarningMessage(message string) {
+func SayWarningMessage(message string, args ...interface{}) {
 	c := color.New(color.FgYellow).Add(color.Bold)
-	c.Println(message)
+	c.Printf(message+"\n", args...)
 }

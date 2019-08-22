@@ -1550,8 +1550,10 @@ var _ = Describe("App-AutoScaler Commands", func() {
 									session.Wait()
 	
 									Expect(session.Out).To(gbytes.Say(ui.CreateCredentialHint, fakeAppName))
+									Expect(session.Out).To(gbytes.Say(ui.CreateCredentialWarning, fakeAppName))
 	
 									credential := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.CreateCredentialHint+"\n", fakeAppName)))
+									credential = bytes.TrimSuffix(credential, []byte(fmt.Sprintf(ui.CreateCredentialWarning+"\n", fakeAppName)))
 									var actualCredential Credential
 									_ = json.Unmarshal(credential, &actualCredential)
 									Expect(actualCredential).To(MatchFields(IgnoreExtras, Fields{
@@ -1569,8 +1571,10 @@ var _ = Describe("App-AutoScaler Commands", func() {
 									session.Wait()
 	
 									Expect(session.Out).To(gbytes.Say(ui.CreateCredentialHint, fakeAppName))
+									Expect(session.Out).To(gbytes.Say(ui.CreateCredentialWarning, fakeAppName))
 	
 									credential := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.CreateCredentialHint+"\n", fakeAppName)))
+									credential = bytes.TrimSuffix(credential, []byte(fmt.Sprintf(ui.CreateCredentialWarning+"\n", fakeAppName)))
 									var actualCredential Credential
 									_ = json.Unmarshal(credential, &actualCredential)
 									Expect(actualCredential).To(MatchFields(IgnoreExtras, Fields{
@@ -1600,8 +1604,10 @@ var _ = Describe("App-AutoScaler Commands", func() {
 									session.Wait()
 	
 									Expect(session.Out).To(gbytes.Say(ui.CreateCredentialHint, fakeAppName))
+									Expect(session.Out).To(gbytes.Say(ui.CreateCredentialWarning, fakeAppName))
 	
 									credential := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.CreateCredentialHint+"\n", fakeAppName)))
+									credential = bytes.TrimSuffix(credential, []byte(fmt.Sprintf(ui.CreateCredentialWarning+"\n", fakeAppName)))
 									var actualCredential Credential
 									_ = json.Unmarshal(credential, &actualCredential)
 									Expect(actualCredential).To(MatchFields(IgnoreExtras, Fields{
@@ -1620,8 +1626,10 @@ var _ = Describe("App-AutoScaler Commands", func() {
 									session.Wait()
 	
 									Expect(session.Out).To(gbytes.Say(ui.CreateCredentialHint, fakeAppName))
+									Expect(session.Out).To(gbytes.Say(ui.CreateCredentialWarning, fakeAppName))
 	
 									credential := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.CreateCredentialHint+"\n", fakeAppName)))
+									credential = bytes.TrimSuffix(credential, []byte(fmt.Sprintf(ui.CreateCredentialWarning+"\n", fakeAppName)))
 									var actualCredential Credential
 									_ = json.Unmarshal(credential, &actualCredential)
 									Expect(actualCredential).To(MatchFields(IgnoreExtras, Fields{
@@ -1653,6 +1661,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 								session.Wait()
 
 								Expect(session.Out).To(gbytes.Say(ui.SaveCredentialHint, fakeAppName, outputFile))
+								Expect(session.Out).To(gbytes.Say(ui.CreateCredentialWarning, fakeAppName))
 
 								Expect(outputFile).To(BeARegularFile())
 								contents, err := ioutil.ReadFile(outputFile)
