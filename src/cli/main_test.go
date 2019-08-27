@@ -1374,6 +1374,16 @@ var _ = Describe("App-AutoScaler Commands", func() {
 					Expect(session.ExitCode()).To(Equal(1))
 				})
 
+				It("Failed when --desc and --asc are used at the same time", func() {
+					args = []string{ts.Port(), "autoscaling-metrics", fakeAppName, metricName, "--asc", "--desc"}
+					session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+					Expect(err).NotTo(HaveOccurred())
+					session.Wait()
+
+					Expect(session).To(gbytes.Say(ui.ConflictDisplayOrder))
+					Expect(session.ExitCode()).To(Equal(1))
+				})
+
 				It("Failed when output file path is invalid", func() {
 					args = []string{ts.Port(), "autoscaling-metrics", fakeAppName, metricName, "--output", "invalidDir/invalidFile"}
 					session, err := gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
@@ -1902,40 +1912,6 @@ var _ = Describe("App-AutoScaler Commands", func() {
 									}
 									Expect(session.ExitCode()).To(Equal(0))
 								})
-
-								It("Succeed to print all pages of the metrics to stdout with asc order when desc is specified as well", func() {
-
-									args = []string{ts.Port(), "autoscaling-metrics", fakeAppName, metricName,
-										"--start", now.Format(time.RFC3339),
-										"--end", time.Unix(0, lowPrecisionNowInNano+int64(29*30*1E9)).Format(time.RFC3339),
-										"--asc",
-										"--desc",
-									}
-
-									session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
-									Expect(err).NotTo(HaveOccurred())
-									session.Wait()
-
-									Expect(session.Out).To(gbytes.Say(ui.ShowAggregatedMetricsHint, metricName, fakeAppName))
-									metricsRaw := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.ShowAggregatedMetricsHint+"\n", metricName, fakeAppName)))
-									metricsTable := strings.Split(string(bytes.TrimRight(metricsRaw, "\n")), "\n")
-									Expect(len(metricsTable)).To(Equal(31))
-									for i, row := range metricsTable {
-										colomns := strings.Split(row, "\t")
-										if i == 0 {
-											Expect(strings.Trim(colomns[0], " ")).To(Equal("Metrics Name"))
-											Expect(strings.Trim(colomns[1], " ")).To(Equal("Value"))
-											Expect(strings.Trim(colomns[2], " ")).To(Equal("Timestamp"))
-										} else {
-											//use "29-(i-1)" to simulate the expected output in asc order
-											Expect(strings.Trim(colomns[0], " ")).To(Equal("memoryused"))
-											Expect(strings.Trim(colomns[1], " ")).To(Equal("100MB"))
-											Expect(strings.Trim(colomns[2], " ")).To(Equal(time.Unix(0, now.UnixNano()+int64((i-1)*30*1E9)).Format(time.RFC3339)))
-										}
-									}
-									Expect(session.ExitCode()).To(Equal(0))
-								})
-
 							})
 
 							Context(" Print the output to a file", func() {
@@ -2075,6 +2051,16 @@ var _ = Describe("App-AutoScaler Commands", func() {
 					session.Wait()
 
 					Expect(session).To(gbytes.Say("unknown flag"))
+					Expect(session.ExitCode()).To(Equal(1))
+				})
+
+				It("Failed when --desc and --asc are used at the same time", func() {
+					args = []string{ts.Port(), "autoscaling-history", fakeAppName, "--asc", "--desc"}
+					session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+					Expect(err).NotTo(HaveOccurred())
+					session.Wait()
+
+					Expect(session).To(gbytes.Say(ui.ConflictDisplayOrder))
 					Expect(session.ExitCode()).To(Equal(1))
 				})
 
@@ -2721,54 +2707,6 @@ var _ = Describe("App-AutoScaler Commands", func() {
 									Expect(session.ExitCode()).To(Equal(0))
 								})
 
-								It("Succeed to print all pages of the history to stdout with asc order when desc is specified as well", func() {
-
-									args = []string{ts.Port(), "autoscaling-history", fakeAppName,
-										"--start", now.Format(time.RFC3339),
-										"--end", time.Unix(0, lowPrecisionNowInNano+int64(29*120*1E9)).Format(time.RFC3339),
-										"--asc",
-										"--desc",
-									}
-
-									session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
-									Expect(err).NotTo(HaveOccurred())
-									session.Wait()
-
-									Expect(session.Out).To(gbytes.Say(ui.ShowHistoryHint, fakeAppName))
-									historyRaw := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.ShowHistoryHint+"\n", fakeAppName)))
-									historyTable := strings.Split(string(bytes.TrimRight(historyRaw, "\n")), "\n")
-									Expect(len(historyTable)).To(Equal(31))
-									for i, row := range historyTable {
-										colomns := strings.Split(row, "\t")
-										if i == 0 {
-											Expect(strings.Trim(colomns[0], " ")).To(Equal("Scaling Type"))
-											Expect(strings.Trim(colomns[1], " ")).To(Equal("Status"))
-											Expect(strings.Trim(colomns[2], " ")).To(Equal("Instance Changes"))
-											Expect(strings.Trim(colomns[3], " ")).To(Equal("Time"))
-											Expect(strings.Trim(colomns[4], " ")).To(Equal("Action"))
-											Expect(strings.Trim(colomns[5], " ")).To(Equal("Error"))
-										} else {
-											//use "29-(i-1)" to simulate the expected output in asc order
-											Expect(strings.Trim(colomns[3], " ")).To(Equal(time.Unix(0, now.UnixNano()+int64((i-1)*120*1E9)).Format(time.RFC3339)))
-											Expect(strings.Trim(colomns[4], " ")).To(Equal("fakeReason"))
-											Expect(strings.Trim(colomns[5], " ")).To(Equal("fakeError"))
-											if i < 11 {
-												Expect(strings.Trim(colomns[0], " ")).To(Equal("dynamic"))
-												Expect(strings.Trim(colomns[1], " ")).To(Equal("succeeded"))
-												Expect(strings.Trim(colomns[2], " ")).To(Equal(strconv.Itoa(i-1+1) + "->" + strconv.Itoa(i-1+2)))
-											} else if i < 21 {
-												Expect(strings.Trim(colomns[0], " ")).To(Equal("scheduled"))
-												Expect(strings.Trim(colomns[1], " ")).To(Equal("succeeded"))
-												Expect(strings.Trim(colomns[2], " ")).To(Equal(strconv.Itoa(i-1+1) + "->" + strconv.Itoa(i-1+2)))
-											} else {
-												Expect(strings.Trim(colomns[0], " ")).To(Equal("scheduled"))
-												Expect(strings.Trim(colomns[1], " ")).To(Equal("failed"))
-												Expect(strings.Trim(colomns[2], " ")).To(Equal(""))
-											}
-										}
-									}
-									Expect(session.ExitCode()).To(Equal(0))
-								})
 							})
 
 							Context(" Print the output to a file", func() {

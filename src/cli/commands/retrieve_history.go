@@ -33,6 +33,9 @@ func (command HistoryCommand) Execute([]string) error {
 		err    error
 		writer *os.File
 	)
+	if command.Desc && command.Asc {
+		return fmt.Errorf(ui.ConflictDisplayOrder)
+	}
 	if command.StartTime != "" {
 		st, err = ctime.ParseTimeFormat(command.StartTime)
 		if err != nil {
