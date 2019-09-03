@@ -34,7 +34,7 @@ func (command HistoryCommand) Execute([]string) error {
 		writer *os.File
 	)
 	if command.Desc && command.Asc {
-		return fmt.Errorf(ui.ConflictDisplayOrder)
+		return fmt.Errorf(ui.DeprecatedDescWarning)
 	}
 	if command.StartTime != "" {
 		st, err = ctime.ParseTimeFormat(command.StartTime)
@@ -65,10 +65,10 @@ func (command HistoryCommand) Execute([]string) error {
 
 	return RetrieveHistory(AutoScaler.CLIConnection,
 		command.RequiredlArgs.AppName,
-		st, et, fpo, command.Asc, writer, command.Output)
+		st, et, fpo, command.Desc, command.Asc, writer, command.Output)
 }
 
-func RetrieveHistory(cliConnection api.Connection, appName string, startTime, endTime int64, firstPageOnly bool, asc bool, writer io.Writer, outputfile string) error {
+func RetrieveHistory(cliConnection api.Connection, appName string, startTime, endTime int64, firstPageOnly bool, desc bool, asc bool, writer io.Writer, outputfile string) error {
 
 	cfclient, err := api.NewCFClient(cliConnection)
 	if err != nil {
@@ -135,6 +135,9 @@ func RetrieveHistory(cliConnection api.Connection, appName string, startTime, en
 	}
 	if moreResult {
 		ui.SayWarningMessage(ui.MoreRecordsWarning)
+	}
+	if desc {
+		ui.SayWarningMessage(ui.DeprecatedDescWarning)
 	}
 
 	return nil

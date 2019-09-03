@@ -34,10 +34,10 @@ const (
 	UnrecognizedTimeFormat = "Unrecognized date time format: %s. \nSupported formats are yyyy-MM-ddTHH:mm:ss+/-hhmm, yyyy-MM-ddTHH:mm:ssZ with an input later than 1970-01-01T00:00:00Z."
 	UnrecognizedMetricName = "Unrecognized metric name: %s. \nSupported value: memoryused, memoryutil, responsetime, throughput, cpu."
 	InvalidTimeRange       = "Invalid time range. The start time %s is greater than the end time %s."
-	ConflictDisplayOrder   = "Conflict display order. Descending and ascending can't be used at the same time."
 
 	AggregatedMetricsNotFound = "No aggregated %s metrics were found for app %s."
 	HistoryNotFound           = "No event history were found for app %s."
 
-	MoreRecordsWarning = "More records available. Please re-run the command with --start or --end option to fetch more."
+	MoreRecordsWarning    = "TIP: More records available. Please re-run the command with --start or --end option to fetch more."
+	DeprecatedDescWarning = "TIP: The default order is set to descending now. Please remove the DEPRECATED flag '--desc'."
 )

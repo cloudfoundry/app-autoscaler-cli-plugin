@@ -45,7 +45,7 @@ func (command MetricsCommand) Execute([]string) error {
 		writer *os.File
 	)
 	if command.Desc && command.Asc {
-		return fmt.Errorf(ui.ConflictDisplayOrder)
+		return fmt.Errorf(ui.DeprecatedDescWarning)
 	}
 	if command.StartTime != "" {
 		st, err = ctime.ParseTimeFormat(command.StartTime)
@@ -75,10 +75,10 @@ func (command MetricsCommand) Execute([]string) error {
 	}
 	return RetrieveAggregatedMetrics(AutoScaler.CLIConnection,
 		command.RequiredlArgs.AppName, command.RequiredlArgs.MetricName,
-		st, et, fpo, command.Asc, writer, command.Output)
+		st, et, fpo, command.Desc, command.Asc, writer, command.Output)
 }
 
-func RetrieveAggregatedMetrics(cliConnection api.Connection, appName, metricName string, startTime, endTime int64, firstPageOnly bool, asc bool, writer io.Writer, outputfile string) error {
+func RetrieveAggregatedMetrics(cliConnection api.Connection, appName, metricName string, startTime, endTime int64, firstPageOnly bool, desc bool, asc bool, writer io.Writer, outputfile string) error {
 
 	cfclient, err := api.NewCFClient(cliConnection)
 	if err != nil {
@@ -147,6 +147,9 @@ func RetrieveAggregatedMetrics(cliConnection api.Connection, appName, metricName
 	}
 	if moreResult {
 		ui.SayWarningMessage(ui.MoreRecordsWarning)
+	}
+	if desc {
+		ui.SayWarningMessage(ui.DeprecatedDescWarning)
 	}
 
 	return nil

@@ -1380,7 +1380,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 					Expect(err).NotTo(HaveOccurred())
 					session.Wait()
 
-					Expect(session).To(gbytes.Say(ui.ConflictDisplayOrder))
+					Expect(session).To(gbytes.Say(ui.DeprecatedDescWarning))
 					Expect(session.ExitCode()).To(Equal(1))
 				})
 
@@ -1735,7 +1735,9 @@ var _ = Describe("App-AutoScaler Commands", func() {
 										session.Wait()
 
 										Expect(session.Out).To(gbytes.Say(ui.ShowAggregatedMetricsHint, metricName, fakeAppName))
+										Expect(session.Out).To(gbytes.Say(ui.DeprecatedDescWarning))
 										metricsRaw := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.ShowAggregatedMetricsHint+"\n", metricName, fakeAppName)))
+										metricsRaw = bytes.TrimSuffix(metricsRaw, []byte(ui.DeprecatedDescWarning+"\n"))
 										metricsTable := strings.Split(string(bytes.TrimRight(metricsRaw, "\n")), "\n")
 										Expect(len(metricsTable)).To(Equal(31))
 										for i, row := range metricsTable {
@@ -2060,7 +2062,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 					Expect(err).NotTo(HaveOccurred())
 					session.Wait()
 
-					Expect(session).To(gbytes.Say(ui.ConflictDisplayOrder))
+					Expect(session).To(gbytes.Say(ui.DeprecatedDescWarning))
 					Expect(session.ExitCode()).To(Equal(1))
 				})
 
@@ -2474,7 +2476,9 @@ var _ = Describe("App-AutoScaler Commands", func() {
 										session.Wait()
 
 										Expect(session.Out).To(gbytes.Say(ui.ShowHistoryHint, fakeAppName))
+										Expect(session.Out).To(gbytes.Say(ui.DeprecatedDescWarning))
 										historyRaw := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.ShowHistoryHint+"\n", fakeAppName)))
+										historyRaw = bytes.TrimSuffix(historyRaw, []byte(ui.DeprecatedDescWarning+"\n"))
 										historyTable := strings.Split(string(bytes.TrimRight(historyRaw, "\n")), "\n")
 										Expect(len(historyTable)).To(Equal(31))
 										for i, row := range historyTable {
