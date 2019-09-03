@@ -47,5 +47,5 @@ const (
 	InvalidCredentialUsername  = "Custom credential `USERNAME` is required if `PASSOWRD` is provided."
 	InvalidCredentialPassword  = "Custom credential `PASSOWRD` is required if `USERNAME` is provided."
 	InvalidCredential          = "Invalid credential definition: %v."
-	CreateCredentialWarning    = "A new credential generated. Please update the credential setting, and use 'cf restart %s' to ensure your env variable changes take effect."
+	CreateCredentialWarning    = "TIP: A new credential generated. Please update the credential setting, and use 'cf restart %s' to ensure your env variable changes take effect."
 )
