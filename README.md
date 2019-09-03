@@ -185,7 +185,7 @@ OK
 Retrieve the aggregated metrics of an application. You can specify the start/end time of the returned query result,  and the display order(ascending or descending). The metrics will be shown in a table.
 
 ```
-cf autoscaling-metrics APP_NAME METRIC_NAME [--start START_TIME] [--end END_TIME] [--desc] [--output PATH_TO_FILE]
+cf autoscaling-metrics APP_NAME METRIC_NAME [--start START_TIME] [--end END_TIME] [--asc] [--output PATH_TO_FILE]
 ```
 #### ALIAS: asm
 
@@ -194,12 +194,12 @@ cf autoscaling-metrics APP_NAME METRIC_NAME [--start START_TIME] [--end END_TIME
 - `METRIC_NAME` : available metric supported: memoryused, memoryutil, responsetime, throughput and cpu.
 - `--start` : start time of metrics collected with format `yyyy-MM-ddTHH:mm:ss+/-HH:mm` or `yyyy-MM-ddTHH:mm:ssZ`, default to very beginning if not specified.
 - `--end` : end time of the metrics collected with format `yyyy-MM-ddTHH:mm:ss+/-HH:mm` or `yyyy-MM-ddTHH:mm:ssZ`, default to current time if not speficied.
-- `--desc` : display in descending order, default to ascending order if not specified
+- `--asc` : display in ascending order, default to descending order if not specified
 - `--output` : dump the metrics to a file
 
 #### EXAMPLES:
 ```
-$ cf autoscaling-metrics APP_NAME memoryused --start 2018-12-27T11:49:00+08:00 --end 2018-12-27T11:52:20+08:00 --desc
+$ cf autoscaling-metrics APP_NAME memoryused --start 2018-12-27T11:49:00+08:00 --end 2018-12-27T11:52:20+08:00 --asc
 
 Retriving aggregated metrics for app APP_NAME...
 Metrics Name     	Value     	Timestamp
@@ -217,7 +217,7 @@ memoryused       	62MB      	2018-12-27T11:51:40+08:00
 
 Retrieve the scaling event history of an application. You can specify the start/end time of the returned query result,  and the display order(ascending or descending). The scaling event history will be shown in a table.
 ```
-cf autoscaling-history APP_NAME [--start START_TIME] [--end END_TIME] [--desc] [--output PATH_TO_FILE]
+cf autoscaling-history APP_NAME [--start START_TIME] [--end END_TIME] [--asc] [--output PATH_TO_FILE]
 ```
 
 #### ALIAS: ash
@@ -225,18 +225,18 @@ cf autoscaling-history APP_NAME [--start START_TIME] [--end END_TIME] [--desc] [
 #### OPTIONS:
 - `--start` : start time of the scaling history with format `yyyy-MM-ddTHH:mm:ss+/-HH:mm` or `yyyy-MM-ddTHH:mm:ssZ`, default to very beginning if not specified.
 - `--end` : end time of the scaling history with format `yyyy-MM-ddTHH:mm:ss+/-HH:mm` or `yyyy-MM-ddTHH:mm:ssZ`, default to current time if not speficied.
-- `--desc` : display in descending order, default to ascending order if not specified
+- `--asc` : display in ascending order, default to descending order if not specified
 - `--output` : dump the scaling history to a file
 
 #### EXAMPLES:
 ```
-$ cf autoscaling-history APP_NAME --start 2018-08-16T17:58:53+08:00 --end 2018-08-16T18:01:00+08:00 --desc
+$ cf autoscaling-history APP_NAME --start 2018-08-16T17:58:53+08:00 --end 2018-08-16T18:01:00+08:00 --asc
 
 Showing history for app APP_NAME...
 Scaling Type     	Status        	Instance Changes     	Time                          	Action                                                        	Error
-scheduled        	succeeded     	3->6                 	2018-08-16T18:00:00+08:00     	3 instance(s) because limited by min instances 6
-dynamic          	succeeded     	2->3                 	2018-08-16T17:59:33+08:00     	+1 instance(s) because memoryused >= 15MB for 120 seconds
 dynamic          	failed        	2->-1                	2018-08-16T17:58:53+08:00     	-1 instance(s) because throughput < 10rps for 120 seconds     	app does not have policy set
+dynamic          	succeeded     	2->3                 	2018-08-16T17:59:33+08:00     	+1 instance(s) because memoryused >= 15MB for 120 seconds
+scheduled        	succeeded     	3->6                 	2018-08-16T18:00:00+08:00     	3 instance(s) because limited by min instances 6
 ```
 - `Scaling Type`: the trigger type of the scaling action, possible scaling types: `dynamic` and `scheduled`
   - `dynamic`: the scaling action is triggered by a dynamic rule (memoryused, memoryutil, responsetime or throughput)

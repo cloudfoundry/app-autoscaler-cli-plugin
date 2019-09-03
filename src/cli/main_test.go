@@ -1364,13 +1364,23 @@ var _ = Describe("App-AutoScaler Commands", func() {
 					Expect(session.ExitCode()).To(Equal(1))
 				})
 
-				It("Failed when --desc is wrong spelled", func() {
-					args = []string{ts.Port(), "autoscaling-metrics", fakeAppName, metricName, "--dddesc"}
+				It("Failed when --asc is wrong spelled", func() {
+					args = []string{ts.Port(), "autoscaling-metrics", fakeAppName, metricName, "--aaasc"}
 					session, err := gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
 					Expect(err).NotTo(HaveOccurred())
 					session.Wait()
 
 					Expect(session).To(gbytes.Say("unknown flag"))
+					Expect(session.ExitCode()).To(Equal(1))
+				})
+
+				It("Failed when --desc and --asc are used at the same time", func() {
+					args = []string{ts.Port(), "autoscaling-metrics", fakeAppName, metricName, "--asc", "--desc"}
+					session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+					Expect(err).NotTo(HaveOccurred())
+					session.Wait()
+
+					Expect(session).To(gbytes.Say(ui.DeprecatedDescWarning))
 					Expect(session.ExitCode()).To(Equal(1))
 				})
 
@@ -1585,7 +1595,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 												TotalResults: 20,
 												TotalPages:   2,
 												Page:         1,
-												Metrics:      metrics[0:10],
+												Metrics:      reversedMetrics[0:10],
 											}),
 											ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
 										),
@@ -1596,7 +1606,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 												TotalResults: 20,
 												TotalPages:   2,
 												Page:         2,
-												Metrics:      metrics[10:20],
+												Metrics:      reversedMetrics[10:20],
 											}),
 											ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
 										),
@@ -1604,7 +1614,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 
 								})
 
-								It("Succeed to print first page of the metrics to stdout with asc order", func() {
+								It("Succeed to print first page of the metrics to stdout with desc order", func() {
 
 									args = []string{ts.Port(), "autoscaling-metrics", fakeAppName, metricName}
 
@@ -1625,7 +1635,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 										} else if i != len(metricsTable)-1 {
 											Expect(strings.Trim(colomns[0], " ")).To(Equal("memoryused"))
 											Expect(strings.Trim(colomns[1], " ")).To(Equal("100MB"))
-											Expect(strings.Trim(colomns[2], " ")).To(Equal(time.Unix(0, now.UnixNano()+int64((i-1)*30*1E9)).Format(time.RFC3339)))
+											Expect(strings.Trim(colomns[2], " ")).To(Equal(time.Unix(0, now.UnixNano()+int64((29-(i-1))*30*1E9)).Format(time.RFC3339)))
 										}
 									}
 									Expect(session.ExitCode()).To(Equal(0))
@@ -1633,22 +1643,22 @@ var _ = Describe("App-AutoScaler Commands", func() {
 
 							})
 
-							Context("Query multiple pages with asc order ", func() {
+							Context("Query multiple pages with desc order ", func() {
 
 								Context("specifiy --start and --end both ", func() {
 									BeforeEach(func() {
-										//simulate the asc response from api server
+										//simulate the desc response from api server
 										apiServer.AppendHandlers(
 											ghttp.CombineHandlers(
 												ghttp.RespondWithJSONEncoded(http.StatusOK, &AggregatedMetricsResults{
 													TotalResults: 30,
 													TotalPages:   3,
 													Page:         1,
-													Metrics:      metrics[0:10],
+													Metrics:      reversedMetrics[0:10],
 												}),
 												ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
 												ghttp.VerifyRequest("GET", aggregatedMetricsUrlPath,
-													fmt.Sprintf("order=asc&page=1&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*30*1E9)),
+													fmt.Sprintf("order=desc&page=1&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*30*1E9)),
 												),
 											),
 										)
@@ -1658,11 +1668,11 @@ var _ = Describe("App-AutoScaler Commands", func() {
 													TotalResults: 30,
 													TotalPages:   3,
 													Page:         2,
-													Metrics:      metrics[10:20],
+													Metrics:      reversedMetrics[10:20],
 												}),
 												ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
 												ghttp.VerifyRequest("GET", aggregatedMetricsUrlPath,
-													fmt.Sprintf("order=asc&page=2&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*30*1E9)),
+													fmt.Sprintf("order=desc&page=2&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*30*1E9)),
 												),
 											),
 										)
@@ -1672,18 +1682,18 @@ var _ = Describe("App-AutoScaler Commands", func() {
 													TotalResults: 30,
 													TotalPages:   3,
 													Page:         3,
-													Metrics:      metrics[20:30],
+													Metrics:      reversedMetrics[20:30],
 												}),
 												ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
 												ghttp.VerifyRequest("GET", aggregatedMetricsUrlPath,
-													fmt.Sprintf("order=asc&page=3&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*30*1E9)),
+													fmt.Sprintf("order=desc&page=3&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*30*1E9)),
 												),
 											),
 										)
 
 									})
 
-									It("Succeed to print all pages of the metrics to stdout with asc order", func() {
+									It("Succeed to print all pages of the metrics to stdout with default desc order", func() {
 
 										args = []string{ts.Port(), "autoscaling-metrics", fakeAppName, metricName,
 											"--start", now.Format(time.RFC3339),
@@ -1706,7 +1716,40 @@ var _ = Describe("App-AutoScaler Commands", func() {
 											} else {
 												Expect(strings.Trim(colomns[0], " ")).To(Equal("memoryused"))
 												Expect(strings.Trim(colomns[1], " ")).To(Equal("100MB"))
-												Expect(strings.Trim(colomns[2], " ")).To(Equal(time.Unix(0, now.UnixNano()+int64((i-1)*30*1E9)).Format(time.RFC3339)))
+												Expect(strings.Trim(colomns[2], " ")).To(Equal(time.Unix(0, now.UnixNano()+int64((29-(i-1))*30*1E9)).Format(time.RFC3339)))
+											}
+										}
+										Expect(session.ExitCode()).To(Equal(0))
+									})
+
+									It("Succeed to print all pages of the metrics to stdout with specified desc order", func() {
+
+										args = []string{ts.Port(), "autoscaling-metrics", fakeAppName, metricName,
+											"--start", now.Format(time.RFC3339),
+											"--end", time.Unix(0, lowPrecisionNowInNano+int64(29*30*1E9)).Format(time.RFC3339),
+											"--desc",
+										}
+
+										session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+										Expect(err).NotTo(HaveOccurred())
+										session.Wait()
+
+										Expect(session.Out).To(gbytes.Say(ui.ShowAggregatedMetricsHint, metricName, fakeAppName))
+										Expect(session.Out).To(gbytes.Say(ui.DeprecatedDescWarning))
+										metricsRaw := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.ShowAggregatedMetricsHint+"\n", metricName, fakeAppName)))
+										metricsRaw = bytes.TrimSuffix(metricsRaw, []byte(ui.DeprecatedDescWarning+"\n"))
+										metricsTable := strings.Split(string(bytes.TrimRight(metricsRaw, "\n")), "\n")
+										Expect(len(metricsTable)).To(Equal(31))
+										for i, row := range metricsTable {
+											colomns := strings.Split(row, "\t")
+											if i == 0 {
+												Expect(strings.Trim(colomns[0], " ")).To(Equal("Metrics Name"))
+												Expect(strings.Trim(colomns[1], " ")).To(Equal("Value"))
+												Expect(strings.Trim(colomns[2], " ")).To(Equal("Timestamp"))
+											} else {
+												Expect(strings.Trim(colomns[0], " ")).To(Equal("memoryused"))
+												Expect(strings.Trim(colomns[1], " ")).To(Equal("100MB"))
+												Expect(strings.Trim(colomns[2], " ")).To(Equal(time.Unix(0, now.UnixNano()+int64((29-(i-1))*30*1E9)).Format(time.RFC3339)))
 											}
 										}
 										Expect(session.ExitCode()).To(Equal(0))
@@ -1715,18 +1758,18 @@ var _ = Describe("App-AutoScaler Commands", func() {
 
 								Context("specifiy --end only ", func() {
 									BeforeEach(func() {
-										//simulate the asc response from api server
+										//simulate the desc response from api server
 										apiServer.AppendHandlers(
 											ghttp.CombineHandlers(
 												ghttp.RespondWithJSONEncoded(http.StatusOK, &AggregatedMetricsResults{
 													TotalResults: 30,
 													TotalPages:   3,
 													Page:         1,
-													Metrics:      metrics[0:10],
+													Metrics:      reversedMetrics[0:10],
 												}),
 												ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
 												ghttp.VerifyRequest("GET", aggregatedMetricsUrlPath,
-													fmt.Sprintf("order=asc&page=1&end-time=%v", lowPrecisionNowInNano+int64(29*30*1E9)),
+													fmt.Sprintf("order=desc&page=1&end-time=%v", lowPrecisionNowInNano+int64(29*30*1E9)),
 												),
 											),
 										)
@@ -1736,11 +1779,11 @@ var _ = Describe("App-AutoScaler Commands", func() {
 													TotalResults: 30,
 													TotalPages:   3,
 													Page:         2,
-													Metrics:      metrics[10:20],
+													Metrics:      reversedMetrics[10:20],
 												}),
 												ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
 												ghttp.VerifyRequest("GET", aggregatedMetricsUrlPath,
-													fmt.Sprintf("order=asc&page=2&end-time=%v", lowPrecisionNowInNano+int64(29*30*1E9)),
+													fmt.Sprintf("order=desc&page=2&end-time=%v", lowPrecisionNowInNano+int64(29*30*1E9)),
 												),
 											),
 										)
@@ -1750,18 +1793,18 @@ var _ = Describe("App-AutoScaler Commands", func() {
 													TotalResults: 30,
 													TotalPages:   3,
 													Page:         3,
-													Metrics:      metrics[20:30],
+													Metrics:      reversedMetrics[20:30],
 												}),
 												ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
 												ghttp.VerifyRequest("GET", aggregatedMetricsUrlPath,
-													fmt.Sprintf("order=asc&page=3&end-time=%v", lowPrecisionNowInNano+int64(29*30*1E9)),
+													fmt.Sprintf("order=desc&page=3&end-time=%v", lowPrecisionNowInNano+int64(29*30*1E9)),
 												),
 											),
 										)
 
 									})
 
-									It("Succeed to print all pages of the metrics to stdout with asc order", func() {
+									It("Succeed to print all pages of the metrics to stdout with desc order", func() {
 
 										args = []string{ts.Port(), "autoscaling-metrics", fakeAppName, metricName,
 											"--end", time.Unix(0, lowPrecisionNowInNano+int64(29*30*1E9)).Format(time.RFC3339)}
@@ -1783,7 +1826,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 											} else {
 												Expect(strings.Trim(colomns[0], " ")).To(Equal("memoryused"))
 												Expect(strings.Trim(colomns[1], " ")).To(Equal("100MB"))
-												Expect(strings.Trim(colomns[2], " ")).To(Equal(time.Unix(0, now.UnixNano()+int64((i-1)*30*1E9)).Format(time.RFC3339)))
+												Expect(strings.Trim(colomns[2], " ")).To(Equal(time.Unix(0, now.UnixNano()+int64((29-(i-1))*30*1E9)).Format(time.RFC3339)))
 											}
 										}
 										Expect(session.ExitCode()).To(Equal(0))
@@ -1791,21 +1834,21 @@ var _ = Describe("App-AutoScaler Commands", func() {
 								})
 							})
 
-							Context("Query multiple pages with desc order ", func() {
+							Context("Query multiple pages with asc order ", func() {
 
 								BeforeEach(func() {
-									//simulate the desc response from api server
+									//simulate the asc response from api server
 									apiServer.AppendHandlers(
 										ghttp.CombineHandlers(
 											ghttp.RespondWithJSONEncoded(http.StatusOK, &AggregatedMetricsResults{
 												TotalResults: 30,
 												TotalPages:   3,
 												Page:         1,
-												Metrics:      reversedMetrics[0:10],
+												Metrics:      metrics[0:10],
 											}),
 											ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
 											ghttp.VerifyRequest("GET", aggregatedMetricsUrlPath,
-												fmt.Sprintf("order=desc&page=1&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*30*1E9)),
+												fmt.Sprintf("order=asc&page=1&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*30*1E9)),
 											),
 										),
 									)
@@ -1815,11 +1858,11 @@ var _ = Describe("App-AutoScaler Commands", func() {
 												TotalResults: 30,
 												TotalPages:   3,
 												Page:         2,
-												Metrics:      reversedMetrics[10:20],
+												Metrics:      metrics[10:20],
 											}),
 											ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
 											ghttp.VerifyRequest("GET", aggregatedMetricsUrlPath,
-												fmt.Sprintf("order=desc&page=2&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*30*1E9)),
+												fmt.Sprintf("order=asc&page=2&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*30*1E9)),
 											),
 										),
 									)
@@ -1829,23 +1872,23 @@ var _ = Describe("App-AutoScaler Commands", func() {
 												TotalResults: 30,
 												TotalPages:   3,
 												Page:         3,
-												Metrics:      reversedMetrics[20:30],
+												Metrics:      metrics[20:30],
 											}),
 											ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
 											ghttp.VerifyRequest("GET", aggregatedMetricsUrlPath,
-												fmt.Sprintf("order=desc&page=3&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*30*1E9)),
+												fmt.Sprintf("order=asc&page=3&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*30*1E9)),
 											),
 										),
 									)
 
 								})
 
-								It("Succeed to print all pages of the metrics to stdout with desc order", func() {
+								It("Succeed to print all pages of the metrics to stdout with asc order", func() {
 
 									args = []string{ts.Port(), "autoscaling-metrics", fakeAppName, metricName,
 										"--start", now.Format(time.RFC3339),
 										"--end", time.Unix(0, lowPrecisionNowInNano+int64(29*30*1E9)).Format(time.RFC3339),
-										"--desc",
+										"--asc",
 									}
 
 									session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
@@ -1863,15 +1906,14 @@ var _ = Describe("App-AutoScaler Commands", func() {
 											Expect(strings.Trim(colomns[1], " ")).To(Equal("Value"))
 											Expect(strings.Trim(colomns[2], " ")).To(Equal("Timestamp"))
 										} else {
-											//use "29-(i-1)" to simulate the expected output in desc order
+											//use "29-(i-1)" to simulate the expected output in asc order
 											Expect(strings.Trim(colomns[0], " ")).To(Equal("memoryused"))
 											Expect(strings.Trim(colomns[1], " ")).To(Equal("100MB"))
-											Expect(strings.Trim(colomns[2], " ")).To(Equal(time.Unix(0, now.UnixNano()+int64((29-(i-1))*30*1E9)).Format(time.RFC3339)))
+											Expect(strings.Trim(colomns[2], " ")).To(Equal(time.Unix(0, now.UnixNano()+int64((i-1)*30*1E9)).Format(time.RFC3339)))
 										}
 									}
 									Expect(session.ExitCode()).To(Equal(0))
 								})
-
 							})
 
 							Context(" Print the output to a file", func() {
@@ -1883,7 +1925,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 												TotalResults: 10,
 												TotalPages:   1,
 												Page:         1,
-												Metrics:      metrics[0:10],
+												Metrics:      reversedMetrics[0:10],
 											}),
 											ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
 										),
@@ -1891,7 +1933,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 
 								})
 
-								It("Succeed to print the metrics to stdout with asc order", func() {
+								It("Succeed to print the metrics to stdout with desc order", func() {
 
 									args = []string{ts.Port(), "autoscaling-metrics", fakeAppName, metricName, "--output", outputFile}
 
@@ -1916,7 +1958,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 										} else {
 											Expect(strings.Trim(colomns[0], " ")).To(Equal("memoryused"))
 											Expect(strings.Trim(colomns[1], " ")).To(Equal("100MB"))
-											Expect(strings.Trim(colomns[2], " ")).To(Equal(time.Unix(0, now.UnixNano()+int64((i-1)*30*1E9)).Format(time.RFC3339)))
+											Expect(strings.Trim(colomns[2], " ")).To(Equal(time.Unix(0, now.UnixNano()+int64((29-(i-1))*30*1E9)).Format(time.RFC3339)))
 										}
 									}
 									Expect(session.ExitCode()).To(Equal(0))
@@ -2004,13 +2046,23 @@ var _ = Describe("App-AutoScaler Commands", func() {
 					Expect(session.ExitCode()).To(Equal(1))
 				})
 
-				It("Failed when --desc is wrong spelled", func() {
-					args = []string{ts.Port(), "autoscaling-history", fakeAppName, "--dddesc"}
+				It("Failed when --asc is wrong spelled", func() {
+					args = []string{ts.Port(), "autoscaling-history", fakeAppName, "--aaasc"}
 					session, err := gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
 					Expect(err).NotTo(HaveOccurred())
 					session.Wait()
 
 					Expect(session).To(gbytes.Say("unknown flag"))
+					Expect(session.ExitCode()).To(Equal(1))
+				})
+
+				It("Failed when --desc and --asc are used at the same time", func() {
+					args = []string{ts.Port(), "autoscaling-history", fakeAppName, "--asc", "--desc"}
+					session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+					Expect(err).NotTo(HaveOccurred())
+					session.Wait()
+
+					Expect(session).To(gbytes.Say(ui.DeprecatedDescWarning))
 					Expect(session.ExitCode()).To(Equal(1))
 				})
 
@@ -2259,7 +2311,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 												TotalResults: 20,
 												TotalPages:   2,
 												Page:         1,
-												Histories:    histories[0:10],
+												Histories:    reversedHistories[0:10],
 											}),
 											ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
 										),
@@ -2270,14 +2322,14 @@ var _ = Describe("App-AutoScaler Commands", func() {
 												TotalResults: 20,
 												TotalPages:   2,
 												Page:         2,
-												Histories:    histories[10:20],
+												Histories:    reversedHistories[10:20],
 											}),
 											ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
 										),
 									)
 								})
 
-								It("Succeed to print first page of the histories to stdout with asc order", func() {
+								It("Succeed to print first page of the histories to stdout with desc order", func() {
 
 									args = []string{ts.Port(), "autoscaling-history", fakeAppName}
 
@@ -2300,10 +2352,10 @@ var _ = Describe("App-AutoScaler Commands", func() {
 											Expect(strings.Trim(colomns[5], " ")).To(Equal("Error"))
 
 										} else if i != len(historyTable)-1 {
-											Expect(strings.Trim(colomns[0], " ")).To(Equal("dynamic"))
-											Expect(strings.Trim(colomns[1], " ")).To(Equal("succeeded"))
-											Expect(strings.Trim(colomns[2], " ")).To(Equal(strconv.Itoa(i-1+1) + "->" + strconv.Itoa(i-1+2)))
-											Expect(strings.Trim(colomns[3], " ")).To(Equal(time.Unix(0, now.UnixNano()+int64((i-1)*120*1E9)).Format(time.RFC3339)))
+											Expect(strings.Trim(colomns[0], " ")).To(Equal("scheduled"))
+											Expect(strings.Trim(colomns[1], " ")).To(Equal("failed"))
+											Expect(strings.Trim(colomns[2], " ")).To(Equal(""))
+											Expect(strings.Trim(colomns[3], " ")).To(Equal(time.Unix(0, now.UnixNano()+int64((29-(i-1))*120*1E9)).Format(time.RFC3339)))
 											Expect(strings.Trim(colomns[4], " ")).To(Equal("fakeReason"))
 											Expect(strings.Trim(colomns[5], " ")).To(Equal("fakeError"))
 										}
@@ -2313,22 +2365,22 @@ var _ = Describe("App-AutoScaler Commands", func() {
 
 							})
 
-							Context("Query multiple pages with asc order ", func() {
+							Context("Query multiple pages with desc order ", func() {
 
 								Context("specifiy --start and --end both ", func() {
 									BeforeEach(func() {
-										//simulate the asc response from api server
+										//simulate the desc response from api server
 										apiServer.AppendHandlers(
 											ghttp.CombineHandlers(
 												ghttp.RespondWithJSONEncoded(http.StatusOK, &HistoryResults{
 													TotalResults: 30,
 													TotalPages:   3,
 													Page:         1,
-													Histories:    histories[0:10],
+													Histories:    reversedHistories[0:10],
 												}),
 												ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
 												ghttp.VerifyRequest("GET", urlpath,
-													fmt.Sprintf("order=asc&page=1&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*120*1E9)),
+													fmt.Sprintf("order=desc&page=1&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*120*1E9)),
 												),
 											),
 										)
@@ -2338,11 +2390,11 @@ var _ = Describe("App-AutoScaler Commands", func() {
 													TotalResults: 30,
 													TotalPages:   3,
 													Page:         2,
-													Histories:    histories[10:20],
+													Histories:    reversedHistories[10:20],
 												}),
 												ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
 												ghttp.VerifyRequest("GET", urlpath,
-													fmt.Sprintf("order=asc&page=2&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*120*1E9)),
+													fmt.Sprintf("order=desc&page=2&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*120*1E9)),
 												),
 											),
 										)
@@ -2352,11 +2404,11 @@ var _ = Describe("App-AutoScaler Commands", func() {
 													TotalResults: 30,
 													TotalPages:   3,
 													Page:         3,
-													Histories:    histories[20:30],
+													Histories:    reversedHistories[20:30],
 												}),
 												ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
 												ghttp.VerifyRequest("GET", urlpath,
-													fmt.Sprintf("order=asc&page=3&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*120*1E9)),
+													fmt.Sprintf("order=desc&page=3&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*120*1E9)),
 												),
 											),
 										)
@@ -2389,22 +2441,74 @@ var _ = Describe("App-AutoScaler Commands", func() {
 												//header line
 											} else {
 												//use (i-1) to skip header
-												Expect(strings.Trim(colomns[3], " ")).To(Equal(time.Unix(0, now.UnixNano()+int64((i-1)*120*1E9)).Format(time.RFC3339)))
+												Expect(strings.Trim(colomns[3], " ")).To(Equal(time.Unix(0, now.UnixNano()+int64((29-(i-1))*120*1E9)).Format(time.RFC3339)))
 												Expect(strings.Trim(colomns[4], " ")).To(Equal("fakeReason"))
 												Expect(strings.Trim(colomns[5], " ")).To(Equal("fakeError"))
 
 												if i < 11 {
-													Expect(strings.Trim(colomns[0], " ")).To(Equal("dynamic"))
-													Expect(strings.Trim(colomns[1], " ")).To(Equal("succeeded"))
-													Expect(strings.Trim(colomns[2], " ")).To(Equal(strconv.Itoa(i-1+1) + "->" + strconv.Itoa(i-1+2)))
-												} else if i < 21 {
-													Expect(strings.Trim(colomns[0], " ")).To(Equal("scheduled"))
-													Expect(strings.Trim(colomns[1], " ")).To(Equal("succeeded"))
-													Expect(strings.Trim(colomns[2], " ")).To(Equal(strconv.Itoa(i-1+1) + "->" + strconv.Itoa(i-1+2)))
-												} else {
 													Expect(strings.Trim(colomns[0], " ")).To(Equal("scheduled"))
 													Expect(strings.Trim(colomns[1], " ")).To(Equal("failed"))
 													Expect(strings.Trim(colomns[2], " ")).To(Equal(""))
+												} else if i < 21 {
+													Expect(strings.Trim(colomns[0], " ")).To(Equal("scheduled"))
+													Expect(strings.Trim(colomns[1], " ")).To(Equal("succeeded"))
+													Expect(strings.Trim(colomns[2], " ")).To(Equal(strconv.Itoa(29-(i-1)+1) + "->" + strconv.Itoa(29-(i-1)+2)))
+												} else {
+													Expect(strings.Trim(colomns[0], " ")).To(Equal("dynamic"))
+													Expect(strings.Trim(colomns[1], " ")).To(Equal("succeeded"))
+													Expect(strings.Trim(colomns[2], " ")).To(Equal(strconv.Itoa(29-(i-1)+1) + "->" + strconv.Itoa(29-(i-1)+2)))
+												}
+											}
+										}
+										Expect(session.ExitCode()).To(Equal(0))
+									})
+
+									It("Succeed to print all pages of the history with specified desc to stdout", func() {
+
+										args = []string{ts.Port(), "autoscaling-history", fakeAppName,
+											"--start", now.Format(time.RFC3339),
+											"--end", time.Unix(0, lowPrecisionNowInNano+int64(29*120*1E9)).Format(time.RFC3339),
+											"--desc",
+										}
+
+										session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+										Expect(err).NotTo(HaveOccurred())
+										session.Wait()
+
+										Expect(session.Out).To(gbytes.Say(ui.ShowHistoryHint, fakeAppName))
+										Expect(session.Out).To(gbytes.Say(ui.DeprecatedDescWarning))
+										historyRaw := bytes.TrimPrefix(session.Out.Contents(), []byte(fmt.Sprintf(ui.ShowHistoryHint+"\n", fakeAppName)))
+										historyRaw = bytes.TrimSuffix(historyRaw, []byte(ui.DeprecatedDescWarning+"\n"))
+										historyTable := strings.Split(string(bytes.TrimRight(historyRaw, "\n")), "\n")
+										Expect(len(historyTable)).To(Equal(31))
+										for i, row := range historyTable {
+											colomns := strings.Split(row, "\t")
+											if i == 0 {
+												Expect(strings.Trim(colomns[0], " ")).To(Equal("Scaling Type"))
+												Expect(strings.Trim(colomns[1], " ")).To(Equal("Status"))
+												Expect(strings.Trim(colomns[2], " ")).To(Equal("Instance Changes"))
+												Expect(strings.Trim(colomns[3], " ")).To(Equal("Time"))
+												Expect(strings.Trim(colomns[4], " ")).To(Equal("Action"))
+												Expect(strings.Trim(colomns[5], " ")).To(Equal("Error"))
+												//header line
+											} else {
+												//use (i-1) to skip header
+												Expect(strings.Trim(colomns[3], " ")).To(Equal(time.Unix(0, now.UnixNano()+int64((29-(i-1))*120*1E9)).Format(time.RFC3339)))
+												Expect(strings.Trim(colomns[4], " ")).To(Equal("fakeReason"))
+												Expect(strings.Trim(colomns[5], " ")).To(Equal("fakeError"))
+
+												if i < 11 {
+													Expect(strings.Trim(colomns[0], " ")).To(Equal("scheduled"))
+													Expect(strings.Trim(colomns[1], " ")).To(Equal("failed"))
+													Expect(strings.Trim(colomns[2], " ")).To(Equal(""))
+												} else if i < 21 {
+													Expect(strings.Trim(colomns[0], " ")).To(Equal("scheduled"))
+													Expect(strings.Trim(colomns[1], " ")).To(Equal("succeeded"))
+													Expect(strings.Trim(colomns[2], " ")).To(Equal(strconv.Itoa(29-(i-1)+1) + "->" + strconv.Itoa(29-(i-1)+2)))
+												} else {
+													Expect(strings.Trim(colomns[0], " ")).To(Equal("dynamic"))
+													Expect(strings.Trim(colomns[1], " ")).To(Equal("succeeded"))
+													Expect(strings.Trim(colomns[2], " ")).To(Equal(strconv.Itoa(29-(i-1)+1) + "->" + strconv.Itoa(29-(i-1)+2)))
 												}
 											}
 										}
@@ -2414,18 +2518,18 @@ var _ = Describe("App-AutoScaler Commands", func() {
 
 								Context("specify --end only ", func() {
 									BeforeEach(func() {
-										//simulate the asc response from api server
+										//simulate the desc response from api server
 										apiServer.AppendHandlers(
 											ghttp.CombineHandlers(
 												ghttp.RespondWithJSONEncoded(http.StatusOK, &HistoryResults{
 													TotalResults: 30,
 													TotalPages:   3,
 													Page:         1,
-													Histories:    histories[0:10],
+													Histories:    reversedHistories[0:10],
 												}),
 												ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
 												ghttp.VerifyRequest("GET", urlpath,
-													fmt.Sprintf("order=asc&page=1&end-time=%v", lowPrecisionNowInNano+int64(29*120*1E9)),
+													fmt.Sprintf("order=desc&page=1&end-time=%v", lowPrecisionNowInNano+int64(29*120*1E9)),
 												),
 											),
 										)
@@ -2435,11 +2539,11 @@ var _ = Describe("App-AutoScaler Commands", func() {
 													TotalResults: 30,
 													TotalPages:   3,
 													Page:         2,
-													Histories:    histories[10:20],
+													Histories:    reversedHistories[10:20],
 												}),
 												ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
 												ghttp.VerifyRequest("GET", urlpath,
-													fmt.Sprintf("order=asc&page=2&end-time=%v", lowPrecisionNowInNano+int64(29*120*1E9)),
+													fmt.Sprintf("order=desc&page=2&end-time=%v", lowPrecisionNowInNano+int64(29*120*1E9)),
 												),
 											),
 										)
@@ -2449,11 +2553,11 @@ var _ = Describe("App-AutoScaler Commands", func() {
 													TotalResults: 30,
 													TotalPages:   3,
 													Page:         3,
-													Histories:    histories[20:30],
+													Histories:    reversedHistories[20:30],
 												}),
 												ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
 												ghttp.VerifyRequest("GET", urlpath,
-													fmt.Sprintf("order=asc&page=3&end-time=%v", lowPrecisionNowInNano+int64(29*120*1E9)),
+													fmt.Sprintf("order=desc&page=3&end-time=%v", lowPrecisionNowInNano+int64(29*120*1E9)),
 												),
 											),
 										)
@@ -2485,22 +2589,22 @@ var _ = Describe("App-AutoScaler Commands", func() {
 												//header line
 											} else {
 												//use (i-1) to skip header
-												Expect(strings.Trim(colomns[3], " ")).To(Equal(time.Unix(0, now.UnixNano()+int64((i-1)*120*1E9)).Format(time.RFC3339)))
+												Expect(strings.Trim(colomns[3], " ")).To(Equal(time.Unix(0, now.UnixNano()+int64((29-(i-1))*120*1E9)).Format(time.RFC3339)))
 												Expect(strings.Trim(colomns[4], " ")).To(Equal("fakeReason"))
 												Expect(strings.Trim(colomns[5], " ")).To(Equal("fakeError"))
 
 												if i < 11 {
-													Expect(strings.Trim(colomns[0], " ")).To(Equal("dynamic"))
-													Expect(strings.Trim(colomns[1], " ")).To(Equal("succeeded"))
-													Expect(strings.Trim(colomns[2], " ")).To(Equal(strconv.Itoa(i-1+1) + "->" + strconv.Itoa(i-1+2)))
-												} else if i < 21 {
-													Expect(strings.Trim(colomns[0], " ")).To(Equal("scheduled"))
-													Expect(strings.Trim(colomns[1], " ")).To(Equal("succeeded"))
-													Expect(strings.Trim(colomns[2], " ")).To(Equal(strconv.Itoa(i-1+1) + "->" + strconv.Itoa(i-1+2)))
-												} else {
 													Expect(strings.Trim(colomns[0], " ")).To(Equal("scheduled"))
 													Expect(strings.Trim(colomns[1], " ")).To(Equal("failed"))
 													Expect(strings.Trim(colomns[2], " ")).To(Equal(""))
+												} else if i < 21 {
+													Expect(strings.Trim(colomns[0], " ")).To(Equal("scheduled"))
+													Expect(strings.Trim(colomns[1], " ")).To(Equal("succeeded"))
+													Expect(strings.Trim(colomns[2], " ")).To(Equal(strconv.Itoa(29-(i-1)+1) + "->" + strconv.Itoa(29-(i-1)+2)))
+												} else {
+													Expect(strings.Trim(colomns[0], " ")).To(Equal("dynamic"))
+													Expect(strings.Trim(colomns[1], " ")).To(Equal("succeeded"))
+													Expect(strings.Trim(colomns[2], " ")).To(Equal(strconv.Itoa(29-(i-1)+1) + "->" + strconv.Itoa(29-(i-1)+2)))
 												}
 											}
 										}
@@ -2510,21 +2614,21 @@ var _ = Describe("App-AutoScaler Commands", func() {
 
 							})
 
-							Context("Query multiple pages with desc order ", func() {
+							Context("Query multiple pages with asc order ", func() {
 
 								BeforeEach(func() {
-									//simulate the desc response from api server
+									//simulate the asc response from api server
 									apiServer.AppendHandlers(
 										ghttp.CombineHandlers(
 											ghttp.RespondWithJSONEncoded(http.StatusOK, &HistoryResults{
 												TotalResults: 30,
 												TotalPages:   3,
 												Page:         1,
-												Histories:    reversedHistories[0:10],
+												Histories:    histories[0:10],
 											}),
 											ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
 											ghttp.VerifyRequest("GET", urlpath,
-												fmt.Sprintf("order=desc&page=1&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*120*1E9)),
+												fmt.Sprintf("order=asc&page=1&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*120*1E9)),
 											),
 										),
 									)
@@ -2534,11 +2638,11 @@ var _ = Describe("App-AutoScaler Commands", func() {
 												TotalResults: 30,
 												TotalPages:   3,
 												Page:         2,
-												Histories:    reversedHistories[10:20],
+												Histories:    histories[10:20],
 											}),
 											ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
 											ghttp.VerifyRequest("GET", urlpath,
-												fmt.Sprintf("order=desc&page=2&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*120*1E9)),
+												fmt.Sprintf("order=asc&page=2&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*120*1E9)),
 											),
 										),
 									)
@@ -2548,23 +2652,23 @@ var _ = Describe("App-AutoScaler Commands", func() {
 												TotalResults: 30,
 												TotalPages:   3,
 												Page:         3,
-												Histories:    reversedHistories[20:30],
+												Histories:    histories[20:30],
 											}),
 											ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
 											ghttp.VerifyRequest("GET", urlpath,
-												fmt.Sprintf("order=desc&page=3&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*120*1E9)),
+												fmt.Sprintf("order=asc&page=3&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*120*1E9)),
 											),
 										),
 									)
 
 								})
 
-								It("Succeed to print all pages of the history to stdout with desc order", func() {
+								It("Succeed to print all pages of the history to stdout with asc order", func() {
 
 									args = []string{ts.Port(), "autoscaling-history", fakeAppName,
 										"--start", now.Format(time.RFC3339),
 										"--end", time.Unix(0, lowPrecisionNowInNano+int64(29*120*1E9)).Format(time.RFC3339),
-										"--desc",
+										"--asc",
 									}
 
 									session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
@@ -2585,22 +2689,22 @@ var _ = Describe("App-AutoScaler Commands", func() {
 											Expect(strings.Trim(colomns[4], " ")).To(Equal("Action"))
 											Expect(strings.Trim(colomns[5], " ")).To(Equal("Error"))
 										} else {
-											//use "29-(i-1)" to simulate the expected output in desc order
-											Expect(strings.Trim(colomns[3], " ")).To(Equal(time.Unix(0, now.UnixNano()+int64((29-(i-1))*120*1E9)).Format(time.RFC3339)))
+											//use "29-(i-1)" to simulate the expected output in asc order
+											Expect(strings.Trim(colomns[3], " ")).To(Equal(time.Unix(0, now.UnixNano()+int64((i-1)*120*1E9)).Format(time.RFC3339)))
 											Expect(strings.Trim(colomns[4], " ")).To(Equal("fakeReason"))
 											Expect(strings.Trim(colomns[5], " ")).To(Equal("fakeError"))
 											if i < 11 {
-												Expect(strings.Trim(colomns[0], " ")).To(Equal("scheduled"))
-												Expect(strings.Trim(colomns[1], " ")).To(Equal("failed"))
-												Expect(strings.Trim(colomns[2], " ")).To(Equal(""))
+												Expect(strings.Trim(colomns[0], " ")).To(Equal("dynamic"))
+												Expect(strings.Trim(colomns[1], " ")).To(Equal("succeeded"))
+												Expect(strings.Trim(colomns[2], " ")).To(Equal(strconv.Itoa(i-1+1) + "->" + strconv.Itoa(i-1+2)))
 											} else if i < 21 {
 												Expect(strings.Trim(colomns[0], " ")).To(Equal("scheduled"))
 												Expect(strings.Trim(colomns[1], " ")).To(Equal("succeeded"))
-												Expect(strings.Trim(colomns[2], " ")).To(Equal(strconv.Itoa(29-(i-1)+1) + "->" + strconv.Itoa(29-(i-1)+2)))
+												Expect(strings.Trim(colomns[2], " ")).To(Equal(strconv.Itoa(i-1+1) + "->" + strconv.Itoa(i-1+2)))
 											} else {
-												Expect(strings.Trim(colomns[0], " ")).To(Equal("dynamic"))
-												Expect(strings.Trim(colomns[1], " ")).To(Equal("succeeded"))
-												Expect(strings.Trim(colomns[2], " ")).To(Equal(strconv.Itoa(29-(i-1)+1) + "->" + strconv.Itoa(29-(i-1)+2)))
+												Expect(strings.Trim(colomns[0], " ")).To(Equal("scheduled"))
+												Expect(strings.Trim(colomns[1], " ")).To(Equal("failed"))
+												Expect(strings.Trim(colomns[2], " ")).To(Equal(""))
 											}
 										}
 									}
@@ -2618,7 +2722,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 												TotalResults: 10,
 												TotalPages:   1,
 												Page:         1,
-												Histories:    histories[0:10],
+												Histories:    reversedHistories[0:10],
 											}),
 											ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
 										),
@@ -2626,7 +2730,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 
 								})
 
-								It("Succeed to print the history to a file with asc order", func() {
+								It("Succeed to print the history to a file with desc order", func() {
 
 									args = []string{ts.Port(), "autoscaling-history", fakeAppName, "--output", outputFile}
 
@@ -2652,10 +2756,10 @@ var _ = Describe("App-AutoScaler Commands", func() {
 											Expect(strings.Trim(colomns[4], " ")).To(Equal("Action"))
 											Expect(strings.Trim(colomns[5], " ")).To(Equal("Error"))
 										} else {
-											Expect(strings.Trim(colomns[0], " ")).To(Equal("dynamic"))
-											Expect(strings.Trim(colomns[1], " ")).To(Equal("succeeded"))
-											Expect(strings.Trim(colomns[2], " ")).To(Equal(strconv.Itoa(i-1+1) + "->" + strconv.Itoa(i-1+2)))
-											Expect(strings.Trim(colomns[3], " ")).To(Equal(time.Unix(0, now.UnixNano()+int64((i-1)*120*1E9)).Format(time.RFC3339)))
+											Expect(strings.Trim(colomns[0], " ")).To(Equal("scheduled"))
+											Expect(strings.Trim(colomns[1], " ")).To(Equal("failed"))
+											Expect(strings.Trim(colomns[2], " ")).To(Equal(""))
+											Expect(strings.Trim(colomns[3], " ")).To(Equal(time.Unix(0, now.UnixNano()+int64((29-(i-1))*120*1E9)).Format(time.RFC3339)))
 											Expect(strings.Trim(colomns[4], " ")).To(Equal("fakeReason"))
 											Expect(strings.Trim(colomns[5], " ")).To(Equal("fakeError"))
 										}
