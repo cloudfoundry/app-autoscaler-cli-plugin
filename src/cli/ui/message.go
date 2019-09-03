@@ -41,11 +41,11 @@ const (
 	AggregatedMetricsNotFound = "No aggregated %s metrics were found for app %s."
 	HistoryNotFound           = "No event history were found for app %s."
 
-	MoreRecordsWarning    = "TIP: More records available. Please re-run the command with --start or --end option to fetch more."
-	DeprecatedDescWarning = "TIP: The default order is set to descending now. Please remove the DEPRECATED flag '--desc'."
-
 	InvalidCredentialUsername  = "Custom credential `USERNAME` is required if `PASSOWRD` is provided."
 	InvalidCredentialPassword  = "Custom credential `PASSOWRD` is required if `USERNAME` is provided."
 	InvalidCredential          = "Invalid credential definition: %v."
-	CreateCredentialWarning    = "TIP: A new credential generated. Please update the credential setting, and use 'cf restart %s' to ensure your env variable changes take effect."
+
+	MoreRecordsWarning      = "TIP: More records available. Please re-run the command with --start or --end option to fetch more."
+	DeprecatedDescWarning   = "TIP: The default order is set to descending now. Please remove the DEPRECATED flag '--desc'."
+	CreateCredentialWarning = "TIP: A new credential generated. Please update the credential setting, and use 'cf restart %s' to ensure your env variable changes take effect."
 )
