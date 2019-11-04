@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"regexp"
 	"time"
 )
 
@@ -22,10 +23,13 @@ type MetricsCommand struct {
 
 type MetricsPositionalArgs struct {
 	AppName    string `positional-arg-name:"APP_NAME" required:"true"`
-	MetricName string `positional-arg-name:"METRIC_NAME" required:"true" description:"available metric for the application"`
+	MetricName string `positional-arg-name:"METRIC_NAME" required:"true" description:"available metric for the application:\n memoryused, memoryutil, responsetime, throughput, cpu or custom metrics"`
 }
 
 func (command MetricsCommand) Execute([]string) error {
+	if ok, _ := regexp.MatchString("^[a-zA-Z0-9_]+$", command.RequiredlArgs.MetricName); !ok {
+		return errors.New(fmt.Sprintf(ui.UnrecognizedMetricName, command.RequiredlArgs.MetricName))
+	}
 
 	var (
 		st     int64 = 0

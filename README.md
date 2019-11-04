@@ -147,7 +147,7 @@ OK
 
 ### `cf attach-autoscaling-policy` 
 
-Attach a scaling policy to an application, the policy file must be a JSON file, refer to [policy specification](https://github.com/cloudfoundry-incubator/blob/master/docs/policy.md) for the policy format.
+Attach a scaling policy to an application, the policy file must be a JSON file, refer to [policy specification](https://github.com/cloudfoundry/app-autoscaler/blob/develop/docs/policy.md) for the policy format.
 
 ```
 cf attach-autoscaling-policy APP_NAME PATH_TO_POLICY_FILE
@@ -184,7 +184,11 @@ OK
 
 ### `cf create-autoscaling-credential`
 
-Create custom metric credential for an application, the credential will be displayed in JSON format. Random credential pair will be created if username and password are not specified.
+Credential is required when submitting custom metrics to app-autoscaler.
+If an application is connecting to autoscaler through a service binding approach, the required credential could be found in Cloud Foundry `VCAP_SERVICES` environment variables.
+This command is used to generate autoscaler credential and display it in JSON format. Then you need to set this credential to your application through environment variable or user-provide-service.
+Auto-scaler only grants access with the most recent credential, so the newly generated credential will overwritten the old pairs. Please ensure to update the credential setting in your application once you launch the command `create-autoscaling-credential`.
+Random credential pair will be created by default when username and password are not specified by `--username` and `--password` option.
 
 ```
 cf create-autoscaling-credential APP_NAME [--username USERNAME --password PASSWORD] [--output PATH_TO_FILE]
@@ -198,7 +202,7 @@ cf create-autoscaling-credential APP_NAME [--username USERNAME --password PASSWO
 - `--output`       : Dump the credential to a file in JSON format
 
 #### EXAMPLES:
-- Create and view custom credential with specified username and password:
+- Create and view custom credential with user-defined username and password:
 ```
 $ cf create-autoscaling-credential APP_NAME --username MY_USERNAME --password MY_PASSWORD
 
@@ -248,6 +252,7 @@ cf autoscaling-metrics APP_NAME METRIC_NAME [--start START_TIME] [--end END_TIME
 
 
 #### OPTIONS:
+- `METRIC_NAME` : default metrics "memoryused, memoryutil, responsetime, throughput, cpu" or customized name for your own metrics.
 - `--start` : start time of metrics collected with format `yyyy-MM-ddTHH:mm:ss+/-HH:mm` or `yyyy-MM-ddTHH:mm:ssZ`, default to very beginning if not specified.
 - `--end` : end time of the metrics collected with format `yyyy-MM-ddTHH:mm:ss+/-HH:mm` or `yyyy-MM-ddTHH:mm:ssZ`, default to current time if not speficied.
 - `--asc` : display in ascending order, default to descending order if not specified

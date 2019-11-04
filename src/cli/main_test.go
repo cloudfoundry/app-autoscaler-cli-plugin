@@ -1333,7 +1333,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 					Expect(err).NotTo(HaveOccurred())
 					session.Wait()
 
-					Expect(session).To(gbytes.Say("Custom credential `USERNAME` is required if `PASSOWRD` is provided."))
+					Expect(session).To(gbytes.Say("Both USERNAME and PASSWORD need to be provided for user-defined credential."))
 					Expect(session.ExitCode()).To(Equal(1))
 				})
 
@@ -1343,7 +1343,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 					Expect(err).NotTo(HaveOccurred())
 					session.Wait()
 
-					Expect(session).To(gbytes.Say("Custom credential `PASSOWRD` is required if `USERNAME` is provided."))
+					Expect(session).To(gbytes.Say("Both USERNAME and PASSWORD need to be provided for user-defined credential."))
 					Expect(session.ExitCode()).To(Equal(1))
 				})
 			})
@@ -1927,6 +1927,16 @@ var _ = Describe("App-AutoScaler Commands", func() {
 					session.Wait()
 
 					Expect(session).To(gbytes.Say("required argument `METRIC_NAME` was not provided"))
+					Expect(session.ExitCode()).To(Equal(1))
+				})
+
+				It("Failed when METRIC_NAME is unsupported", func() {
+					args = []string{ts.Port(), "autoscaling-metrics", fakeAppName, "invalid-metric-name%"}
+					session, err := gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+					Expect(err).NotTo(HaveOccurred())
+					session.Wait()
+
+					Expect(session).To(gbytes.Say(fmt.Sprintf(ui.UnrecognizedMetricName, "invalid-metric-name%")))
 					Expect(session.ExitCode()).To(Equal(1))
 				})
 
