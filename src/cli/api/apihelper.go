@@ -28,6 +28,7 @@ import (
 const (
 	HealthPath           = "/health"
 	PolicyPath           = "/v1/apps/{appId}/policy"
+	CredentialPath       = "/v1/apps/{appId}/credential"
 	AggregatedMetricPath = "/v1/apps/{appId}/aggregated_metric_histories/{metric_type}"
 	HistoryPath          = "/v1/apps/{appId}/scaling_histories"
 )
@@ -95,16 +96,24 @@ func (helper *APIHelper) DoRequest(req *http.Request) (*http.Response, error) {
 
 }
 
-func parseErrResponse(raw []byte) string {
-
-	var f interface{}
-	err := json.Unmarshal(raw, &f)
-	if err != nil {
-		return string(raw)
+func parseErrArrayResponse(a []interface{}) string {
+	retMsg := ""
+	for _, entry := range a {
+		mentry := entry.(map[string]interface{})
+		var context, description string
+		for ik, iv := range mentry {
+			if ik == "context" {
+				context = iv.(string)
+			} else if ik == "description" {
+				description,_ = strconv.Unquote(strings.Replace(strconv.Quote(iv.(string)), `\\u`, `\u`, -1))
+			}
+		}
+		retMsg = retMsg + "\n" + fmt.Sprintf("%v: %v", context, description)
 	}
+	return retMsg
+}
 
-	m := f.(map[string]interface{})
-
+func parseErrObjectResponse(m map[string]interface{}) string {
 	retMsg := ""
 	for k, v := range m {
 		if k == "error" {
@@ -131,10 +140,29 @@ func parseErrResponse(raw []byte) string {
 				retMsg = fmt.Sprintf("%v", v)
 			}
 
+		} else if k == "message" {
+			retMsg = fmt.Sprintf("%v", v)
 		}
 	}
-
 	return retMsg
+}
+
+func parseErrResponse(raw []byte) string {
+
+	var f interface{}
+	err := json.Unmarshal(raw, &f)
+	if err != nil {
+		return string(raw)
+	}
+
+	switch f.(type) {
+	case map[string]interface{}:
+		return parseErrObjectResponse(f.(map[string]interface{}))
+	case []interface{}:
+		return parseErrArrayResponse(f.([]interface{}))
+	default:
+		return ""
+	}
 }
 
 func (helper *APIHelper) CheckHealth() error {
@@ -448,4 +476,98 @@ func (helper *APIHelper) GetHistory(startTime, endTime int64, asc bool, page uin
 		return false, data, nil
 	}
 
+}
+
+func (helper *APIHelper) DeleteCredential() error {
+
+	err := helper.CheckHealth()
+	if err != nil {
+		return err
+	}
+
+	baseURL := helper.Endpoint.URL
+	requestURL := fmt.Sprintf("%s%s", baseURL, strings.Replace(CredentialPath, "{appId}", helper.Client.AppId, -1))
+
+	req, err := http.NewRequest("DELETE", requestURL, nil)
+	req.Header.Add("Authorization", helper.Client.AuthToken)
+
+	resp, err := helper.DoRequest(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	raw, err := ioutil.ReadAll(resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		var errorMsg string
+		switch resp.StatusCode {
+		case 401:
+			errorMsg = fmt.Sprintf(ui.Unauthorized, baseURL)
+		default:
+			errorMsg = parseErrResponse(raw)
+		}
+		return errors.New(errorMsg)
+	}
+
+	return nil
+
+}
+
+func (helper *APIHelper) CreateCredential(data interface{}) ([]byte, error) {
+
+	err := helper.CheckHealth()
+	if err != nil {
+		return nil, err
+	}
+
+	baseURL := helper.Endpoint.URL
+	requestURL := fmt.Sprintf("%s%s", baseURL, strings.Replace(CredentialPath, "{appId}", helper.Client.AppId, -1))
+
+	var body io.Reader
+	if data != nil {
+		jsonByte, e := json.Marshal(data)
+		if e != nil {
+			return nil, fmt.Errorf(ui.InvalidCredential, e)
+		}
+		body = bytes.NewBuffer(jsonByte)
+	}
+
+	req, err := http.NewRequest("PUT", requestURL, body)
+	req.Header.Add("Authorization", helper.Client.AuthToken)
+	req.Header.Add("Content-Type", "application/json")
+
+	resp, err := helper.DoRequest(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	raw, err := ioutil.ReadAll(resp.Body)
+
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
+
+		var errorMsg string
+		switch resp.StatusCode {
+		case 401:
+			errorMsg = fmt.Sprintf(ui.Unauthorized, baseURL)
+		case 400:
+			errorMsg = fmt.Sprintf(ui.InvalidCredential, parseErrResponse(raw))
+		default:
+			errorMsg = parseErrResponse(raw)
+		}
+		return nil, errors.New(errorMsg)
+	}
+
+	var credential models.CredentialResponse
+	err = json.Unmarshal(raw, &credential)
+	if err != nil {
+		return nil, err
+	}
+
+	prettyCredential, err := cjson.MarshalWithoutHTMLEscape(credential)
+	if err != nil {
+		return nil, err
+	}
+
+	return prettyCredential, nil
 }
