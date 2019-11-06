@@ -184,10 +184,12 @@ OK
 
 ### `cf create-autoscaling-credential`
 
-Credential is required when submitting custom metrics to app-autoscaler.
-If an application is connecting to autoscaler through a service binding approach, the required credential could be found in Cloud Foundry `VCAP_SERVICES` environment variables.
-This command is used to generate autoscaler credential and display it in JSON format. Then you need to set this credential to your application through environment variable or user-provide-service.
-Auto-scaler only grants access with the most recent credential, so the newly generated credential will overwritten the old pairs. Please ensure to update the credential setting in your application once you launch the command `create-autoscaling-credential`.
+Credential is required when submitting custom metrics to app-autoscaler. If an application is connecting to autoscaler through a service binding approach, the required credential could be found in Cloud Foundry `VCAP_SERVICES` environment variables. Otherwise, you need to generate the required credential explicitly with this command.
+
+The command will generate autoscaler credential and display it in JSON format. Then you need to set this credential to your application through environment variables or user-provided-service.  
+
+Note: Auto-scaler only grants access with the most recent credential, so the newly generated credential will overwritten the old pairs. Please make sure to update the credential setting in your application once you launch the command `create-autoscaling-credential`.
+
 Random credential pair will be created by default when username and password are not specified by `--username` and `--password` option.
 
 ```
