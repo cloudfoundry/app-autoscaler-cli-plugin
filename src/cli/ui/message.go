@@ -48,5 +48,6 @@ const (
 
 	MoreRecordsWarning      = "TIP: More records available. Please re-run the command with --start or --end option to fetch more."
 	DeprecatedDescWarning   = "TIP: The default order is set to descending now. Please remove the DEPRECATED flag '--desc'."
-	CreateCredentialWarning = "TIP: A new credential generated. Please update the credential setting, and use 'cf restart %s' to ensure your env variable changes take effect."
+	CreateCredentialWarning = "TIP: A new credential generated. Please update the credential setting of your application, and use 'cf restart %s' to ensure your env variable changes take effect."
+	DeleteCredentialWarning = "TIP: The credential removed. Please remove the credential setting from your application, and use 'cf restart %s' to ensure your env variable changes take effect."
 )

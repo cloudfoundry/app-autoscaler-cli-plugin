@@ -1884,6 +1884,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 
 								Expect(session.Out).To(gbytes.Say(ui.DeleteCredentialHint, fakeAppName))
 								Expect(session.Out).To(gbytes.Say("OK"))
+								Expect(session.Out).To(gbytes.Say(ui.DeleteCredentialWarning, fakeAppName))
 								Expect(session.ExitCode()).To(Equal(0))
 							})
 
