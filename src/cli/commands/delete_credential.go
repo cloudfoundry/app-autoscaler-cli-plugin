@@ -48,5 +48,6 @@ func DeleteCredential(cliConnection api.Connection, appName string) error {
 	}
 
 	ui.SayOK()
+	ui.SayWarningMessage(ui.DeleteCredentialWarning, appName)
 	return nil
 }
