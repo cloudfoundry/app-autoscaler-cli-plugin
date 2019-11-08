@@ -79,14 +79,3 @@ type HistoryResults struct {
 	Page         uint16               `json:"page"`
 	Histories    []*AppScalingHistory `json:"resources"`
 }
-
-type Credential struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
-
-type CredentialResponse struct {
-	AppId string `json:"app_id"`
-	*Credential
-	Url string `json:"url"`
-}

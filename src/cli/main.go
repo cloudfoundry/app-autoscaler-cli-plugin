@@ -61,40 +61,20 @@ OPTIONS:
 				},
 			},
 			{
-				Name:     "create-autoscaling-credential",
-				Alias:    "casc",
-				HelpText: "Create custom metric credential for an application",
-				UsageDetails: plugin.Usage{
-					Usage: `cf create-autoscaling-credential APP_NAME [--username USERNAME --password PASSWORD] [--output PATH_TO_FILE]
-
-OPTIONS:
-	--username, -u   Username of the custom metric credential, random username will be set if not specified.
-	--password, -p   Password of the custom metric credential, random password will be set if not specified.
-	--output         Dump the credential to a file in JSON format.
-					`,
-				},
-			},
-			{
-				Name:     "delete-autoscaling-credential",
-				Alias:    "dasc",
-				HelpText: "Delete the custom metric credential of an application",
-				UsageDetails: plugin.Usage{
-					Usage: `cf delete-autoscaling-credential APP_NAME`,
-				},
-			},
-			{
 				Name:     "autoscaling-metrics",
 				Alias:    "asm",
 				HelpText: "Retrieve the metrics of an application",
 				UsageDetails: plugin.Usage{
-					Usage: `cf autoscaling-metrics APP_NAME METRIC_NAME [--start START_TIME] [--end END_TIME] [--asc] [--output PATH_TO_FILE]
+					Usage: `cf autoscaling-metrics APP_NAME METRIC_NAME [--start START_TIME] [--end END_TIME] [--number NUMBER] [--desc] [--output PATH_TO_FILE]
 
-METRIC_NAME:
-	memoryused, memoryutil, responsetime, throughput, cpu or custom metric names.
+METRIC_NAME: 
+	memoryused, memoryutil, responsetime, throughput, cpu.	
+
 OPTIONS:
 	--start		Start time of metrics collected with format "yyyy-MM-ddTHH:mm:ss+/-HH:mm" or "yyyy-MM-ddTHH:mm:ssZ", default to very beginning if not specified.
 	--end		End time of the metrics collected with format "yyyy-MM-ddTHH:mm:ss+/-HH:mm" or "yyyy-MM-ddTHH:mm:ssZ", default to current time if not speficied.
-	--asc		Display in ascending order, default to descending order if not specified.
+	--number	The number of the records to return, will be ignored if both start time and end time are specified.
+	--desc		Display in descending order, default to ascending order if not specified.
 	--output	Dump the metrics to a file in table format.
 					`,
 				},
@@ -104,12 +84,13 @@ OPTIONS:
 				Alias:    "ash",
 				HelpText: "Retrieve the scaling history of an application",
 				UsageDetails: plugin.Usage{
-					Usage: `cf autoscaling-history APP_NAME [--start START_TIME] [--end END_TIME] [--asc] [--output PATH_TO_FILE] 
+					Usage: `cf autoscaling-history APP_NAME [--start START_TIME] [--end END_TIME] [--number NUMBER] [--desc] [--output PATH_TO_FILE] 
 
 OPTIONS:
 	--start		Start time of the scaling history with format "yyyy-MM-ddTHH:mm:ss+/-HH:mm" or "yyyy-MM-ddTHH:mm:ssZ", default to very beginning if not specified.
 	--end		End time of the scaling history with format "yyyy-MM-ddTHH:mm:ss+/-HH:mm" or "yyyy-MM-ddTHH:mm:ssZ", default to current time if not speficied.
-	--asc		Display in ascending order, default to descending order if not specified.
+	--number	The number of the records to return, will be ignored if both start time and end time are specified.
+	--desc		Display in descending order, default to ascending order if not specified.
 	--output	Dump the scaling history to a file in table format.
 					`,
 				},

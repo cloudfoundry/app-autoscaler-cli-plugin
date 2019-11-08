@@ -37,8 +37,6 @@ cf uninstall-plugin AutoScaler
 | [autoscaling-policy, asp](#cf-autoscaling-policy) | Retrieve the scaling policy of an application |
 | [attach-autoscaling-policy, aasp](#cf-attach-autoscaling-policy) | Attach a scaling policy to an application |
 | [detach-autoscaling-policy, dasp](#cf-detach-autoscaling-policy) | Detach the scaling policy from an application |
-| [create-autoscaling-credential, casc](#cf-create-autoscaling-credential) | Create custom metric credential for an application |
-| [delete-autoscaling-credential, dasc](#cf-delete-autoscaling-credential) | Delete the custom metric credential of an application |
 | [autoscaling-metrics, asm](#cf-autoscaling-metrics) | Retrieve the metrics of an application |
 | [autoscaling-history, ash](#cf-autoscaling-history) | Retrieve the scaling history of an application|
 
@@ -141,13 +139,13 @@ Showing policy for app APP_NAME...
 ```
 $ cf asp APP_NAME --output PATH_TO_FILE
 
-Saving policy for app APP_NAME to PATH_TO_FILE...
+Showing policy for app APP_NAME...
 OK
 ```
 
 ### `cf attach-autoscaling-policy` 
 
-Attach a scaling policy to an application, the policy file must be a JSON file, refer to [policy specification](https://github.com/cloudfoundry/app-autoscaler/blob/develop/docs/policy.md) for the policy format.
+Attach a scaling policy to an application, the policy file must be a JSON file, refer to [policy specification](https://github.com/cloudfoundry-incubator/blob/master/docs/policy.md) for the policy format.
 
 ```
 cf attach-autoscaling-policy APP_NAME PATH_TO_POLICY_FILE
@@ -169,7 +167,7 @@ OK
 Detach the scaling policy from an application, the policy will be **deleted** when detached.
 
 ```
-cf detach-autoscaling-policy APP_NAME
+cf detach-as-policy APP_NAME
 ```
 #### ALIAS: dasp
 
@@ -182,87 +180,27 @@ OK
 ```
 
 
-### `cf create-autoscaling-credential`
-
-Credential is required when submitting custom metrics to app-autoscaler. If an application is connecting to autoscaler through a service binding approach, the required credential could be found in Cloud Foundry `VCAP_SERVICES` environment variables. Otherwise, you need to generate the required credential explicitly with this command.
-
-The command will generate autoscaler credential and display it in JSON format. Then you need to set this credential to your application through environment variables or user-provided-service.  
-
-Note: Auto-scaler only grants access with the most recent credential, so the newly generated credential will overwritten the old pairs. Please make sure to update the credential setting in your application once you launch the command `create-autoscaling-credential`.
-
-Random credential pair will be created by default when username and password are not specified by `--username` and `--password` option.
-
-```
-cf create-autoscaling-credential APP_NAME [--username USERNAME --password PASSWORD] [--output PATH_TO_FILE]
-```
-#### ALIAS: casc
-
-
-#### OPTIONS:
-- `--username, -u` : username of the custom metric credential, random username will be set if not specified
-- `--password, -p` : password of the custom metric credential, random password will be set if not specified
-- `--output`       : Dump the credential to a file in JSON format
-
-#### EXAMPLES:
-- Create and view custom credential with user-defined username and password:
-```
-$ cf create-autoscaling-credential APP_NAME --username MY_USERNAME --password MY_PASSWORD
-
-Creating custom metric credential for app APP_NAME...
-{
-	"app_id": "<APP_ID>",
-	"username": "MY_USERNAME",
-	"password": "MY_PASSWORD",
-	"url": "https://autoscalermetrics.<DOMAIN>"
-}
-```
-- Create random username and password and dump the credential to a file:
-```
-$ cf create-autoscaling-credential APP_NAME --output PATH_TO_FILE
-
-Saving new created credential for app APP_NAME to PATH_TO_FILE...
-OK
-```
-
-
-### `cf delete-autoscaling-credential`
-
-Delete the custom metric credential of an application.
-
-```
-cf delete-autoscaling-credential APP_NAME
-```
-#### ALIAS: dasc
-
-#### EXAMPLES:
-```
-$ cf delete-autoscaling-credential APP_NAME
-
-Deleting custom metric credential for app APP_NAME...
-OK
-```
-
-
 ### `cf autoscaling-metrics`
 
-Retrieve the aggregated metrics of an application. You can specify the start/end time of the returned query result,  and the display order(ascending or descending). The metrics will be shown in a table.
+Retrieve the aggregated metrics of an application. You can specify the start/end time or the number of the returned query result,  and the display order(ascending or descending). The metrics will be shown in a table.
 
 ```
-cf autoscaling-metrics APP_NAME METRIC_NAME [--start START_TIME] [--end END_TIME] [--asc] [--output PATH_TO_FILE]
+cf autoscaling-metrics APP_NAME METRIC_NAME [--number RECORD_NUMBER] [--start START_TIME] [--end END_TIME] [--desc] [--output PATH_TO_FILE]
 ```
 #### ALIAS: asm
 
 
 #### OPTIONS:
-- `METRIC_NAME` : default metrics "memoryused, memoryutil, responsetime, throughput, cpu" or customized name for your own metrics.
+- `METRIC_NAME` : available metric supported: memoryused, memoryutil, responsetime, throughput and cpu.
 - `--start` : start time of metrics collected with format `yyyy-MM-ddTHH:mm:ss+/-HH:mm` or `yyyy-MM-ddTHH:mm:ssZ`, default to very beginning if not specified.
 - `--end` : end time of the metrics collected with format `yyyy-MM-ddTHH:mm:ss+/-HH:mm` or `yyyy-MM-ddTHH:mm:ssZ`, default to current time if not speficied.
-- `--asc` : display in ascending order, default to descending order if not specified
+- `--number|-n` : the number of the records to return, will be ignored if both start time and end time are specified.
+- `--desc` : display in descending order, default to ascending order if not specified
 - `--output` : dump the metrics to a file
 
 #### EXAMPLES:
 ```
-$ cf autoscaling-metrics APP_NAME memoryused --start 2018-12-27T11:49:00+08:00 --end 2018-12-27T11:52:20+08:00 --asc
+$ cf autoscaling-metrics APP_NAME memoryused --start 2018-12-27T11:49:00+08:00 --end 2018-12-27T11:52:20+08:00 --desc
 
 Retriving aggregated metrics for app APP_NAME...
 Metrics Name     	Value     	Timestamp
@@ -278,9 +216,9 @@ memoryused       	62MB      	2018-12-27T11:51:40+08:00
 
 ###  `cf autoscaling-history`
 
-Retrieve the scaling event history of an application. You can specify the start/end time of the returned query result,  and the display order(ascending or descending). The scaling event history will be shown in a table.
+Retrieve the scaling event history of an application. You can specify the start/end time or the number of the returned query result,  and the display order(ascending or descending). The scaling event history will be shown in a table.
 ```
-cf autoscaling-history APP_NAME [--start START_TIME] [--end END_TIME] [--asc] [--output PATH_TO_FILE]
+cf autoscaling-history APP_NAME [--number RECORD_NUMBER] [--start START_TIME] [--end END_TIME] [--desc] [--output PATH_TO_FILE]
 ```
 
 #### ALIAS: ash
@@ -288,18 +226,19 @@ cf autoscaling-history APP_NAME [--start START_TIME] [--end END_TIME] [--asc] [-
 #### OPTIONS:
 - `--start` : start time of the scaling history with format `yyyy-MM-ddTHH:mm:ss+/-HH:mm` or `yyyy-MM-ddTHH:mm:ssZ`, default to very beginning if not specified.
 - `--end` : end time of the scaling history with format `yyyy-MM-ddTHH:mm:ss+/-HH:mm` or `yyyy-MM-ddTHH:mm:ssZ`, default to current time if not speficied.
-- `--asc` : display in ascending order, default to descending order if not specified
+- `--number|-n` : the number of the records to return, will be ignored if both start time and end time are specified.
+- `--desc` : display in descending order, default to ascending order if not specified
 - `--output` : dump the scaling history to a file
 
 #### EXAMPLES:
 ```
-$ cf autoscaling-history APP_NAME --start 2018-08-16T17:58:53+08:00 --end 2018-08-16T18:01:00+08:00 --asc
+$ cf autoscaling-history APP_NAME --start 2018-08-16T17:58:53+08:00 --end 2018-08-16T18:01:00+08:00 --number 3 --desc
 
 Showing history for app APP_NAME...
 Scaling Type     	Status        	Instance Changes     	Time                          	Action                                                        	Error
-dynamic          	failed        	2->-1                	2018-08-16T17:58:53+08:00     	-1 instance(s) because throughput < 10rps for 120 seconds     	app does not have policy set
-dynamic          	succeeded     	2->3                 	2018-08-16T17:59:33+08:00     	+1 instance(s) because memoryused >= 15MB for 120 seconds
 scheduled        	succeeded     	3->6                 	2018-08-16T18:00:00+08:00     	3 instance(s) because limited by min instances 6
+dynamic          	succeeded     	2->3                 	2018-08-16T17:59:33+08:00     	+1 instance(s) because memoryused >= 15MB for 120 seconds
+dynamic          	failed        	2->-1                	2018-08-16T17:58:53+08:00     	-1 instance(s) because throughput < 10rps for 120 seconds     	app does not have policy set
 ```
 - `Scaling Type`: the trigger type of the scaling action, possible scaling types: `dynamic` and `scheduled`
   - `dynamic`: the scaling action is triggered by a dynamic rule (memoryused, memoryutil, responsetime or throughput)
