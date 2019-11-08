@@ -19,3 +19,8 @@ func SayFailed() {
 func SayMessage(message string, args ...interface{}) {
 	fmt.Printf(message+"\n", args...)
 }
+
+func SayWarningMessage(message string, args ...interface{}) {
+	c := color.New(color.FgYellow).Add(color.Bold)
+	c.Printf(message+"\n", args...)
+}

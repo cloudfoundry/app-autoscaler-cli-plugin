@@ -44,6 +44,10 @@ var _ = Describe("API Helper Test", func() {
 				},
 			},
 		}
+		fakeCredential Credential = Credential{
+			Username: "fake-user",
+			Password: "fake-password",
+		}
 	)
 
 	BeforeEach(func() {
@@ -316,16 +320,32 @@ var _ = Describe("API Helper Test", func() {
 			})
 
 			Context("Invalid Policy Format", func() {
-				BeforeEach(func() {
-					apiServer.RouteToHandler("PUT", urlpath,
-						ghttp.RespondWith(http.StatusBadRequest, `{"success":false,"error":[{"property":"instance_min_count","message":"instance_min_count and instance_max_count values are not compatible","instance":{"instance_max_count":2,"instance_min_count":10,"scaling_rules":[{"adjustment":"+1","breach_duration_secs":600,"cool_down_secs":300,"metric_type":"memoryused","operator":">","stat_window_secs":300,"threshold":100},{"adjustment":"-1","breach_duration_secs":600,"cool_down_secs":300,"metric_type":"memoryused","operator":"<=","stat_window_secs":300,"threshold":5}]},"stack":"instance_min_count 10 is higher or equal to instance_max_count 2 in policy_json"}],"result":null}`),
-					)
+				Context("Received error object", func() {
+					BeforeEach(func() {
+						apiServer.RouteToHandler("PUT", urlpath,
+							ghttp.RespondWith(http.StatusBadRequest, `{"success":false,"error":[{"property":"instance_min_count","message":"instance_min_count and instance_max_count values are not compatible","instance":{"instance_max_count":2,"instance_min_count":10,"scaling_rules":[{"adjustment":"+1","breach_duration_secs":600,"cool_down_secs":300,"metric_type":"memoryused","operator":">","stat_window_secs":300,"threshold":100},{"adjustment":"-1","breach_duration_secs":600,"cool_down_secs":300,"metric_type":"memoryused","operator":"<=","stat_window_secs":300,"threshold":5}]},"stack":"instance_min_count 10 is higher or equal to instance_max_count 2 in policy_json"}],"result":null}`),
+						)
+					})
+
+					It("Fail with 400 error", func() {
+						err = apihelper.CreatePolicy(fakePolicy)
+						Expect(err).Should(HaveOccurred())
+						Expect(err).Should(MatchError(fmt.Sprintf(ui.InvalidPolicy, "\n"+"instance_min_count 10 is higher or equal to instance_max_count 2 in policy_json")))
+					})
 				})
 
-				It("Fail with 400 error", func() {
-					err = apihelper.CreatePolicy(fakePolicy)
-					Expect(err).Should(HaveOccurred())
-					Expect(err).Should(MatchError(fmt.Sprintf(ui.InvalidPolicy, "\n"+"instance_min_count 10 is higher or equal to instance_max_count 2 in policy_json")))
+				Context("Received error array", func() {
+					BeforeEach(func() {
+						apiServer.RouteToHandler("PUT", urlpath,
+							ghttp.RespondWith(http.StatusBadRequest, `[{"context":"(root).scaling_rules.0.operator","description":"scaling_rules.0.operator must be one of the following: \"\\u003c\", \"\\u003e\", \"\\u003c=\", \"\\u003e=\""},{"context":"(root).schedules.recurring_schedule.0.start_time","description":"Does not match pattern '^(2[0-3]|1[0-9]|0[0-9]):([0-5][0-9])$'"}]`),
+						)
+					})
+
+					It("Fail with 400 error", func() {
+						err = apihelper.CreatePolicy(fakePolicy)
+						Expect(err).Should(HaveOccurred())
+						Expect(err).Should(MatchError(fmt.Sprintf(ui.InvalidPolicy, "\n(root).scaling_rules.0.operator: scaling_rules.0.operator must be one of the following: \"<\", \">\", \"<=\", \">=\"\n(root).schedules.recurring_schedule.0.start_time: Does not match pattern '^(2[0-3]|1[0-9]|0[0-9]):([0-5][0-9])$'")))
+					})
 				})
 			})
 
@@ -436,6 +456,204 @@ var _ = Describe("API Helper Test", func() {
 
 		})
 
+		Context("Create Credential", func() {
+			var urlpath string = "/v1/apps/" + fakeAppId + "/credential"
+
+			Context("201 Created with valid auth token", func() {
+				BeforeEach(func() {
+					apiServer.RouteToHandler("PUT", urlpath,
+						ghttp.CombineHandlers(
+							ghttp.RespondWithJSONEncoded(http.StatusCreated, &fakeCredential),
+							ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
+						),
+					)
+				})
+
+				It("succeed", func() {
+					response, err := apihelper.CreateCredential(fakeCredential)
+					Expect(err).NotTo(HaveOccurred())
+
+					var actualCredential Credential
+					_ = json.Unmarshal([]byte(response), &actualCredential)
+					Expect(actualCredential).To(MatchFields(IgnoreExtras, Fields{
+						"Username": Equal(fakeCredential.Username),
+						"Password": Equal(fakeCredential.Password),
+					}))
+				})
+			})
+
+			Context("200 OK with valid auth token", func() {
+				BeforeEach(func() {
+					apiServer.RouteToHandler("PUT", urlpath,
+						ghttp.CombineHandlers(
+							ghttp.RespondWithJSONEncoded(http.StatusCreated, &fakeCredential),
+							ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
+						),
+					)
+				})
+
+				It("succeed", func() {
+					response, err := apihelper.CreateCredential(fakeCredential)
+					Expect(err).NotTo(HaveOccurred())
+
+					var actualCredential Credential
+					_ = json.Unmarshal([]byte(response), &actualCredential)
+					Expect(actualCredential).To(MatchFields(IgnoreExtras, Fields{
+						"Username": Equal(fakeCredential.Username),
+						"Password": Equal(fakeCredential.Password),
+					}))
+				})
+			})
+
+			Context("Forbidden Request", func() {
+				BeforeEach(func() {
+					apiServer.RouteToHandler("PUT", urlpath,
+						ghttp.RespondWith(http.StatusForbidden, `{"code":"Forbidden","message":"This command is only valid for build-in auto-scaling capacity. Please operate service credential with \"cf bind/unbind-service\" command."}`),
+					)
+				})
+
+				It("Fail with 403 error", func() {
+					_, err = apihelper.CreateCredential(fakeCredential)
+					Expect(err).Should(HaveOccurred())
+					Expect(err).Should(MatchError(fmt.Sprintf(`This command is only valid for build-in auto-scaling capacity. Please operate service credential with "cf bind/unbind-service" command.`)))
+				})
+			})
+
+			Context("Unauthorized Access", func() {
+				BeforeEach(func() {
+					apiServer.RouteToHandler("PUT", urlpath,
+						ghttp.RespondWith(http.StatusUnauthorized, ""),
+					)
+				})
+
+				It("Fail with 401 error", func() {
+					_, err = apihelper.CreateCredential(fakeCredential)
+					Expect(err).Should(HaveOccurred())
+					Expect(err).Should(MatchError(fmt.Sprintf(ui.Unauthorized, apihelper.Endpoint.URL)))
+				})
+			})
+
+			Context("Invalid Credential Format", func() {
+				BeforeEach(func() {
+					apiServer.RouteToHandler("PUT", urlpath,
+						ghttp.RespondWith(http.StatusBadRequest, `{"code":"Bad Request","message":"Username and password are both required"}`),
+					)
+				})
+
+				It("Fail with 400 error", func() {
+					_, err = apihelper.CreateCredential(fakeCredential)
+					Expect(err).Should(HaveOccurred())
+					Expect(err).Should(MatchError(fmt.Sprintf(ui.InvalidCredential, "Username and password are both required")))
+				})
+			})
+
+			Context("Default error handling", func() {
+				BeforeEach(func() {
+					apiServer.RouteToHandler("PUT", urlpath,
+						ghttp.RespondWith(http.StatusInternalServerError, `{"success":false,"error":{"message":"Internal error","statusCode":500},"result":null}`),
+					)
+				})
+
+				It("Fail with 500 error", func() {
+					_, err = apihelper.CreateCredential(fakeCredential)
+					Expect(err).Should(HaveOccurred())
+					Expect(err).Should(MatchError("Internal error"))
+				})
+			})
+
+			Context("When error msg is a plain text", func() {
+				BeforeEach(func() {
+					apiServer.RouteToHandler("PUT", urlpath,
+						ghttp.RespondWith(http.StatusBadGateway, "502 bad gateway"),
+					)
+				})
+
+				It("Fail with 502 error", func() {
+					_, err = apihelper.CreateCredential(fakeCredential)
+					Expect(err).Should(HaveOccurred())
+					Expect(err).Should(MatchError("502 bad gateway"))
+				})
+			})
+
+		})
+
+		Context("Delete Credential", func() {
+			var urlpath string = "/v1/apps/" + fakeAppId + "/credential"
+
+			Context("Succeed with valid auth token", func() {
+				BeforeEach(func() {
+					apiServer.RouteToHandler("DELETE", urlpath,
+						ghttp.CombineHandlers(
+							ghttp.RespondWith(http.StatusOK, ""),
+							ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
+						),
+					)
+				})
+
+				It("succeed", func() {
+					err = apihelper.DeleteCredential()
+					Expect(err).NotTo(HaveOccurred())
+				})
+			})
+
+			Context("Forbidden Request", func() {
+				BeforeEach(func() {
+					apiServer.RouteToHandler("DELETE", urlpath,
+						ghttp.RespondWith(http.StatusForbidden, `{"code":"Forbidden","message":"This command is only valid for build-in auto-scaling capacity. Please operate service credential with \"cf bind/unbind-service\" command."}`),
+					)
+				})
+
+				It("Fail with 403 error", func() {
+					err = apihelper.DeleteCredential()
+					Expect(err).Should(HaveOccurred())
+					Expect(err).Should(MatchError(fmt.Sprintf(`This command is only valid for build-in auto-scaling capacity. Please operate service credential with "cf bind/unbind-service" command.`)))
+				})
+			})
+
+			Context("Unauthorized Access", func() {
+				BeforeEach(func() {
+					apiServer.RouteToHandler("DELETE", urlpath,
+						ghttp.RespondWith(http.StatusUnauthorized, ""),
+					)
+				})
+
+				It("Fail with 401 error", func() {
+					err = apihelper.DeleteCredential()
+					Expect(err).Should(HaveOccurred())
+					Expect(err).Should(MatchError(fmt.Sprintf(ui.Unauthorized, apihelper.Endpoint.URL)))
+				})
+			})
+
+			Context("Default error handling", func() {
+				BeforeEach(func() {
+					apiServer.RouteToHandler("DELETE", urlpath,
+						ghttp.RespondWith(http.StatusInternalServerError, `{"success":false,"error":{"message":"Internal error","statusCode":500},"result":null}`),
+					)
+				})
+
+				It("Fail with 500 error", func() {
+					err = apihelper.DeleteCredential()
+					Expect(err).Should(HaveOccurred())
+					Expect(err).Should(MatchError("Internal error"))
+				})
+			})
+
+			Context("When error msg is a plain text", func() {
+				BeforeEach(func() {
+					apiServer.RouteToHandler("DELETE", urlpath,
+						ghttp.RespondWith(http.StatusBadGateway, "502 bad gateway"),
+					)
+				})
+
+				It("Fail with 502 error", func() {
+					err = apihelper.DeleteCredential()
+					Expect(err).Should(HaveOccurred())
+					Expect(err).Should(MatchError("502 bad gateway"))
+				})
+			})
+
+		})
+
 		Context("Get Aggregated Metrics", func() {
 			var urlpath = "/v1/apps/" + fakeAppId + "/aggregated_metric_histories/memoryused"
 			var now int64
@@ -461,7 +679,7 @@ var _ = Describe("API Helper Test", func() {
 
 			Context("With valid auth token", func() {
 
-				Context("Query multiple pages with order asc", func() {
+				Context("Query multiple pages with order desc", func() {
 					BeforeEach(func() {
 						apiServer.AppendHandlers(
 							ghttp.CombineHandlers(
@@ -472,7 +690,7 @@ var _ = Describe("API Helper Test", func() {
 									Metrics:      metrics[0:10],
 								}),
 								ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-								ghttp.VerifyRequest("GET", urlpath, "order=asc&page=1"),
+								ghttp.VerifyRequest("GET", urlpath, "order=desc&page=1"),
 							),
 						)
 
@@ -485,7 +703,7 @@ var _ = Describe("API Helper Test", func() {
 									Metrics:      metrics[10:20],
 								}),
 								ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-								ghttp.VerifyRequest("GET", urlpath, "order=asc&page=2"),
+								ghttp.VerifyRequest("GET", urlpath, "order=desc&page=2"),
 							),
 						)
 
@@ -498,7 +716,7 @@ var _ = Describe("API Helper Test", func() {
 									Metrics:      metrics[20:30],
 								}),
 								ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-								ghttp.VerifyRequest("GET", urlpath, "order=asc&page=3"),
+								ghttp.VerifyRequest("GET", urlpath, "order=desc&page=3"),
 							),
 						)
 					})
@@ -541,7 +759,7 @@ var _ = Describe("API Helper Test", func() {
 					})
 				})
 
-				Context("Query multiple pages with order desc", func() {
+				Context("Query multiple pages with order asc", func() {
 					BeforeEach(func() {
 						apiServer.AppendHandlers(
 							ghttp.CombineHandlers(
@@ -552,7 +770,7 @@ var _ = Describe("API Helper Test", func() {
 									Metrics:      reversedMetrics[0:10],
 								}),
 								ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-								ghttp.VerifyRequest("GET", urlpath, "order=desc&page=1"),
+								ghttp.VerifyRequest("GET", urlpath, "order=asc&page=1"),
 							),
 						)
 
@@ -565,7 +783,7 @@ var _ = Describe("API Helper Test", func() {
 									Metrics:      reversedMetrics[10:20],
 								}),
 								ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-								ghttp.VerifyRequest("GET", urlpath, "order=desc&page=2"),
+								ghttp.VerifyRequest("GET", urlpath, "order=asc&page=2"),
 							),
 						)
 
@@ -578,7 +796,7 @@ var _ = Describe("API Helper Test", func() {
 									Metrics:      reversedMetrics[20:30],
 								}),
 								ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-								ghttp.VerifyRequest("GET", urlpath, "order=desc&page=3"),
+								ghttp.VerifyRequest("GET", urlpath, "order=asc&page=3"),
 							),
 						)
 					})
@@ -621,7 +839,7 @@ var _ = Describe("API Helper Test", func() {
 					})
 				})
 
-				Context("Query with asc & start time & end time ", func() {
+				Context("Query with desc & start time & end time ", func() {
 					BeforeEach(func() {
 						apiServer.AppendHandlers(
 							ghttp.CombineHandlers(
@@ -632,7 +850,7 @@ var _ = Describe("API Helper Test", func() {
 									Metrics:      metrics[0:10],
 								}),
 								ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-								ghttp.VerifyRequest("GET", urlpath, fmt.Sprintf("order=asc&page=1&start-time=%v&end-time=%v", now, now+int64(9*30*1E9))),
+								ghttp.VerifyRequest("GET", urlpath, fmt.Sprintf("order=desc&page=1&start-time=%v&end-time=%v", now, now+int64(9*30*1E9))),
 							),
 						)
 					})
@@ -664,7 +882,7 @@ var _ = Describe("API Helper Test", func() {
 									Metrics:      []*AppAggregatedMetric{},
 								}),
 								ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-								ghttp.VerifyRequest("GET", urlpath, fmt.Sprintf("order=asc&page=1&start-time=%v&end-time=%v", now, now+int64(9*30*1E9))),
+								ghttp.VerifyRequest("GET", urlpath, fmt.Sprintf("order=desc&page=1&start-time=%v&end-time=%v", now, now+int64(9*30*1E9))),
 							),
 						)
 					})
@@ -684,7 +902,7 @@ var _ = Describe("API Helper Test", func() {
 					apiServer.AppendHandlers(
 						ghttp.CombineHandlers(
 							ghttp.RespondWith(http.StatusUnauthorized, ""),
-							ghttp.VerifyRequest("GET", urlpath, "order=asc&page=1"),
+							ghttp.VerifyRequest("GET", urlpath, "order=desc&page=1"),
 						),
 					)
 				})
@@ -701,7 +919,7 @@ var _ = Describe("API Helper Test", func() {
 					apiServer.AppendHandlers(
 						ghttp.CombineHandlers(
 							ghttp.RespondWith(http.StatusInternalServerError, `{"success":false,"error":{"message":"Internal error","statusCode":500},"result":null}`),
-							ghttp.VerifyRequest("GET", urlpath, "order=asc&page=1"),
+							ghttp.VerifyRequest("GET", urlpath, "order=desc&page=1"),
 						),
 					)
 				})
@@ -718,7 +936,7 @@ var _ = Describe("API Helper Test", func() {
 					apiServer.AppendHandlers(
 						ghttp.CombineHandlers(
 							ghttp.RespondWith(http.StatusNotFound, "502 bad gateway"),
-							ghttp.VerifyRequest("GET", urlpath, "order=asc&page=1"),
+							ghttp.VerifyRequest("GET", urlpath, "order=desc&page=1"),
 						),
 					)
 				})
@@ -835,7 +1053,7 @@ var _ = Describe("API Helper Test", func() {
 									Histories:    histories_ut[0:3],
 								}),
 								ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-								ghttp.VerifyRequest("GET", urlpath, "order=asc&page=1"),
+								ghttp.VerifyRequest("GET", urlpath, "order=desc&page=1"),
 							),
 						)
 
@@ -871,7 +1089,7 @@ var _ = Describe("API Helper Test", func() {
 					})
 				})
 
-				Context("Query multiple pages with order asc", func() {
+				Context("Query multiple pages with order desc", func() {
 					BeforeEach(func() {
 						apiServer.AppendHandlers(
 							ghttp.CombineHandlers(
@@ -882,7 +1100,7 @@ var _ = Describe("API Helper Test", func() {
 									Histories:    histories[0:10],
 								}),
 								ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-								ghttp.VerifyRequest("GET", urlpath, "order=asc&page=1"),
+								ghttp.VerifyRequest("GET", urlpath, "order=desc&page=1"),
 							),
 						)
 
@@ -895,7 +1113,7 @@ var _ = Describe("API Helper Test", func() {
 									Histories:    histories[10:20],
 								}),
 								ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-								ghttp.VerifyRequest("GET", urlpath, "order=asc&page=2"),
+								ghttp.VerifyRequest("GET", urlpath, "order=desc&page=2"),
 							),
 						)
 
@@ -908,7 +1126,7 @@ var _ = Describe("API Helper Test", func() {
 									Histories:    histories[20:30],
 								}),
 								ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-								ghttp.VerifyRequest("GET", urlpath, "order=asc&page=3"),
+								ghttp.VerifyRequest("GET", urlpath, "order=desc&page=3"),
 							),
 						)
 
@@ -961,7 +1179,7 @@ var _ = Describe("API Helper Test", func() {
 					})
 				})
 
-				Context("Query multiple pages with order desc", func() {
+				Context("Query multiple pages with order asc", func() {
 					BeforeEach(func() {
 						apiServer.AppendHandlers(
 							ghttp.CombineHandlers(
@@ -972,7 +1190,7 @@ var _ = Describe("API Helper Test", func() {
 									Histories:    reversedHistories[0:10],
 								}),
 								ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-								ghttp.VerifyRequest("GET", urlpath, "order=desc&page=1"),
+								ghttp.VerifyRequest("GET", urlpath, "order=asc&page=1"),
 							),
 						)
 
@@ -985,7 +1203,7 @@ var _ = Describe("API Helper Test", func() {
 									Histories:    reversedHistories[10:20],
 								}),
 								ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-								ghttp.VerifyRequest("GET", urlpath, "order=desc&page=2"),
+								ghttp.VerifyRequest("GET", urlpath, "order=asc&page=2"),
 							),
 						)
 
@@ -998,7 +1216,7 @@ var _ = Describe("API Helper Test", func() {
 									Histories:    reversedHistories[20:30],
 								}),
 								ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-								ghttp.VerifyRequest("GET", urlpath, "order=desc&page=3"),
+								ghttp.VerifyRequest("GET", urlpath, "order=asc&page=3"),
 							),
 						)
 					})
@@ -1050,7 +1268,7 @@ var _ = Describe("API Helper Test", func() {
 					})
 				})
 
-				Context("Query with asc & start time & end time ", func() {
+				Context("Query with desc & start time & end time ", func() {
 					BeforeEach(func() {
 						apiServer.AppendHandlers(
 							ghttp.CombineHandlers(
@@ -1061,7 +1279,7 @@ var _ = Describe("API Helper Test", func() {
 									Histories:    histories[0:10],
 								}),
 								ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-								ghttp.VerifyRequest("GET", urlpath, fmt.Sprintf("order=asc&page=1&start-time=%v&end-time=%v", now, now+int64(9*120*1E9))),
+								ghttp.VerifyRequest("GET", urlpath, fmt.Sprintf("order=desc&page=1&start-time=%v&end-time=%v", now, now+int64(9*120*1E9))),
 							),
 						)
 					})
@@ -1096,7 +1314,7 @@ var _ = Describe("API Helper Test", func() {
 									Histories:    []*AppScalingHistory{},
 								}),
 								ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-								ghttp.VerifyRequest("GET", urlpath, fmt.Sprintf("order=asc&page=1&start-time=%v&end-time=%v", now, now+int64(9*120*1E9))),
+								ghttp.VerifyRequest("GET", urlpath, fmt.Sprintf("order=desc&page=1&start-time=%v&end-time=%v", now, now+int64(9*120*1E9))),
 							),
 						)
 					})
@@ -1116,7 +1334,7 @@ var _ = Describe("API Helper Test", func() {
 					apiServer.AppendHandlers(
 						ghttp.CombineHandlers(
 							ghttp.RespondWith(http.StatusUnauthorized, ""),
-							ghttp.VerifyRequest("GET", urlpath, "order=asc&page=1"),
+							ghttp.VerifyRequest("GET", urlpath, "order=desc&page=1"),
 						),
 					)
 				})
@@ -1133,7 +1351,7 @@ var _ = Describe("API Helper Test", func() {
 					apiServer.AppendHandlers(
 						ghttp.CombineHandlers(
 							ghttp.RespondWith(http.StatusInternalServerError, `{"success":false,"error":{"message":"Internal error","statusCode":500},"result":null}`),
-							ghttp.VerifyRequest("GET", urlpath, "order=asc&page=1"),
+							ghttp.VerifyRequest("GET", urlpath, "order=desc&page=1"),
 						),
 					)
 				})
@@ -1150,7 +1368,7 @@ var _ = Describe("API Helper Test", func() {
 					apiServer.AppendHandlers(
 						ghttp.CombineHandlers(
 							ghttp.RespondWith(http.StatusNotFound, "502 bad gateway"),
-							ghttp.VerifyRequest("GET", urlpath, "order=asc&page=1"),
+							ghttp.VerifyRequest("GET", urlpath, "order=desc&page=1"),
 						),
 					)
 				})
