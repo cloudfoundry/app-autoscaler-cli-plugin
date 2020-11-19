@@ -2,6 +2,9 @@ language: go
 
 dist: trusty
 sudo: required
+arch:
+  - amd64
+  - arm64
 
 env:
   global:
