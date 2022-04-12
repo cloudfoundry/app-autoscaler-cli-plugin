@@ -65,9 +65,8 @@ func makeTransport(skipSSLValidation bool, logger trace.Printer) http.RoundTripp
 		TLSHandshakeTimeout: 10 * time.Second,
 		DisableCompression:  true,
 		DisableKeepAlives:   true,
-		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: skipSSLValidation,
-		},
+		// #nosec G402
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: skipSSLValidation},
 	}, logger)
 }
 
@@ -105,7 +104,7 @@ func parseErrArrayResponse(a []interface{}) string {
 			if ik == "context" {
 				context = iv.(string)
 			} else if ik == "description" {
-				description,_ = strconv.Unquote(strings.Replace(strconv.Quote(iv.(string)), `\\u`, `\u`, -1))
+				description, _ = strconv.Unquote(strings.Replace(strconv.Quote(iv.(string)), `\\u`, `\u`, -1))
 			}
 		}
 		retMsg = retMsg + "\n" + fmt.Sprintf("%v: %v", context, description)
