@@ -17,10 +17,10 @@ import (
 	"strings"
 	"time"
 
-	"cli/models"
-	"cli/ui"
-	. "cli/util/http"
-	cjson "cli/util/json"
+	"code.cloudfoundry.org/app-autoscaler-cli-plugin/ui"
+	"code.cloudfoundry.org/app-autoscaler-cli-plugin/models"
+	. "code.cloudfoundry.org/app-autoscaler-cli-plugin/util/http"
+	cjson "code.cloudfoundry.org/app-autoscaler-cli-plugin/util/json"
 
 	"code.cloudfoundry.org/cli/cf/trace"
 )

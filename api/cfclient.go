@@ -1,7 +1,7 @@
 package api
 
 import (
-	"cli/ui"
+	"code.cloudfoundry.org/app-autoscaler-cli-plugin/ui"
 	"errors"
 	"fmt"
 

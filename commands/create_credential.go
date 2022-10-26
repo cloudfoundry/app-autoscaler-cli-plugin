@@ -1,14 +1,13 @@
 package commands
 
 import (
-	"cli/api"
-	"cli/ui"
+	"code.cloudfoundry.org/app-autoscaler-cli-plugin/api"
+	"code.cloudfoundry.org/app-autoscaler-cli-plugin/models"
+	"code.cloudfoundry.org/app-autoscaler-cli-plugin/ui"
 	"errors"
 	"fmt"
 	"io"
 	"os"
-
-	"cli/models"
 )
 
 type CreateCredentialCommand struct {
@@ -19,7 +18,7 @@ type CreateCredentialCommand struct {
 }
 
 type CreateCredentialPositionalArgs struct {
-	AppName        string `positional-arg-name:"APP_NAME" required:"true" `
+	AppName string `positional-arg-name:"APP_NAME" required:"true" `
 }
 
 func (command CreateCredentialCommand) Execute([]string) error {
@@ -77,7 +76,7 @@ func CreateCredential(cliConnection api.Connection, appName string, username str
 
 	var credentialResult []byte
 	if username != "" && password != "" {
-		credentialSource := models.Credential {
+		credentialSource := models.Credential{
 			Username: username,
 			Password: password,
 		}

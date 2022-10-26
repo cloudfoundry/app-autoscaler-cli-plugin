@@ -1,7 +1,7 @@
 package time
 
 import (
-	"cli/ui"
+	"code.cloudfoundry.org/app-autoscaler-cli-plugin/ui"
 	"errors"
 	"fmt"
 	"time"

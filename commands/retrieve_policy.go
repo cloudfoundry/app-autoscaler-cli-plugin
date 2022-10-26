@@ -1,8 +1,8 @@
 package commands
 
 import (
-	"cli/api"
-	"cli/ui"
+	"code.cloudfoundry.org/app-autoscaler-cli-plugin/ui"
+	"code.cloudfoundry.org/app-autoscaler-cli-plugin/api"
 	"errors"
 	"fmt"
 	"io"

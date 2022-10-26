@@ -13,4 +13,4 @@ clean:
 
 build:
 	@echo "# building cli"
-	@CGO_ENABLED=$(CGO_ENABLED) go build $(BUILDTAGS) $(BUILDFLAGS) -o build/$* src/cli/main.go
+	@CGO_ENABLED=$(CGO_ENABLED) go build $(BUILDTAGS) $(BUILDFLAGS) -o build/$* main.go

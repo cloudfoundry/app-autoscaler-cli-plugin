@@ -3,8 +3,8 @@ package main
 import (
 	"os"
 
-	"code.cloudfoundry.org/app-autoscaler-cli-plugin/src/cli/commands"
-	"code.cloudfoundry.org/app-autoscaler-cli-plugin/src/cli/ui"
+	"code.cloudfoundry.org/app-autoscaler-cli-plugin/commands"
+	"code.cloudfoundry.org/app-autoscaler-cli-plugin/ui"
 
 	"code.cloudfoundry.org/cli/plugin"
 	"github.com/jessevdk/go-flags"

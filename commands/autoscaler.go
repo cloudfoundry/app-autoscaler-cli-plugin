@@ -1,7 +1,7 @@
 package commands
 
 import (
-	"cli/api"
+	"code.cloudfoundry.org/app-autoscaler-cli-plugin/api"
 )
 
 type AutoScalerCmds struct {

@@ -3,8 +3,8 @@ package commands
 import (
 	"strings"
 
-	"cli/api"
-	"cli/ui"
+	"code.cloudfoundry.org/app-autoscaler-cli-plugin/ui"
+	"code.cloudfoundry.org/app-autoscaler-cli-plugin/api"
 )
 
 type ApiCommand struct {
