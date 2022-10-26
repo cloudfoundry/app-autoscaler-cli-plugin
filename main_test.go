@@ -13,12 +13,12 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	. "github.com/onsi/ginkgo/v2"
+  . "github.com/onsi/gomega"
 
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega/matchers"
-	. "github.com/onsi/gomega"
-	"code.cloudfoundry.org/app-autoscaler-cli-plugin/ui"
+
 	. "code.cloudfoundry.org/app-autoscaler-cli-plugin/models"
+	"code.cloudfoundry.org/app-autoscaler-cli-plugin/ui"
 	"code.cloudfoundry.org/app-autoscaler-cli-plugin/api"
 	cjson "code.cloudfoundry.org/app-autoscaler-cli-plugin/util/json"
 

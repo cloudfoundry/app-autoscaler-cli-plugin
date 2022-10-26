@@ -23,7 +23,7 @@ build_test-%:
 	@export build_folder=${PWD}/build/tests/$* &&\
 	 mkdir -p $${build_folder} &&\
 	 cd $* &&\
-	 for package in $$(  go list ./... | sed 's|.*/autoscaler/$*|.|' | awk '{ print length, $$0 }' | sort -n -r | cut -d" " -f2- );\
+	 for package in $$(  go list ./... | awk '{ print length, $$0 }' | sort -n -r | cut -d" " -f2- );\
 	 do\
 	   export test_file=$${build_folder}/$${package}.test;\
 	   echo "   - compiling $${package} to $${test_file}";\
