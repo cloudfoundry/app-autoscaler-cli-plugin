@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-    . "code.cloudfoundry.org/app-autoscaler-cli-plugin/src/cli/util/http"
+	. "code.cloudfoundry.org/app-autoscaler-cli-plugin/util/http"
 	"code.cloudfoundry.org/cli/cf/trace"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

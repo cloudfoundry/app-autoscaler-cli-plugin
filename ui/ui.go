@@ -8,12 +8,12 @@ import (
 
 func SayOK() {
 	c := color.New(color.FgGreen).Add(color.Bold)
-	c.Println(OK + "\n")
+	c.Println(OK)
 }
 
 func SayFailed() {
 	c := color.New(color.FgRed).Add(color.Bold)
-	c.Println(FAILED + "\n")
+	c.Println(FAILED)
 }
 
 func SayMessage(message string, args ...interface{}) {

@@ -14,9 +14,13 @@ import (
 	"strings"
 	"time"
 
-	"api"
-	"ui"
-	cjson "util/json"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega/matchers"
+	. "github.com/onsi/gomega"
+	"code.cloudfoundry.org/app-autoscaler-cli-plugin/ui"
+	. "code.cloudfoundry.org/app-autoscaler-cli-plugin/models"
+	"code.cloudfoundry.org/app-autoscaler-cli-plugin/api"
+	cjson "code.cloudfoundry.org/app-autoscaler-cli-plugin/util/json"
 
 	"code.cloudfoundry.org/cli/cf/util/testhelpers/rpcserver"
 	"code.cloudfoundry.org/cli/cf/util/testhelpers/rpcserver/rpcserverfakes"

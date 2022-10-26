@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"os"
 
-	. "cli/api"
+	. "code.cloudfoundry.org/app-autoscaler-cli-plugin/api"
 
 	"code.cloudfoundry.org/cli/plugin/pluginfakes"
 

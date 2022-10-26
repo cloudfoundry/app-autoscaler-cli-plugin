@@ -8,9 +8,11 @@ import (
 	"strconv"
 	"time"
 
-	. "cli/api"
-	. "cli/models"
-	"cli/ui"
+
+	"code.cloudfoundry.org/app-autoscaler-cli-plugin/ui"
+	. "code.cloudfoundry.org/app-autoscaler-cli-plugin/api"
+	. "code.cloudfoundry.org/app-autoscaler-cli-plugin/models"
+
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
