@@ -2,7 +2,6 @@ package main_test
 
 import (
 	"bytes"
-	plugin_models "code.cloudfoundry.org/cli/plugin/models"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -13,13 +12,14 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	plugin_models "code.cloudfoundry.org/cli/plugin/models"
 	. "github.com/onsi/ginkgo/v2"
-  . "github.com/onsi/gomega"
+	. "github.com/onsi/gomega"
 
-
+	"code.cloudfoundry.org/app-autoscaler-cli-plugin/api"
 	. "code.cloudfoundry.org/app-autoscaler-cli-plugin/models"
 	"code.cloudfoundry.org/app-autoscaler-cli-plugin/ui"
-	"code.cloudfoundry.org/app-autoscaler-cli-plugin/api"
 	cjson "code.cloudfoundry.org/app-autoscaler-cli-plugin/util/json"
 
 	"code.cloudfoundry.org/cli/cf/util/testhelpers/rpcserver"
@@ -28,6 +28,7 @@ import (
 	"github.com/onsi/gomega/gbytes"
 	"github.com/onsi/gomega/gexec"
 	"github.com/onsi/gomega/ghttp"
+	. "github.com/onsi/gomega/gstruct"
 )
 
 var _ = Describe("App-AutoScaler Commands", func() {

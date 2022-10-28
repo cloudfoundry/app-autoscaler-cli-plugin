@@ -104,7 +104,7 @@ OPTIONS:
 				Alias:    "ash",
 				HelpText: "Retrieve the scaling history of an application",
 				UsageDetails: plugin.Usage{
-					Usage: `cf autoscaling-history APP_NAME [--start START_TIME] [--end END_TIME] [--asc] [--output PATH_TO_FILE] 
+					Usage: `cf autoscaling-history APP_NAME [--start START_TIME] [--end END_TIME] [--asc] [--output PATH_TO_FILE]
 
 OPTIONS:
 	--start		Start time of the scaling history with format "yyyy-MM-ddTHH:mm:ss+/-HH:mm" or "yyyy-MM-ddTHH:mm:ssZ", default to very beginning if not specified.
