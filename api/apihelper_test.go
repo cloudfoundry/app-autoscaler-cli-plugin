@@ -8,13 +8,11 @@ import (
 	"strconv"
 	"time"
 
-
-	"code.cloudfoundry.org/app-autoscaler-cli-plugin/ui"
 	. "code.cloudfoundry.org/app-autoscaler-cli-plugin/api"
 	. "code.cloudfoundry.org/app-autoscaler-cli-plugin/models"
+	"code.cloudfoundry.org/app-autoscaler-cli-plugin/ui"
 
-
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/ghttp"
 	. "github.com/onsi/gomega/gstruct"
@@ -662,7 +660,7 @@ var _ = Describe("API Helper Test", func() {
 			var metrics, reversedMetrics []*AppAggregatedMetric
 
 			BeforeEach(func() {
-				now = int64(1E9)
+				now = int64(1e9)
 
 				for i := 0; i < 30; i++ {
 					metrics = append(metrics, &AppAggregatedMetric{
@@ -670,7 +668,7 @@ var _ = Describe("API Helper Test", func() {
 						Name:      "memoryused",
 						Unit:      "MB",
 						Value:     "100",
-						Timestamp: now + int64(i*30*1E9),
+						Timestamp: now + int64(i*30*1e9),
 					})
 				}
 
@@ -733,7 +731,7 @@ var _ = Describe("API Helper Test", func() {
 						for i, row := range data {
 							Expect(row[0]).To(Equal("memoryused"))
 							Expect(row[1]).To(Equal("100MB"))
-							Expect(row[2]).To(Equal(time.Unix(0, now+int64(i*30*1E9)).Format(time.RFC3339)))
+							Expect(row[2]).To(Equal(time.Unix(0, now+int64(i*30*1e9)).Format(time.RFC3339)))
 						}
 
 						next, data, err = apihelper.GetAggregatedMetrics("memoryused", 0, 0, false, uint64(2))
@@ -744,7 +742,7 @@ var _ = Describe("API Helper Test", func() {
 						for i, row := range data {
 							Expect(row[0]).To(Equal("memoryused"))
 							Expect(row[1]).To(Equal("100MB"))
-							Expect(row[2]).To(Equal(time.Unix(0, now+int64((i+10)*30*1E9)).Format(time.RFC3339)))
+							Expect(row[2]).To(Equal(time.Unix(0, now+int64((i+10)*30*1e9)).Format(time.RFC3339)))
 						}
 
 						next, data, err = apihelper.GetAggregatedMetrics("memoryused", 0, 0, false, uint64(3))
@@ -755,7 +753,7 @@ var _ = Describe("API Helper Test", func() {
 						for i, row := range data {
 							Expect(row[0]).To(Equal("memoryused"))
 							Expect(row[1]).To(Equal("100MB"))
-							Expect(row[2]).To(Equal(time.Unix(0, now+int64((i+20)*30*1E9)).Format(time.RFC3339)))
+							Expect(row[2]).To(Equal(time.Unix(0, now+int64((i+20)*30*1e9)).Format(time.RFC3339)))
 						}
 
 					})
@@ -813,7 +811,7 @@ var _ = Describe("API Helper Test", func() {
 						for i, row := range data {
 							Expect(row[0]).To(Equal("memoryused"))
 							Expect(row[1]).To(Equal("100MB"))
-							Expect(row[2]).To(Equal(time.Unix(0, now+int64((29-i)*30*1E9)).Format(time.RFC3339)))
+							Expect(row[2]).To(Equal(time.Unix(0, now+int64((29-i)*30*1e9)).Format(time.RFC3339)))
 						}
 
 						next, data, err = apihelper.GetAggregatedMetrics("memoryused", 0, 0, true, uint64(2))
@@ -824,7 +822,7 @@ var _ = Describe("API Helper Test", func() {
 						for i, row := range data {
 							Expect(row[0]).To(Equal("memoryused"))
 							Expect(row[1]).To(Equal("100MB"))
-							Expect(row[2]).To(Equal(time.Unix(0, now+int64((19-i)*30*1E9)).Format(time.RFC3339)))
+							Expect(row[2]).To(Equal(time.Unix(0, now+int64((19-i)*30*1e9)).Format(time.RFC3339)))
 						}
 
 						next, data, err = apihelper.GetAggregatedMetrics("memoryused", 0, 0, true, uint64(3))
@@ -835,7 +833,7 @@ var _ = Describe("API Helper Test", func() {
 						for i, row := range data {
 							Expect(row[0]).To(Equal("memoryused"))
 							Expect(row[1]).To(Equal("100MB"))
-							Expect(row[2]).To(Equal(time.Unix(0, now+int64((9-i)*30*1E9)).Format(time.RFC3339)))
+							Expect(row[2]).To(Equal(time.Unix(0, now+int64((9-i)*30*1e9)).Format(time.RFC3339)))
 						}
 
 					})
@@ -852,14 +850,14 @@ var _ = Describe("API Helper Test", func() {
 									Metrics:      metrics[0:10],
 								}),
 								ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-								ghttp.VerifyRequest("GET", urlpath, fmt.Sprintf("order=desc&page=1&start-time=%v&end-time=%v", now, now+int64(9*30*1E9))),
+								ghttp.VerifyRequest("GET", urlpath, fmt.Sprintf("order=desc&page=1&start-time=%v&end-time=%v", now, now+int64(9*30*1e9))),
 							),
 						)
 					})
 
 					It("succeed", func() {
 
-						next, data, err := apihelper.GetAggregatedMetrics("memoryused", now, now+int64(9*30*1E9), false, uint64(1))
+						next, data, err := apihelper.GetAggregatedMetrics("memoryused", now, now+int64(9*30*1e9), false, uint64(1))
 						Expect(err).NotTo(HaveOccurred())
 						Expect(next).To(BeFalse())
 						Expect(len(data)).To(Equal(10))
@@ -867,7 +865,7 @@ var _ = Describe("API Helper Test", func() {
 						for i, row := range data {
 							Expect(row[0]).To(Equal("memoryused"))
 							Expect(row[1]).To(Equal("100MB"))
-							Expect(row[2]).To(Equal(time.Unix(0, now+int64(i*30*1E9)).Format(time.RFC3339)))
+							Expect(row[2]).To(Equal(time.Unix(0, now+int64(i*30*1e9)).Format(time.RFC3339)))
 						}
 
 					})
@@ -884,13 +882,13 @@ var _ = Describe("API Helper Test", func() {
 									Metrics:      []*AppAggregatedMetric{},
 								}),
 								ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-								ghttp.VerifyRequest("GET", urlpath, fmt.Sprintf("order=desc&page=1&start-time=%v&end-time=%v", now, now+int64(9*30*1E9))),
+								ghttp.VerifyRequest("GET", urlpath, fmt.Sprintf("order=desc&page=1&start-time=%v&end-time=%v", now, now+int64(9*30*1e9))),
 							),
 						)
 					})
 
 					It("succeed", func() {
-						next, data, err := apihelper.GetAggregatedMetrics("memoryused", now, now+int64(9*30*1E9), false, uint64(1))
+						next, data, err := apihelper.GetAggregatedMetrics("memoryused", now, now+int64(9*30*1e9), false, uint64(1))
 						Expect(err).NotTo(HaveOccurred())
 						Expect(next).To(BeFalse())
 						Expect(len(data)).To(Equal(0))
@@ -958,12 +956,12 @@ var _ = Describe("API Helper Test", func() {
 			var histories, reversedHistories []*AppScalingHistory
 
 			BeforeEach(func() {
-				now = int64(1E9)
+				now = int64(1e9)
 
 				for i := 0; i < 10; i++ {
 					histories = append(histories, &AppScalingHistory{
 						AppId:        fakeAppId,
-						Timestamp:    now + int64(i*120*1E9),
+						Timestamp:    now + int64(i*120*1e9),
 						ScalingType:  0, //dynamic
 						Status:       0, //succeed
 						OldInstances: i + 1,
@@ -977,7 +975,7 @@ var _ = Describe("API Helper Test", func() {
 				for i := 10; i < 20; i++ {
 					histories = append(histories, &AppScalingHistory{
 						AppId:        fakeAppId,
-						Timestamp:    now + int64(i*120*1E9),
+						Timestamp:    now + int64(i*120*1e9),
 						ScalingType:  1, //scheduled
 						Status:       0, //succeed
 						OldInstances: i + 1,
@@ -991,7 +989,7 @@ var _ = Describe("API Helper Test", func() {
 				for i := 20; i < 30; i++ {
 					histories = append(histories, &AppScalingHistory{
 						AppId:        fakeAppId,
-						Timestamp:    now + int64(i*120*1E9),
+						Timestamp:    now + int64(i*120*1e9),
 						ScalingType:  1, //scheduled
 						Status:       1, //failed
 						OldInstances: i + 1,
@@ -1025,7 +1023,7 @@ var _ = Describe("API Helper Test", func() {
 						})
 						histories_ut = append(histories_ut, &AppScalingHistory{
 							AppId:        fakeAppId,
-							Timestamp:    now + int64(120*1E9),
+							Timestamp:    now + int64(120*1e9),
 							ScalingType:  0, //dynamic
 							Status:       0, //succeed
 							OldInstances: 11,
@@ -1036,7 +1034,7 @@ var _ = Describe("API Helper Test", func() {
 						})
 						histories_ut = append(histories_ut, &AppScalingHistory{
 							AppId:        fakeAppId,
-							Timestamp:    now + 2*int64(120*1E9),
+							Timestamp:    now + 2*int64(120*1e9),
 							ScalingType:  0, //dynamic
 							Status:       0, //succeed
 							OldInstances: 2,
@@ -1077,14 +1075,14 @@ var _ = Describe("API Helper Test", func() {
 						Expect(data[1][0]).To(Equal("dynamic"))
 						Expect(data[1][1]).To(Equal("succeeded"))
 						Expect(data[1][2]).To(Equal("11->2"))
-						Expect(data[1][3]).To(Equal(time.Unix(0, now+int64(120*1E9)).Format(time.RFC3339)))
+						Expect(data[1][3]).To(Equal(time.Unix(0, now+int64(120*1e9)).Format(time.RFC3339)))
 						Expect(data[1][4]).To(Equal("-9 instance(s) because fakeMsg"))
 						Expect(data[1][5]).To(Equal("fakeError"))
 
 						Expect(data[2][0]).To(Equal("dynamic"))
 						Expect(data[2][1]).To(Equal("succeeded"))
 						Expect(data[2][2]).To(Equal("2->10"))
-						Expect(data[2][3]).To(Equal(time.Unix(0, now+2*int64(120*1E9)).Format(time.RFC3339)))
+						Expect(data[2][3]).To(Equal(time.Unix(0, now+2*int64(120*1e9)).Format(time.RFC3339)))
 						Expect(data[2][4]).To(Equal("+8 instance(s) because fakeMsg"))
 						Expect(data[2][5]).To(Equal("fakeError"))
 
@@ -1145,7 +1143,7 @@ var _ = Describe("API Helper Test", func() {
 							Expect(row[0]).To(Equal("dynamic"))
 							Expect(row[1]).To(Equal("succeeded"))
 							Expect(row[2]).To(Equal(strconv.Itoa(i+1) + "->" + strconv.Itoa(i+2)))
-							Expect(row[3]).To(Equal(time.Unix(0, now+int64(i*120*1E9)).Format(time.RFC3339)))
+							Expect(row[3]).To(Equal(time.Unix(0, now+int64(i*120*1e9)).Format(time.RFC3339)))
 							Expect(row[4]).To(Equal("fakeReason"))
 							Expect(row[5]).To(Equal("fakeError"))
 						}
@@ -1159,7 +1157,7 @@ var _ = Describe("API Helper Test", func() {
 							Expect(row[0]).To(Equal("scheduled"))
 							Expect(row[1]).To(Equal("succeeded"))
 							Expect(row[2]).To(Equal(strconv.Itoa(i+10+1) + "->" + strconv.Itoa(i+10+2)))
-							Expect(row[3]).To(Equal(time.Unix(0, now+int64((i+10)*120*1E9)).Format(time.RFC3339)))
+							Expect(row[3]).To(Equal(time.Unix(0, now+int64((i+10)*120*1e9)).Format(time.RFC3339)))
 							Expect(row[4]).To(Equal("fakeReason"))
 							Expect(row[5]).To(Equal("fakeError"))
 						}
@@ -1173,7 +1171,7 @@ var _ = Describe("API Helper Test", func() {
 							Expect(row[0]).To(Equal("scheduled"))
 							Expect(row[1]).To(Equal("failed"))
 							Expect(row[2]).To(Equal(""))
-							Expect(row[3]).To(Equal(time.Unix(0, now+int64((i+20)*120*1E9)).Format(time.RFC3339)))
+							Expect(row[3]).To(Equal(time.Unix(0, now+int64((i+20)*120*1e9)).Format(time.RFC3339)))
 							Expect(row[4]).To(Equal("fakeReason"))
 							Expect(row[5]).To(Equal("fakeError"))
 						}
@@ -1234,7 +1232,7 @@ var _ = Describe("API Helper Test", func() {
 							Expect(row[0]).To(Equal("scheduled"))
 							Expect(row[1]).To(Equal("failed"))
 							Expect(row[2]).To(Equal(""))
-							Expect(row[3]).To(Equal(time.Unix(0, now+int64((29-i)*120*1E9)).Format(time.RFC3339)))
+							Expect(row[3]).To(Equal(time.Unix(0, now+int64((29-i)*120*1e9)).Format(time.RFC3339)))
 							Expect(row[4]).To(Equal("fakeReason"))
 							Expect(row[5]).To(Equal("fakeError"))
 						}
@@ -1248,7 +1246,7 @@ var _ = Describe("API Helper Test", func() {
 							Expect(row[0]).To(Equal("scheduled"))
 							Expect(row[1]).To(Equal("succeeded"))
 							Expect(row[2]).To(Equal(strconv.Itoa(19-i+1) + "->" + strconv.Itoa(19-i+2)))
-							Expect(row[3]).To(Equal(time.Unix(0, now+int64((19-i)*120*1E9)).Format(time.RFC3339)))
+							Expect(row[3]).To(Equal(time.Unix(0, now+int64((19-i)*120*1e9)).Format(time.RFC3339)))
 							Expect(row[4]).To(Equal("fakeReason"))
 							Expect(row[5]).To(Equal("fakeError"))
 						}
@@ -1262,7 +1260,7 @@ var _ = Describe("API Helper Test", func() {
 							Expect(row[0]).To(Equal("dynamic"))
 							Expect(row[1]).To(Equal("succeeded"))
 							Expect(row[2]).To(Equal(strconv.Itoa(9-i+1) + "->" + strconv.Itoa(9-i+2)))
-							Expect(row[3]).To(Equal(time.Unix(0, now+int64((9-i)*120*1E9)).Format(time.RFC3339)))
+							Expect(row[3]).To(Equal(time.Unix(0, now+int64((9-i)*120*1e9)).Format(time.RFC3339)))
 							Expect(row[4]).To(Equal("fakeReason"))
 							Expect(row[5]).To(Equal("fakeError"))
 						}
@@ -1281,14 +1279,14 @@ var _ = Describe("API Helper Test", func() {
 									Histories:    histories[0:10],
 								}),
 								ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-								ghttp.VerifyRequest("GET", urlpath, fmt.Sprintf("order=desc&page=1&start-time=%v&end-time=%v", now, now+int64(9*120*1E9))),
+								ghttp.VerifyRequest("GET", urlpath, fmt.Sprintf("order=desc&page=1&start-time=%v&end-time=%v", now, now+int64(9*120*1e9))),
 							),
 						)
 					})
 
 					It("succeed", func() {
 
-						next, data, err := apihelper.GetHistory(now, now+int64(9*120*1E9), false, uint64(1))
+						next, data, err := apihelper.GetHistory(now, now+int64(9*120*1e9), false, uint64(1))
 						Expect(err).NotTo(HaveOccurred())
 						Expect(next).To(BeFalse())
 						Expect(len(data)).To(Equal(10))
@@ -1297,7 +1295,7 @@ var _ = Describe("API Helper Test", func() {
 							Expect(row[0]).To(Equal("dynamic"))
 							Expect(row[1]).To(Equal("succeeded"))
 							Expect(row[2]).To(Equal(strconv.Itoa(i+1) + "->" + strconv.Itoa(i+2)))
-							Expect(row[3]).To(Equal(time.Unix(0, now+int64(i*120*1E9)).Format(time.RFC3339)))
+							Expect(row[3]).To(Equal(time.Unix(0, now+int64(i*120*1e9)).Format(time.RFC3339)))
 							Expect(row[4]).To(Equal("fakeReason"))
 							Expect(row[5]).To(Equal("fakeError"))
 						}
@@ -1316,13 +1314,13 @@ var _ = Describe("API Helper Test", func() {
 									Histories:    []*AppScalingHistory{},
 								}),
 								ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-								ghttp.VerifyRequest("GET", urlpath, fmt.Sprintf("order=desc&page=1&start-time=%v&end-time=%v", now, now+int64(9*120*1E9))),
+								ghttp.VerifyRequest("GET", urlpath, fmt.Sprintf("order=desc&page=1&start-time=%v&end-time=%v", now, now+int64(9*120*1e9))),
 							),
 						)
 					})
 
 					It("succeed", func() {
-						next, data, err := apihelper.GetHistory(now, now+int64(9*120*1E9), false, uint64(1))
+						next, data, err := apihelper.GetHistory(now, now+int64(9*120*1e9), false, uint64(1))
 						Expect(err).NotTo(HaveOccurred())
 						Expect(next).To(BeFalse())
 						Expect(len(data)).To(Equal(0))

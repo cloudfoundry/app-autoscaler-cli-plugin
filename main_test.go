@@ -159,7 +159,8 @@ var _ = Describe("App-AutoScaler Commands", func() {
 			Context("with http server", func() {
 				Context("When endpoint url is valid", func() {
 					It("Succeed' ", func() {
-						session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
+						command := exec.Command(validPluginPath, args...)
+						session, err = gexec.Start(command, GinkgoWriter, GinkgoWriter)
 						Expect(err).NotTo(HaveOccurred())
 						session.Wait()
 						Expect(session).To(gbytes.Say(ui.SetAPIEndpoint, apiEndpoint))
