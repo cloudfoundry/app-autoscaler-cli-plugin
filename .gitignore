@@ -1,3 +1,6 @@
 /out/
 /pkg/
 /bin/
+.idea
+build
+
