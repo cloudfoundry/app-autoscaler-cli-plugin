@@ -1,7 +1,6 @@
 { stdenv }:
-stdenv.mkDerivation {
-  pname = "hello";
-  version = "2.12.1";
-
+stdenv.buildGoModule {
+  pname = "app-autoscaler-cli-plugin";
+  version = "latest";
   src = ./.;
 }
