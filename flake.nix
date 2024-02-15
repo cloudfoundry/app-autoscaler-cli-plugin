@@ -14,7 +14,11 @@
       nixpkgsFor = forAllSystems (system: import nixpkgs { inherit system; });
     in {
       packages = forAllSystems (system:{
-          app-autoscaler-cli-plugin = nixpkgsFor.${system}.callPackage ./app-autoscaler-cli-plugin.nix {};
+          app-autoscaler-cli-plugin = nixpkgsFor.${system}.buildGoModule {
+            pname = "app-autoscaler-cli-plugin";
+            version = "latest";
+            src = ./.;
+          };
       });
     };
 }
