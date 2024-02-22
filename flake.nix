@@ -27,6 +27,9 @@
               lastModifiedDate = self.lastModifiedDate or self.lastModified or "19700101";
             in "${builtins.substring 0 8 lastModifiedDate}-dev";
           src = ./.;
+
+          # 🔨🚧 To-do: Create automation to get that updated if necessary per pull-request.
+          # As long as this automation does not exist, it needs to be updated manually.
           vendorHash = "sha256-NzEStcOv8ZQsHOA8abLABKy+ZE3/SiYbRD/ZVxo0CEk=";
 
           doCheck = false;
@@ -38,7 +41,7 @@
               policies, retrieve metrics and scaling event history.
             '';
             homepage = "https://github.com/cloudfoundry/app-autoscaler-cli-plugin";
-            license = [nixpkgsLib.licenses.apsl20];
+            license = [nixpkgs.lib.licenses.apsl20];
           };
         };
       };
