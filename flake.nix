@@ -34,7 +34,7 @@
           meta = {
             description = ''
               App-AutoScaler plug-in provides the command line interface to manage
-              [App AutoScaler](<https://github.com/cloudfoundry-incubator/app-autoscaler>)
+              [App AutoScaler](<https://github.com/cloudfoundry/app-autoscaler-release>)
               policies, retrieve metrics and scaling event history.
             '';
             homepage = "https://github.com/cloudfoundry/app-autoscaler-cli-plugin";
