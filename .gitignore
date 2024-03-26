@@ -1,6 +1,4 @@
-/out/
-/pkg/
-/bin/
-.idea
-build
+# Nix build-results
+/result
+/result-*
 
