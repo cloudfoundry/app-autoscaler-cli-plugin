@@ -24,8 +24,6 @@ jobs:
   check-tidy-go-mod:
     name: Adapt the hashes in Nix-package-definitions.
     runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
     steps:
       - uses: actions/checkout@v4
         with:
