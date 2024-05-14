@@ -3,14 +3,14 @@ on:
   workflow_dispatch: {} # 🚧 To-do: Remove this debug code.
   pull_request:
     branches:
-      - master
+      - main
     paths:
       - ".github/workflows/nix_adapt_hashes.yaml"
       - "go.mod"
       - "go.sum"
   push:
     branches:
-      - master
+      - main
     paths:
       - ".github/workflows/nix_adapt_hashes.yaml"
       - "go.mod"
