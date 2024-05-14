@@ -1,0 +1,39 @@
+name: Check if go.mod is tidy
+on:
+  pull_request:
+
+concurrency:
+  group: "${{ github.workflow }}/${{ github.ref }}"
+  cancel-in-progress: true
+
+jobs:
+  check-tidy-go-mod:
+    name: ensure that go mod tidy has run
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Trust my checkout
+        run: git config --global --add safe.directory "${GITHUB_WORKSPACE}"
+
+      - name: run go mod tidy on all .mod's
+        shell: bash
+        run: |
+          #! /usr/bin/env bash
+          set -eu -o pipefail
+
+          make generate-fakes
+          make generate-openapi-generated-clients-and-servers
+          make go-mod-tidy
+
+      - name: Check if there is any change
+        id: get_changes
+        run: echo "changed=$(git status --porcelain | wc -l)" >> $GITHUB_OUTPUT
+
+      - name: Process changes
+        if: steps.get_changes.outputs.changed != 0
+        run: |
+          echo "::error::go.mod is not tidy, run make go-mod-tidy to tidy"
+          exit 1
