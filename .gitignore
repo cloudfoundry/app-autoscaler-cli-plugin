@@ -1,4 +1,7 @@
-# Nix build-results
+# Editor-configurations
+.idea
+
+# ❄ Nix build-results
 /result
 /result-*
 
