@@ -1,10 +1,18 @@
 name: Adapt Nix hashes
 on:
-  workflow_call: # 🚧 To-do: Remove this debug code.
+  workflow_dispatch: {} # 🚧 To-do: Remove this debug code.
   pull_request:
     branches:
       - master
     paths:
+      - ".github/workflows/nix_adapt_hashes.yaml"
+      - "go.mod"
+      - "go.sum"
+  push:
+    branches:
+      - master
+    paths:
+      - ".github/workflows/nix_adapt_hashes.yaml"
       - "go.mod"
       - "go.sum"
 
