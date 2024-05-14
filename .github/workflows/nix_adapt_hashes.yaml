@@ -1,0 +1,55 @@
+name: Adapt Nix hashes
+on:
+  workflow_call: # 🚧 To-do: Remove this debug code.
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "go.mod"
+      - "go.sum"
+
+concurrency:
+  group: "${{ github.workflow }}/${{ github.ref }}"
+  cancel-in-progress: true
+
+jobs:
+  check-tidy-go-mod:
+    name: Adapt the hashes in Nix-package-definitions.
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          # With push token that can trigger new PR jobs.
+          token: ${{ secrets.APP_AUTOSCALER_CI_TOKEN }}
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v26
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install nix-update
+        run: nix profile install 'nixpkgs/nixos-unstable#nix-update'
+
+      - name: Run nix-update
+        shell: bash
+        run: |
+          #! /usr/bin/env bash
+          set -eu -o pipefail
+
+          nix-update 'app-autoscaler-cli-plugin' --flake
+
+          declare -i -r num_changed_files="$(git status --porcelain | wc --lines)"
+          if ((num_changed_files > 0))
+          then
+            echo 'Changes to some files were necessary!'
+            declare -r tidy_message='🤖🦾🛠️ Update Nix-package-hashes'
+            git add .
+            git commit --message="${tidy_message}"
+            git push
+          else
+            echo 'No hash-changes necessary!'
+          fi
+          echo '🏁'
