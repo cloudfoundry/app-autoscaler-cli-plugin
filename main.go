@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"code.cloudfoundry.org/app-autoscaler-cli-plugin/commands"
@@ -11,6 +12,14 @@ import (
 )
 
 type AutoScaler struct{}
+
+var BuildVersion    string
+var BuildPrerelease string
+var BuildMeta       string
+var BuildDate       string
+var BuildVcsUrl     string
+var BuildVcsId      string
+var BuildVcsIdDate  string
 
 func (as *AutoScaler) GetMetadata() plugin.PluginMetadata {
 	return plugin.PluginMetadata{
@@ -119,6 +128,17 @@ OPTIONS:
 }
 
 func main() {
+
+	args := os.Args[1:]
+	if len(args) == 0 {
+	    fmt.Println("Upstream Version: ",BuildVersion)
+	    fmt.Println("Build Prerelease: ",BuildPrerelease)
+	    fmt.Println("Build Version: ", BuildMeta)
+	    fmt.Println("Build Date: ", BuildDate)
+	    fmt.Println("VCS Url:", BuildVcsUrl)
+	    fmt.Println("VCS Identifier: ", BuildVcsId)
+	    fmt.Println("VCS Identififer Date: ", BuildVcsIdDate)
+    }
 	plugin.Start(new(AutoScaler))
 }
 
