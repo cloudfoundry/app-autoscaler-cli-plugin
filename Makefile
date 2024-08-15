@@ -13,8 +13,6 @@ endif
 GOOS           :=$(shell go env GOOS)
 GOARCH         :=$(shell go env GOARCH)
 GOMODULECMD    :=main
-RELEASE_ROOT   ?=release
-TARGETS        ?=linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64
 
 
 SEMVER_VERSION    ?=3.0.0
