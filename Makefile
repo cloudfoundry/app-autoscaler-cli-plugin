@@ -1,12 +1,11 @@
 SHELL := /bin/bash
 .SHELLFLAGS = -euo pipefail -c
-# MAKEFLAGS = -s
 CGO_ENABLED = 0
 BUILDTAGS :=
 BUILD_PATH:=build
 BUILD:=ascli
 ifeq ($(CGO_ENABLED),1)
-BUILDFLAGS := -linkmode=external
+BUILDFLAGS += -linkmode=external
 else
 BUILDFLAGS :=
 endif
@@ -17,7 +16,7 @@ GOMODULECMD    :=main
 
 SEMVER_VERSION    ?=3.0.0
 SEMVER_PRERELEASE ?=
-SEMVER_BUILDMETA  ?= +2
+SEMVER_BUILDMETA  ?= +3
 BUILD_DATE        :=$(shell date -u -Iseconds)
 BUILD_VCS_URL     :=$(shell git config --get remote.origin.url) 
 BUILD_VCS_ID      :=$(shell git log -n 1 --date=iso-strict-local --format="%h")
