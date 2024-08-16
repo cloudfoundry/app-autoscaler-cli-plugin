@@ -18,8 +18,7 @@ cf install-plugin -r CF-Community app-autoscaler-plugin
 $ git clone git@github.com:cloudfoundry-incubator/app-autoscaler-cli-plugin.git
 $ cd app-autoscaler-cli-plugin
 $ git submodule update --init --recursive
-$ source .envrc
-$ scripts/build
+$ make build
 $ cf install-plugin out/ascli
 ```
 
