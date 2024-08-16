@@ -32,18 +32,20 @@ GO_LDFLAGS = -ldflags="$(BUILDFLAGS) \
 	            -X '$(GOMODULECMD).BuildVcsId=$(BUILD_VCS_ID)' \
 		    -X '$(GOMODULECMD).BuildVcsIdDate=$(BUILD_VCS_ID_DATE)'"
 
+build: SEMVER_PRERELEASE := dev
+
 test_dirs=$(shell   find . -name "*_test.go" -exec dirname {} \; |  cut -d/ -f2 | sort | uniq)
 
 all: releases
 
-.PHONY: clean distbuild distclean linux darwin windows
+.PHONY: clean distbuild distclean linux darwin windows build
 clean:
 	@echo "# cleaning autoscaler"
 	@go clean -cache -testcache
 	@rm -rf build
 
 # Releases
-releases: distclean distbuild linux darwin # windows
+releases: distclean distbuild linux darwin windows
 
 distbuild:
 	mkdir -p ${BUILD_PATH}
@@ -62,9 +64,9 @@ darwin:
 windows:
 	CGO_ENABLED=$(CGO_ENABLED) GOOS=windows GOARCH=amd64 go build ${GO_LDFLAGS} -o ${BUILD_PATH}/${BUILD}-windows-amd64-${FILE_BUILD_VERSION}.exe .
 
-build:
+build: clean
 	@echo "# building cli"
-	@CGO_ENABLED=$(CGO_ENABLED) go build $(BUILDTAGS) $(GO_LDFLAGS) -o ${BUILD_PATH}/${BUILD}-${FILE_BUILD_VERSION} .
+	CGO_ENABLED=$(CGO_ENABLED) go build $(BUILDTAGS) $(GO_LDFLAGS) -o ${BUILD_PATH}/${BUILD}-${FILE_BUILD_VERSION} .
 
 
 test:
