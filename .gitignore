@@ -1,6 +1,7 @@
-/out/
-/pkg/
-/bin/
+# Editor-configurations
 .idea
-build
+
+# ❄ Nix build-results
+/result
+/result-*
 

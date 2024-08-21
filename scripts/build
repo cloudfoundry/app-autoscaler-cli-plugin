@@ -1,7 +1,7 @@
-#!/bin/bash
+#! /usr/bin/env bash
 
 set -e
 
-ROOT_DIR=$(cd $(dirname $(dirname $0)) && pwd)
+ROOT_DIR="$(cd $(dirname $(dirname $0)) && pwd)"
 
-go build -o $ROOT_DIR/out/ascli cli 
+go build -o "${ROOT_DIR}/out/ascli/cli"
