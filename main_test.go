@@ -261,7 +261,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 					session, err = gexec.Start(exec.Command(validPluginPath, args...), GinkgoWriter, GinkgoWriter)
 					Expect(err).NotTo(HaveOccurred())
 					session.Wait()
-					Expect(session).To(gbytes.Say(ui.InvalidSSLCerts, apiTLSEndpoint))
+					Expect(session).To(gbytes.Say(ui.InvalidSSLCerts, apiTLSEndpoint, ".*"))
 					Expect(session.ExitCode()).To(Equal(1))
 				})
 
