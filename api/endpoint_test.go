@@ -6,13 +6,12 @@ import (
 	"net/http"
 	"os"
 
-	. "code.cloudfoundry.org/app-autoscaler-cli-plugin/api"
-
 	"code.cloudfoundry.org/cli/plugin/pluginfakes"
-
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/ghttp"
+
+	. "code.cloudfoundry.org/app-autoscaler-cli-plugin/api"
 )
 
 var _ = Describe("Endpoint Helper Test", func() {

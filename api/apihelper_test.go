@@ -8,14 +8,14 @@ import (
 	"strconv"
 	"time"
 
-	. "code.cloudfoundry.org/app-autoscaler-cli-plugin/api"
-	. "code.cloudfoundry.org/app-autoscaler-cli-plugin/models"
-	"code.cloudfoundry.org/app-autoscaler-cli-plugin/ui"
-
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/ghttp"
 	. "github.com/onsi/gomega/gstruct"
+
+	. "code.cloudfoundry.org/app-autoscaler-cli-plugin/api"
+	. "code.cloudfoundry.org/app-autoscaler-cli-plugin/models"
+	"code.cloudfoundry.org/app-autoscaler-cli-plugin/ui"
 )
 
 var _ = Describe("API Helper Test", func() {

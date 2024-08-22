@@ -1,10 +1,11 @@
 package commands
 
 import (
-	"code.cloudfoundry.org/app-autoscaler-cli-plugin/ui"
-	"code.cloudfoundry.org/app-autoscaler-cli-plugin/api"
 	"errors"
 	"os"
+
+	"code.cloudfoundry.org/app-autoscaler-cli-plugin/api"
+	"code.cloudfoundry.org/app-autoscaler-cli-plugin/ui"
 )
 
 type DetachPolicyCommand struct {

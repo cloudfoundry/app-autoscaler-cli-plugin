@@ -1,6 +1,7 @@
 package models
 
 type ScalingType int
+
 type ScalingStatus int
 
 type ScalingPolicy struct {

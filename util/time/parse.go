@@ -1,10 +1,11 @@
 package time
 
 import (
-	"code.cloudfoundry.org/app-autoscaler-cli-plugin/ui"
 	"errors"
 	"fmt"
 	"time"
+
+	"code.cloudfoundry.org/app-autoscaler-cli-plugin/ui"
 )
 
 var timeFormats = []string{

@@ -5,12 +5,13 @@ import (
 	"strings"
 	"time"
 
-	. "code.cloudfoundry.org/app-autoscaler-cli-plugin/util/http"
 	"code.cloudfoundry.org/cli/cf/trace"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gbytes"
 	"github.com/onsi/gomega/ghttp"
+
+	. "code.cloudfoundry.org/app-autoscaler-cli-plugin/util/http"
 )
 
 var _ = Describe("Transport Test", func() {

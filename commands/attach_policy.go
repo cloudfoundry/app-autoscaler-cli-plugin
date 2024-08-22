@@ -1,13 +1,14 @@
 package commands
 
 import (
-	"code.cloudfoundry.org/app-autoscaler-cli-plugin/api"
-	"code.cloudfoundry.org/app-autoscaler-cli-plugin/ui"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
+
+	"code.cloudfoundry.org/app-autoscaler-cli-plugin/api"
+	"code.cloudfoundry.org/app-autoscaler-cli-plugin/ui"
 )
 
 type AttachPolicyCommand struct {

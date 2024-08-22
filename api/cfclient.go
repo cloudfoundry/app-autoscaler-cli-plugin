@@ -1,11 +1,12 @@
 package api
 
 import (
-	"code.cloudfoundry.org/app-autoscaler-cli-plugin/ui"
 	"errors"
 	"fmt"
 
-	"code.cloudfoundry.org/cli/plugin/models"
+	plugin_models "code.cloudfoundry.org/cli/plugin/models"
+
+	"code.cloudfoundry.org/app-autoscaler-cli-plugin/ui"
 )
 
 type CFClient struct {

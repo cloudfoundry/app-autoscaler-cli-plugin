@@ -41,7 +41,7 @@ test_dirs=$(shell   find . -name "*_test.go" -exec dirname {} \; |  cut -d/ -f2 
 
 all: test releases
 
-.PHONY: clean distbuild distclean linux darwin windows build
+.PHONY: clean distbuild distclean linux darwin windows build fmt test check
 clean:
 	@echo "# cleaning autoscaler"
 	@go clean -cache -testcache
@@ -71,6 +71,10 @@ build: clean
 	@echo "# building cli"
 	CGO_ENABLED=$(CGO_ENABLED) go build $(BUILDTAGS) $(GO_LDFLAGS) -o ${BUILD_PATH}/${BUILD}-${FILE_BUILD_VERSION} .
 
+check: fmt test
+
+fmt:
+	@goimports-reviser -rm-unused -set-alias -format ./...
 
 test:
 	@ginkgo -r .

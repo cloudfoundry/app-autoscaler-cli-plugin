@@ -1,15 +1,16 @@
 package commands
 
 import (
-	"code.cloudfoundry.org/app-autoscaler-cli-plugin/ui"
-	"code.cloudfoundry.org/app-autoscaler-cli-plugin/api"
-	ctime "code.cloudfoundry.org/app-autoscaler-cli-plugin/util/time"
 	"errors"
 	"fmt"
 	"io"
 	"os"
 	"regexp"
 	"time"
+
+	"code.cloudfoundry.org/app-autoscaler-cli-plugin/api"
+	"code.cloudfoundry.org/app-autoscaler-cli-plugin/ui"
+	ctime "code.cloudfoundry.org/app-autoscaler-cli-plugin/util/time"
 )
 
 type MetricsCommand struct {
