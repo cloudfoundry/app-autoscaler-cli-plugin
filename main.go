@@ -5,23 +5,31 @@ import (
 	"os"
 	"strconv"
 
+	"code.cloudfoundry.org/cli/plugin"
+	flags "github.com/jessevdk/go-flags"
+
 	"code.cloudfoundry.org/app-autoscaler-cli-plugin/commands"
 	"code.cloudfoundry.org/app-autoscaler-cli-plugin/ui"
-
-	"code.cloudfoundry.org/cli/plugin"
-	"github.com/jessevdk/go-flags"
 )
 
 type AutoScaler struct{}
 
 var BuildMajorVersion string
+
 var BuildMinorVersion string
+
 var BuildPatchVersion string
+
 var BuildPrerelease string
+
 var BuildMeta string
+
 var BuildDate string
+
 var BuildVcsUrl string
+
 var BuildVcsId string
+
 var BuildVcsIdDate string
 
 func (as *AutoScaler) GetMetadata() plugin.PluginMetadata {
@@ -68,28 +76,6 @@ OPTIONS:
 				HelpText: "Detach the scaling policy from an application",
 				UsageDetails: plugin.Usage{
 					Usage: `cf detach-as-policy APP_NAME`,
-				},
-			},
-			{
-				Name:     "create-autoscaling-credential",
-				Alias:    "casc",
-				HelpText: "Create custom metric credential for an application",
-				UsageDetails: plugin.Usage{
-					Usage: `cf create-autoscaling-credential APP_NAME [--username USERNAME --password PASSWORD] [--output PATH_TO_FILE]
-
-OPTIONS:
-	--username, -u   Username of the custom metric credential, random username will be set if not specified.
-	--password, -p   Password of the custom metric credential, random password will be set if not specified.
-	--output         Dump the credential to a file in JSON format.
-					`,
-				},
-			},
-			{
-				Name:     "delete-autoscaling-credential",
-				Alias:    "dasc",
-				HelpText: "Delete the custom metric credential of an application",
-				UsageDetails: plugin.Usage{
-					Usage: `cf delete-autoscaling-credential APP_NAME`,
 				},
 			},
 			{

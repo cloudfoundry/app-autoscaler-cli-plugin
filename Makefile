@@ -73,4 +73,4 @@ build: clean
 
 
 test:
-	@ginkgo .
+	@ginkgo -r .
