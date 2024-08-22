@@ -10,7 +10,7 @@ const (
 	SetAPIEndpoint     = "Setting AutoScaler api endpoint to %s..."
 	UnsetAPIEndpoint   = "Unsetting AutoScaler api endpoint."
 	InvalidAPIEndpoint = "Invalid AutoScaler API endpoint : %s"
-	InvalidSSLCerts    = "Invalid SSL Cert for %s \nTIP: Use --skip-ssl-validation to continue with an insecure API endpoint."
+	InvalidSSLCerts    = "Issue connnecting to %s: %s\nTIP: Use --skip-ssl-validation to continue with an insecure API endpoint."
 	InconsistentDomain = "Failed to set AutoScaler domain to %s since it is inconsitent with the domain of CF API %s."
 
 	Unauthorized  = "Unauthorized. Failed to access AutoScaler API endpoint %s."
@@ -42,9 +42,9 @@ const (
 	AggregatedMetricsNotFound = "No aggregated %s metrics were found for app %s."
 	HistoryNotFound           = "No event history were found for app %s."
 
-	InvalidCredentialUsername  = "Both USERNAME and PASSWORD need to be provided for user-defined credential."
-	InvalidCredentialPassword  = "Both USERNAME and PASSWORD need to be provided for user-defined credential."
-	InvalidCredential          = "Invalid credential definition: %v."
+	InvalidCredentialUsername = "Both USERNAME and PASSWORD need to be provided for user-defined credential."
+	InvalidCredentialPassword = "Both USERNAME and PASSWORD need to be provided for user-defined credential."
+	InvalidCredential         = "Invalid credential definition: %v."
 
 	MoreRecordsWarning      = "TIP: More records available. Please re-run the command with --start or --end option to fetch more."
 	DeprecatedDescWarning   = "TIP: The default order is set to descending now. Please remove the DEPRECATED flag '--desc'."

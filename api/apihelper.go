@@ -17,8 +17,8 @@ import (
 	"strings"
 	"time"
 
-	"code.cloudfoundry.org/app-autoscaler-cli-plugin/ui"
 	"code.cloudfoundry.org/app-autoscaler-cli-plugin/models"
+	"code.cloudfoundry.org/app-autoscaler-cli-plugin/ui"
 	. "code.cloudfoundry.org/app-autoscaler-cli-plugin/util/http"
 	cjson "code.cloudfoundry.org/app-autoscaler-cli-plugin/util/json"
 
@@ -83,8 +83,8 @@ func (helper *APIHelper) DoRequest(req *http.Request) (*http.Response, error) {
 
 		if innerErr != nil {
 			switch typedInnerErr := innerErr.(type) {
-			case x509.UnknownAuthorityError, x509.HostnameError, x509.CertificateInvalidError:
-				return nil, fmt.Errorf(ui.InvalidSSLCerts, req.URL.Scheme+"://"+req.URL.Host)
+			case *tls.CertificateVerificationError, x509.UnknownAuthorityError, x509.HostnameError, x509.CertificateInvalidError:
+				return nil, fmt.Errorf(ui.InvalidSSLCerts, req.URL.Scheme+"://"+req.URL.Host, innerErr.Error())
 			default:
 				return nil, typedInnerErr
 			}

@@ -149,13 +149,13 @@ var _ = Describe("API Helper Test", func() {
 			It("Fail to check health", func() {
 				err = apiTLSHelper.CheckHealth()
 				Expect(err).Should(HaveOccurred())
-				Expect(err).Should(MatchError(fmt.Sprintf(ui.InvalidSSLCerts, apiTLSHelper.Endpoint.URL)))
+				Expect(err).Should(MatchError(fmt.Sprintf(ui.InvalidSSLCerts, apiTLSHelper.Endpoint.URL, ".*")))
 			})
 
 			It("Fail to Get policy", func() {
 				_, err = apiTLSHelper.GetPolicy()
 				Expect(err).Should(HaveOccurred())
-				Expect(err).Should(MatchError(fmt.Sprintf(ui.InvalidSSLCerts, apiTLSHelper.Endpoint.URL)))
+				Expect(err).Should(MatchError(fmt.Sprintf(ui.InvalidSSLCerts, apiTLSHelper.Endpoint.URL, ".*"))))
 			})
 
 		})
