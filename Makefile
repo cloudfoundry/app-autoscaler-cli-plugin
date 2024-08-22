@@ -1,5 +1,6 @@
 SHELL := /bin/bash
 .SHELLFLAGS = -euo pipefail -c
+.ONESHELL:
 CGO_ENABLED = 0
 BUILDTAGS :=
 BUILD_PATH:=build
@@ -14,9 +15,11 @@ GOARCH         :=$(shell go env GOARCH)
 GOMODULECMD    :=main
 
 
-SEMVER_VERSION    ?=3.0.0
-SEMVER_PRERELEASE ?=
-SEMVER_BUILDMETA  ?= +3
+SEMVER_MAJOR_VERSION    ?=3
+SEMVER_MINOR_VERSION    ?=0
+SEMVER_PATCH_VERSION    ?=1
+SEMVER_PRERELEASE ?= dev
+SEMVER_BUILDMETA  ?= +0
 BUILD_DATE        :=$(shell date -u -Iseconds)
 BUILD_VCS_URL     :=$(shell git config --get remote.origin.url) 
 BUILD_VCS_ID      :=$(shell git log -n 1 --date=iso-strict-local --format="%h")
@@ -24,7 +27,9 @@ BUILD_VCS_ID_DATE :=$(shell TZ=UTC0 git log -n 1 --date=iso-strict-local --forma
 FILE_BUILD_VERSION :=$(SEMVER_VERSION)$(SEMVER_PRERELEASE)$(SEMVER_BUILDMETA)
 
 GO_LDFLAGS = -ldflags="$(BUILDFLAGS) \
-			    -X '$(GOMODULECMD).BuildVersion=$(SEMVER_VERSION)' \
+			    -X '$(GOMODULECMD).BuildMajorVersion=$(SEMVER_MAJOR_VERSION)' \
+	            -X '$(GOMODULECMD).BuildMinorVersion=$(SEMVER_MINOR_VERSION)' \
+				-X '$(GOMODULECMD).BuildPatchVersion=$(SEMVER_PATCH_VERSION)' \
 	            -X '$(GOMODULECMD).BuildPrerelease=$(SEMVER_PRERELEASE)' \
 	            -X '$(GOMODULECMD).BuildMeta=$(SEMVER_BUILDMETA)' \
 	            -X '$(GOMODULECMD).BuildDate=$(BUILD_DATE)' \
@@ -32,11 +37,9 @@ GO_LDFLAGS = -ldflags="$(BUILDFLAGS) \
 	            -X '$(GOMODULECMD).BuildVcsId=$(BUILD_VCS_ID)' \
 		    -X '$(GOMODULECMD).BuildVcsIdDate=$(BUILD_VCS_ID_DATE)'"
 
-build: SEMVER_PRERELEASE := dev
-
 test_dirs=$(shell   find . -name "*_test.go" -exec dirname {} \; |  cut -d/ -f2 | sort | uniq)
 
-all: releases
+all: test releases
 
 .PHONY: clean distbuild distclean linux darwin windows build
 clean:

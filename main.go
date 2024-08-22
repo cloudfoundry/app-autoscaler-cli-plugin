@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	"code.cloudfoundry.org/app-autoscaler-cli-plugin/commands"
 	"code.cloudfoundry.org/app-autoscaler-cli-plugin/ui"
@@ -13,22 +14,22 @@ import (
 
 type AutoScaler struct{}
 
-var BuildVersion    string
+var BuildMajorVersion string
+var BuildMinorVersion string
+var BuildPatchVersion string
 var BuildPrerelease string
-var BuildMeta       string
-var BuildDate       string
-var BuildVcsUrl     string
-var BuildVcsId      string
-var BuildVcsIdDate  string
+var BuildMeta string
+var BuildDate string
+var BuildVcsUrl string
+var BuildVcsId string
+var BuildVcsIdDate string
 
 func (as *AutoScaler) GetMetadata() plugin.PluginMetadata {
+	version := getVetsion()
+
 	return plugin.PluginMetadata{
-		Name: "AutoScaler",
-		Version: plugin.VersionType{
-			Major: 3,
-			Minor: 0,
-			Build: 0,
-		},
+		Name:    "AutoScaler",
+		Version: version,
 		Commands: []plugin.Command{
 			{
 				Name:     "autoscaling-api",
@@ -127,18 +128,30 @@ OPTIONS:
 	}
 }
 
+func getVetsion() plugin.VersionType {
+	// We set a default version 0.0.0, and then we try to parse the version from the build flags
+	// errors are ignored, as we will use the default version in case of errors
+	version := plugin.VersionType{Major: 0, Minor: 0, Build: 0}
+	version.Major, _ = strconv.Atoi(BuildMajorVersion)
+	version.Minor, _ = strconv.Atoi(BuildMinorVersion)
+	version.Build, _ = strconv.Atoi(BuildPatchVersion)
+
+	return version
+}
+
 func main() {
 
 	args := os.Args[1:]
 	if len(args) == 0 {
-	    fmt.Println("Upstream Version: ",BuildVersion)
-	    fmt.Println("Build Prerelease: ",BuildPrerelease)
-	    fmt.Println("Build Version: ", BuildMeta)
-	    fmt.Println("Build Date: ", BuildDate)
-	    fmt.Println("VCS Url:", BuildVcsUrl)
-	    fmt.Println("VCS Identifier: ", BuildVcsId)
-	    fmt.Println("VCS Identififer Date: ", BuildVcsIdDate)
-    }
+		version := getVetsion()
+		fmt.Printf("Upstream Version: %d.%d.%d\n", version.Major, version.Minor, version.Build)
+		fmt.Println("Build Prerelease: ", BuildPrerelease)
+		fmt.Println("Build Version: ", BuildMeta)
+		fmt.Println("Build Date: ", BuildDate)
+		fmt.Println("VCS Url:", BuildVcsUrl)
+		fmt.Println("VCS Identifier: ", BuildVcsId)
+		fmt.Println("VCS Identififer Date: ", BuildVcsIdDate)
+	}
 	plugin.Start(new(AutoScaler))
 }
 
