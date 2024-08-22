@@ -1,7 +1,6 @@
 package api
 
 import (
-	"code.cloudfoundry.org/app-autoscaler-cli-plugin/ui"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -11,6 +10,8 @@ import (
 	"strings"
 
 	"code.cloudfoundry.org/cli/cf/configuration/confighelpers"
+
+	"code.cloudfoundry.org/app-autoscaler-cli-plugin/ui"
 )
 
 type APIEndpoint struct {

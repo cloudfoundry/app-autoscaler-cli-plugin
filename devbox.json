@@ -1,7 +1,9 @@
 {
   "packages": {
-    "ginkgo":  "2.20.0",
-    "gnumake": "4.4",
-    "go":      "1.23.0"
+    "ginkgo":            "2.20.0",
+    "gnumake":           "4.4",
+    "go":                "1.23.0",
+    "golangci-lint":     "latest",
+    "goimports-reviser": "latest"
   }
 }
