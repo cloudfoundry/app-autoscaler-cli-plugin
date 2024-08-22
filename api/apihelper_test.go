@@ -44,10 +44,6 @@ var _ = Describe("API Helper Test", func() {
 				},
 			},
 		}
-		fakeCredential Credential = Credential{
-			Username: "fake-user",
-			Password: "fake-password",
-		}
 	)
 
 	BeforeEach(func() {
@@ -149,13 +145,13 @@ var _ = Describe("API Helper Test", func() {
 			It("Fail to check health", func() {
 				err = apiTLSHelper.CheckHealth()
 				Expect(err).Should(HaveOccurred())
-				Expect(err).Should(MatchError(fmt.Sprintf(ui.InvalidSSLCerts, apiTLSHelper.Endpoint.URL, ".*")))
+				Expect(err).Should(MatchError(fmt.Sprintf(ui.InvalidSSLCerts, apiTLSHelper.Endpoint.URL, "tls: failed to verify certificate: x509: certificate signed by unknown authority")))
 			})
 
 			It("Fail to Get policy", func() {
 				_, err = apiTLSHelper.GetPolicy()
 				Expect(err).Should(HaveOccurred())
-				Expect(err).Should(MatchError(fmt.Sprintf(ui.InvalidSSLCerts, apiTLSHelper.Endpoint.URL, ".*"))))
+				Expect(err).Should(MatchError(fmt.Sprintf(ui.InvalidSSLCerts, apiTLSHelper.Endpoint.URL, "tls: failed to verify certificate: x509: certificate signed by unknown authority")))
 			})
 
 		})
@@ -449,204 +445,6 @@ var _ = Describe("API Helper Test", func() {
 
 				It("Fail with 502 error", func() {
 					err = apihelper.DeletePolicy()
-					Expect(err).Should(HaveOccurred())
-					Expect(err).Should(MatchError("502 bad gateway"))
-				})
-			})
-
-		})
-
-		Context("Create Credential", func() {
-			var urlpath string = "/v1/apps/" + fakeAppId + "/credential"
-
-			Context("201 Created with valid auth token", func() {
-				BeforeEach(func() {
-					apiServer.RouteToHandler("PUT", urlpath,
-						ghttp.CombineHandlers(
-							ghttp.RespondWithJSONEncoded(http.StatusCreated, &fakeCredential),
-							ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-						),
-					)
-				})
-
-				It("succeed", func() {
-					response, err := apihelper.CreateCredential(fakeCredential)
-					Expect(err).NotTo(HaveOccurred())
-
-					var actualCredential Credential
-					_ = json.Unmarshal([]byte(response), &actualCredential)
-					Expect(actualCredential).To(MatchFields(IgnoreExtras, Fields{
-						"Username": Equal(fakeCredential.Username),
-						"Password": Equal(fakeCredential.Password),
-					}))
-				})
-			})
-
-			Context("200 OK with valid auth token", func() {
-				BeforeEach(func() {
-					apiServer.RouteToHandler("PUT", urlpath,
-						ghttp.CombineHandlers(
-							ghttp.RespondWithJSONEncoded(http.StatusCreated, &fakeCredential),
-							ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-						),
-					)
-				})
-
-				It("succeed", func() {
-					response, err := apihelper.CreateCredential(fakeCredential)
-					Expect(err).NotTo(HaveOccurred())
-
-					var actualCredential Credential
-					_ = json.Unmarshal([]byte(response), &actualCredential)
-					Expect(actualCredential).To(MatchFields(IgnoreExtras, Fields{
-						"Username": Equal(fakeCredential.Username),
-						"Password": Equal(fakeCredential.Password),
-					}))
-				})
-			})
-
-			Context("Forbidden Request", func() {
-				BeforeEach(func() {
-					apiServer.RouteToHandler("PUT", urlpath,
-						ghttp.RespondWith(http.StatusForbidden, `{"code":"Forbidden","message":"This command is only valid for build-in auto-scaling capacity. Please operate service credential with \"cf bind/unbind-service\" command."}`),
-					)
-				})
-
-				It("Fail with 403 error", func() {
-					_, err = apihelper.CreateCredential(fakeCredential)
-					Expect(err).Should(HaveOccurred())
-					Expect(err).Should(MatchError(fmt.Sprintf(`This command is only valid for build-in auto-scaling capacity. Please operate service credential with "cf bind/unbind-service" command.`)))
-				})
-			})
-
-			Context("Unauthorized Access", func() {
-				BeforeEach(func() {
-					apiServer.RouteToHandler("PUT", urlpath,
-						ghttp.RespondWith(http.StatusUnauthorized, ""),
-					)
-				})
-
-				It("Fail with 401 error", func() {
-					_, err = apihelper.CreateCredential(fakeCredential)
-					Expect(err).Should(HaveOccurred())
-					Expect(err).Should(MatchError(fmt.Sprintf(ui.Unauthorized, apihelper.Endpoint.URL)))
-				})
-			})
-
-			Context("Invalid Credential Format", func() {
-				BeforeEach(func() {
-					apiServer.RouteToHandler("PUT", urlpath,
-						ghttp.RespondWith(http.StatusBadRequest, `{"code":"Bad Request","message":"Username and password are both required"}`),
-					)
-				})
-
-				It("Fail with 400 error", func() {
-					_, err = apihelper.CreateCredential(fakeCredential)
-					Expect(err).Should(HaveOccurred())
-					Expect(err).Should(MatchError(fmt.Sprintf(ui.InvalidCredential, "Username and password are both required")))
-				})
-			})
-
-			Context("Default error handling", func() {
-				BeforeEach(func() {
-					apiServer.RouteToHandler("PUT", urlpath,
-						ghttp.RespondWith(http.StatusInternalServerError, `{"success":false,"error":{"message":"Internal error","statusCode":500},"result":null}`),
-					)
-				})
-
-				It("Fail with 500 error", func() {
-					_, err = apihelper.CreateCredential(fakeCredential)
-					Expect(err).Should(HaveOccurred())
-					Expect(err).Should(MatchError("Internal error"))
-				})
-			})
-
-			Context("When error msg is a plain text", func() {
-				BeforeEach(func() {
-					apiServer.RouteToHandler("PUT", urlpath,
-						ghttp.RespondWith(http.StatusBadGateway, "502 bad gateway"),
-					)
-				})
-
-				It("Fail with 502 error", func() {
-					_, err = apihelper.CreateCredential(fakeCredential)
-					Expect(err).Should(HaveOccurred())
-					Expect(err).Should(MatchError("502 bad gateway"))
-				})
-			})
-
-		})
-
-		Context("Delete Credential", func() {
-			var urlpath string = "/v1/apps/" + fakeAppId + "/credential"
-
-			Context("Succeed with valid auth token", func() {
-				BeforeEach(func() {
-					apiServer.RouteToHandler("DELETE", urlpath,
-						ghttp.CombineHandlers(
-							ghttp.RespondWith(http.StatusOK, ""),
-							ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-						),
-					)
-				})
-
-				It("succeed", func() {
-					err = apihelper.DeleteCredential()
-					Expect(err).NotTo(HaveOccurred())
-				})
-			})
-
-			Context("Forbidden Request", func() {
-				BeforeEach(func() {
-					apiServer.RouteToHandler("DELETE", urlpath,
-						ghttp.RespondWith(http.StatusForbidden, `{"code":"Forbidden","message":"This command is only valid for build-in auto-scaling capacity. Please operate service credential with \"cf bind/unbind-service\" command."}`),
-					)
-				})
-
-				It("Fail with 403 error", func() {
-					err = apihelper.DeleteCredential()
-					Expect(err).Should(HaveOccurred())
-					Expect(err).Should(MatchError(fmt.Sprintf(`This command is only valid for build-in auto-scaling capacity. Please operate service credential with "cf bind/unbind-service" command.`)))
-				})
-			})
-
-			Context("Unauthorized Access", func() {
-				BeforeEach(func() {
-					apiServer.RouteToHandler("DELETE", urlpath,
-						ghttp.RespondWith(http.StatusUnauthorized, ""),
-					)
-				})
-
-				It("Fail with 401 error", func() {
-					err = apihelper.DeleteCredential()
-					Expect(err).Should(HaveOccurred())
-					Expect(err).Should(MatchError(fmt.Sprintf(ui.Unauthorized, apihelper.Endpoint.URL)))
-				})
-			})
-
-			Context("Default error handling", func() {
-				BeforeEach(func() {
-					apiServer.RouteToHandler("DELETE", urlpath,
-						ghttp.RespondWith(http.StatusInternalServerError, `{"success":false,"error":{"message":"Internal error","statusCode":500},"result":null}`),
-					)
-				})
-
-				It("Fail with 500 error", func() {
-					err = apihelper.DeleteCredential()
-					Expect(err).Should(HaveOccurred())
-					Expect(err).Should(MatchError("Internal error"))
-				})
-			})
-
-			Context("When error msg is a plain text", func() {
-				BeforeEach(func() {
-					apiServer.RouteToHandler("DELETE", urlpath,
-						ghttp.RespondWith(http.StatusBadGateway, "502 bad gateway"),
-					)
-				})
-
-				It("Fail with 502 error", func() {
-					err = apihelper.DeleteCredential()
 					Expect(err).Should(HaveOccurred())
 					Expect(err).Should(MatchError("502 bad gateway"))
 				})
