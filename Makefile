@@ -71,6 +71,10 @@ build: clean ## Build the binary for your platform
 	@echo "# building cli"
 	CGO_ENABLED=$(CGO_ENABLED) go build $(BUILDTAGS) $(GO_LDFLAGS) -o ${BUILD_PATH}/${BUILD}-${FILE_BUILD_VERSION} .
 
+install: build ## Install the plugin locally
+	@echo "# installing plugin"
+	@cf install-plugin -f ${BUILD_PATH}/${BUILD}-${FILE_BUILD_VERSION}
+
 check: fmt test ## Run fmt and test
 
 fmt: ## Run goimports-reviser: Right imports sorting & code formatting tool (goimports alternative)
