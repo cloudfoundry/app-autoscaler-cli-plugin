@@ -6,6 +6,8 @@ const (
 
 	NOCFAPIEndpoint    = "No Cloud Foundry api endpoint set. Use 'cf api' to set Cloud Foundry endpoint first."
 	NoEndpoint         = "No AutoScaler api endpoint set. Use 'cf autoscaling-api' to set an endpoint."
+	NoTarget           = "No org and space targeted, use 'cf target -o ORG -s SPACE' to target an org and space"
+	NoApp              = "App '%s' not found."
 	APIEndpoint        = "Autoscaler api endpoint: %s"
 	SetAPIEndpoint     = "Setting AutoScaler api endpoint to %s..."
 	UnsetAPIEndpoint   = "Unsetting AutoScaler api endpoint."
