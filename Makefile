@@ -39,16 +39,16 @@ GO_LDFLAGS = -ldflags="$(BUILDFLAGS) \
 
 test_dirs=$(shell   find . -name "*_test.go" -exec dirname {} \; |  cut -d/ -f2 | sort | uniq)
 
-all: test releases
+all: test releases ## Run tests and build the binary for all platforms (Default target)
 
-.PHONY: clean distbuild distclean linux darwin windows build fmt test check
-clean:
+.PHONY: clean distbuild distclean linux darwin windows build fmt test check help
+clean: ## Clean
 	@echo "# cleaning autoscaler"
 	@go clean -cache -testcache
 	@rm -rf build
 
 # Releases
-releases: distclean distbuild linux darwin windows
+releases: distclean distbuild linux darwin windows ## Build the binary for all platforms
 
 distbuild:
 	mkdir -p ${BUILD_PATH}
@@ -67,14 +67,19 @@ darwin:
 windows:
 	CGO_ENABLED=$(CGO_ENABLED) GOOS=windows GOARCH=amd64 go build ${GO_LDFLAGS} -o ${BUILD_PATH}/${BUILD}-windows-amd64-${FILE_BUILD_VERSION}.exe .
 
-build: clean
+build: clean ## Build the binary for your platform
 	@echo "# building cli"
 	CGO_ENABLED=$(CGO_ENABLED) go build $(BUILDTAGS) $(GO_LDFLAGS) -o ${BUILD_PATH}/${BUILD}-${FILE_BUILD_VERSION} .
 
-check: fmt test
+check: fmt test ## Run fmt and test
 
-fmt:
+fmt: ## Run goimports-reviser: Right imports sorting & code formatting tool (goimports alternative)
+	@echo "# formatting code"
 	@goimports-reviser -rm-unused -set-alias -format ./...
 
-test:
+test: ## Run tests
+	@echo "# running tests"
 	@ginkgo -r .
+
+help: ## Show this help
+	@grep --extended-regexp --no-filename '\s##\s' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
