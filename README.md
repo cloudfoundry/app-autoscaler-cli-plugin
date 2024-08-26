@@ -1,30 +1,28 @@
-# Cloud Foundry CLI AutoScaler Plug-in [![Build Status](https://travis-ci.org/cloudfoundry/app-autoscaler-cli-plugin.svg?branch=master)](https://travis-ci.org/cloudfoundry/app-autoscaler-cli-plugin)
+# Cloud Foundry CLI AutoScaler Plug-in [![Build status](https://github.com/cloudfoundry/app-autoscaler-cli-plugin/actions/workflows/build.yml/badge.svg)](https://github.com/cloudfoundry/app-autoscaler-cli-plugin/actions/workflows/build.yml)
 
-App-AutoScaler plug-in provides the command line interface to manage [App AutoScaler](https://github.com/cloudfoundry-incubator/app-autoscaler) policies, retrieve metrics and scaling event history.
+App-AutoScaler plug-in provides the command line interface to manage [App AutoScaler](https://github.com/cloudfoundry/app-autoscaler) policies, retrieve metrics and scaling event history.
 
 
 ## Install plugin
 
 ### From CF-Community
 
-```
+```shell
 cf install-plugin -r CF-Community app-autoscaler-plugin
 ```
 
 ## From source code
 
 
-```
-$ git clone git@github.com:cloudfoundry-incubator/app-autoscaler-cli-plugin.git
-$ cd app-autoscaler-cli-plugin
-$ git submodule update --init --recursive
-$ make build
-$ cf install-plugin out/ascli
+```shell
+git clone https://github.com/cloudfoundry/app-autoscaler-cli-plugin.git
+cd app-autoscaler-cli-plugin
+make install
 ```
 
 ## Uninstall plugin
 
-```
+```shell
 cf uninstall-plugin AutoScaler
 ```
 
@@ -36,8 +34,6 @@ cf uninstall-plugin AutoScaler
 | [autoscaling-policy, asp](#cf-autoscaling-policy) | Retrieve the scaling policy of an application |
 | [attach-autoscaling-policy, aasp](#cf-attach-autoscaling-policy) | Attach a scaling policy to an application |
 | [detach-autoscaling-policy, dasp](#cf-detach-autoscaling-policy) | Detach the scaling policy from an application |
-| [create-autoscaling-credential, casc](#cf-create-autoscaling-credential) | Create custom metric credential for an application |
-| [delete-autoscaling-credential, dasc](#cf-delete-autoscaling-credential) | Delete the custom metric credential of an application |
 | [autoscaling-metrics, asm](#cf-autoscaling-metrics) | Retrieve the metrics of an application |
 | [autoscaling-history, ash](#cf-autoscaling-history) | Retrieve the scaling history of an application|
 
@@ -179,68 +175,6 @@ $ cf detach-autoscaling-policy APP_NAME
 Detaching policy for app APP_NAME...
 OK
 ```
-
-
-### `cf create-autoscaling-credential`
-
-Credential is required when submitting custom metrics to app-autoscaler. If an application is connecting to autoscaler through a service binding approach, the required credential could be found in Cloud Foundry `VCAP_SERVICES` environment variables. Otherwise, you need to generate the required credential explicitly with this command.
-
-The command will generate autoscaler credential and display it in JSON format. Then you need to set this credential to your application through environment variables or user-provided-service.  
-
-Note: Auto-scaler only grants access with the most recent credential, so the newly generated credential will overwritten the old pairs. Please make sure to update the credential setting in your application once you launch the command `create-autoscaling-credential`.
-
-Random credential pair will be created by default when username and password are not specified by `--username` and `--password` option.
-
-```
-cf create-autoscaling-credential APP_NAME [--username USERNAME --password PASSWORD] [--output PATH_TO_FILE]
-```
-#### ALIAS: casc
-
-
-#### OPTIONS:
-- `--username, -u` : username of the custom metric credential, random username will be set if not specified
-- `--password, -p` : password of the custom metric credential, random password will be set if not specified
-- `--output`       : Dump the credential to a file in JSON format
-
-#### EXAMPLES:
-- Create and view custom credential with user-defined username and password:
-```
-$ cf create-autoscaling-credential APP_NAME --username MY_USERNAME --password MY_PASSWORD
-
-Creating custom metric credential for app APP_NAME...
-{
-	"app_id": "<APP_ID>",
-	"username": "MY_USERNAME",
-	"password": "MY_PASSWORD",
-	"url": "https://autoscalermetrics.<DOMAIN>"
-}
-```
-- Create random username and password and dump the credential to a file:
-```
-$ cf create-autoscaling-credential APP_NAME --output PATH_TO_FILE
-
-Saving new created credential for app APP_NAME to PATH_TO_FILE...
-OK
-```
-
-
-### `cf delete-autoscaling-credential`
-
-Delete the custom metric credential of an application.
-
-```
-cf delete-autoscaling-credential APP_NAME
-```
-#### ALIAS: dasc
-
-#### EXAMPLES:
-```
-$ cf delete-autoscaling-credential APP_NAME
-
-Deleting custom metric credential for app APP_NAME...
-OK
-```
-
 
 ### `cf autoscaling-metrics`
 
