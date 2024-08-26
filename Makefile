@@ -75,7 +75,7 @@ install: build ## Install the plugin locally
 	@echo "# installing plugin"
 	@cf install-plugin -f ${BUILD_PATH}/${BUILD}-${FILE_BUILD_VERSION}
 
-check: fmt test ## Run fmt and test
+check: fmt lint test ## Run fmt, lint and test
 
 fmt: ## Run goimports-reviser: Right imports sorting & code formatting tool (goimports alternative)
 	@echo "# formatting code"
@@ -84,6 +84,10 @@ fmt: ## Run goimports-reviser: Right imports sorting & code formatting tool (goi
 test: ## Run tests
 	@echo "# running tests"
 	@ginkgo -r .
+
+lint: ## Run linter
+	@echo "# running linter"
+	@golangci-lint run --new-from-rev=HEAD~1
 
 help: ## Show this help
 	@grep --extended-regexp --no-filename '\s##\s' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
