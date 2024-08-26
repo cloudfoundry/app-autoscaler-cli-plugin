@@ -31,7 +31,7 @@ import (
 
 const (
 	fakeAppName     string = "fakeAppName"
-	fakeAppId       string = "fakeAppId"
+	fakeAppID       string = "fakeAppId"
 	fakeAccessToken string = `bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjI1MTYyMzkwMjJ9.d9Bbx_4LikUHETu6aK5c4b-gO3PA8rzrIU2JwHna__s`
 
 	outputFile string = "output.txt"
@@ -101,12 +101,12 @@ var _ = Describe("App-AutoScaler Commands", func() {
 		os.Unsetenv("CF_TRACE")
 		os.Setenv("AUTOSCALER_CONFIG_FILE", "test_config.json")
 
-		//start fake API server
+		// start fake API server
 		apiServer = ghttp.NewServer()
-		autoscalerEndpoint = convertToNipIoUrl(apiServer.URL(), "autoscaler")
-		cloudControllerEndpoint = convertToNipIoUrl(apiServer.URL(), "api")
+		autoscalerEndpoint = convertToNipIoURL(apiServer.URL(), "autoscaler")
+		cloudControllerEndpoint = convertToNipIoURL(apiServer.URL(), "api")
 
-		//basic autoscaler api behavior: return 200 OK for /health
+		// basic autoscaler api behavior: return 200 OK for /health
 		apiServer.RouteToHandler(
 			"GET", "/health",
 			ghttp.CombineHandlers(
@@ -114,7 +114,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 				ghttp.RespondWith(http.StatusOK, ""),
 			),
 		)
-		//basic cloud controller api behavior: return 200 OK for /
+		// basic cloud controller api behavior: return 200 OK for /
 		apiServer.RouteToHandler(
 			"GET", "/",
 			ghttp.CombineHandlers(
@@ -123,17 +123,17 @@ var _ = Describe("App-AutoScaler Commands", func() {
 			),
 		)
 
-		//start rpc server to test cf cli plugin
+		// start rpc server to test cf cli plugin
 		rpcHandlers = new(rpcserverfakes.FakeHandlers)
 
-		//set rpc.CallCoreCommand to a successful call
-		//rpc.CallCoreCommand is used in both cliConnection.CliCommand() and
-		//cliConnection.CliWithoutTerminalOutput()
+		// set rpc.CallCoreCommand to a successful call
+		// rpc.CallCoreCommand is used in both cliConnection.CliCommand() and
+		// cliConnection.CliWithoutTerminalOutput()
 		rpcHandlers.CallCoreCommandStub = func(_ []string, retVal *bool) error {
 			*retVal = true
 			return nil
 		}
-		//set rpc.GetOutputAndReset to return empty string; this is used by CliCommand()/CliWithoutTerminalOutput()
+		// set rpc.GetOutputAndReset to return empty string; this is used by CliCommand()/CliWithoutTerminalOutput()
 		rpcHandlers.GetOutputAndResetStub = func(_ bool, retVal *[]string) error {
 			*retVal = []string{"{}"}
 			return nil
@@ -251,7 +251,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 					apiTLSServer.RouteToHandler("GET", "/health",
 						ghttp.RespondWith(http.StatusOK, ""),
 					)
-					apiTLSEndpoint = convertToNipIoUrl(apiTLSServer.URL(), "autoscaler")
+					apiTLSEndpoint = convertToNipIoURL(apiTLSServer.URL(), "autoscaler")
 				})
 
 				AfterEach(func() {
@@ -406,7 +406,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 
 	Describe("Commands autoscaling-policy, asp", func() {
 
-		var urlpath = "/v1/apps/" + fakeAppId + "/policy"
+		var urlpath = "/v1/apps/" + fakeAppID + "/policy"
 		Context("autoscaling-policy", func() {
 
 			When("the args are not properly provided", func() {
@@ -530,7 +530,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 								ghttp.RespondWith(http.StatusOK, fmt.Sprintf(`
 								{"resources":[{
 									"guid": "%s",
-									"name": "%s"}]}`, fakeAppId, fakeAppName)),
+									"name": "%s"}]}`, fakeAppID, fakeAppName)),
 							)
 						})
 
@@ -556,7 +556,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 
 						When("access token is correct", func() {
 							BeforeEach(func() {
-								rpcHandlers.AccessTokenStub = func(args string, retVal *string) error {
+								rpcHandlers.AccessTokenStub = func(_ string, retVal *string) error {
 									*retVal = fakeAccessToken
 									return nil
 								}
@@ -659,7 +659,8 @@ var _ = Describe("App-AutoScaler Commands", func() {
 										Expect(session.Out).To(gbytes.Say(ui.SavePolicyHint, fakeAppName, outputFile))
 
 										Expect(outputFile).To(BeARegularFile())
-										contents, err := ioutil.ReadFile(outputFile)
+										var contents []byte
+										contents, err = os.ReadFile(outputFile)
 										Expect(err).NotTo(HaveOccurred())
 
 										var actualPolicy ScalingPolicy
@@ -725,7 +726,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 
 	Describe("Commands attach-autoscaling-policy, aasp", func() {
 
-		var urlpath = "/v1/apps/" + fakeAppId + "/policy"
+		var urlpath = "/v1/apps/" + fakeAppID + "/policy"
 		Context("attach-autoscaling-policy", func() {
 
 			When("the args are not properly provided", func() {
@@ -812,7 +813,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 
 				When("not targeting a space", func() {
 					BeforeEach(func() {
-						rpcHandlers.HasSpaceStub = func(args string, retVal *bool) error {
+						rpcHandlers.HasSpaceStub = func(_ string, retVal *bool) error {
 							*retVal = false
 							return nil
 						}
@@ -852,7 +853,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 								ghttp.RespondWith(http.StatusOK, fmt.Sprintf(`
 								{"resources":[{
 									"guid": "%s",
-									"name": "%s"}]}`, fakeAppId, fakeAppName)),
+									"name": "%s"}]}`, fakeAppID, fakeAppName)),
 							)
 						})
 
@@ -908,7 +909,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 							BeforeEach(func() {
 								policyBytes, err := cjson.MarshalWithoutHTMLEscape(fakePolicy)
 								Expect(err).NotTo(HaveOccurred())
-								err = ioutil.WriteFile(outputFile, policyBytes, 0666)
+								err = os.WriteFile(outputFile, policyBytes, 0666)
 								Expect(err).NotTo(HaveOccurred())
 							})
 
@@ -930,7 +931,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 
 							When("access token is correct", func() {
 								BeforeEach(func() {
-									rpcHandlers.AccessTokenStub = func(args string, retVal *string) error {
+									rpcHandlers.AccessTokenStub = func(_ string, retVal *string) error {
 										*retVal = fakeAccessToken
 										return nil
 									}
@@ -949,7 +950,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 										fakePolicy.InstanceMax = 2
 										policyBytes, err := cjson.MarshalWithoutHTMLEscape(fakePolicy)
 										Expect(err).NotTo(HaveOccurred())
-										err = ioutil.WriteFile(outputFile, policyBytes, 0666)
+										err = os.WriteFile(outputFile, policyBytes, 0666)
 										Expect(err).NotTo(HaveOccurred())
 
 									})
@@ -980,7 +981,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 										fakePolicy.InstanceMax = 2
 										policyBytes, err := cjson.MarshalWithoutHTMLEscape(fakePolicy)
 										Expect(err).NotTo(HaveOccurred())
-										err = ioutil.WriteFile(outputFile, policyBytes, 0666)
+										err = os.WriteFile(outputFile, policyBytes, 0666)
 										Expect(err).NotTo(HaveOccurred())
 
 									})
@@ -1054,7 +1055,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 
 	Describe("Commands detach-autoscaling-policy, dasp", func() {
 
-		var urlpath = "/v1/apps/" + fakeAppId + "/policy"
+		var urlpath = "/v1/apps/" + fakeAppID + "/policy"
 		Context("detach-autoscaling-policy", func() {
 
 			When("the args are not properly provided", func() {
@@ -1170,7 +1171,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 								ghttp.RespondWith(http.StatusOK, fmt.Sprintf(`
 						{"resources":[{
 							"guid": "%s",
-							"name": "%s"}]}`, fakeAppId, fakeAppName)),
+							"name": "%s"}]}`, fakeAppID, fakeAppName)),
 							)
 						})
 
@@ -1197,7 +1198,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 
 						When("access token is correct", func() {
 							BeforeEach(func() {
-								rpcHandlers.AccessTokenStub = func(args string, retVal *string) error {
+								rpcHandlers.AccessTokenStub = func(_ string, retVal *string) error {
 									*retVal = fakeAccessToken
 									return nil
 								}
@@ -1253,7 +1254,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 
 		var (
 			metricName               = "memoryused"
-			aggregatedMetricsUrlPath = "/v1/apps/" + fakeAppId + "/aggregated_metric_histories/" + metricName
+			aggregatedMetricsURLPath = "/v1/apps/" + fakeAppID + "/aggregated_metric_histories/" + metricName
 			now                      = time.Now()
 			lowPrecisionNowInNano    = (now.UnixNano() / 1e9) * 1e9
 		)
@@ -1454,7 +1455,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 								ghttp.RespondWith(http.StatusOK, fmt.Sprintf(`
 						{"resources":[{
 							"guid": "%s",
-							"name": "%s"}]}`, fakeAppId, fakeAppName)),
+							"name": "%s"}]}`, fakeAppID, fakeAppName)),
 							)
 						})
 
@@ -1465,7 +1466,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 
 						When("access token is wrong", func() {
 							BeforeEach(func() {
-								apiServer.RouteToHandler("GET", aggregatedMetricsUrlPath,
+								apiServer.RouteToHandler("GET", aggregatedMetricsURLPath,
 									ghttp.CombineHandlers(
 										ghttp.RespondWith(http.StatusUnauthorized, ""),
 									),
@@ -1484,14 +1485,14 @@ var _ = Describe("App-AutoScaler Commands", func() {
 						When("access token is correct", func() {
 
 							BeforeEach(func() {
-								rpcHandlers.AccessTokenStub = func(args string, retVal *string) error {
+								rpcHandlers.AccessTokenStub = func(_ string, retVal *string) error {
 									*retVal = fakeAccessToken
 									return nil
 								}
 							})
 							When("no aggregated metric record in desired duration", func() {
 								BeforeEach(func() {
-									apiServer.RouteToHandler("GET", aggregatedMetricsUrlPath,
+									apiServer.RouteToHandler("GET", aggregatedMetricsURLPath,
 										ghttp.CombineHandlers(
 											ghttp.RespondWithJSONEncoded(http.StatusOK, &AggregatedMetricsResults{
 												TotalResults: 0,
@@ -1523,7 +1524,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 								BeforeEach(func() {
 									for i := 0; i < 30; i++ {
 										metrics = append(metrics, &AppAggregatedMetric{
-											AppId:     fakeAppId,
+											AppId:     fakeAppID,
 											Name:      "memoryused",
 											Unit:      "MB",
 											Value:     "100",
@@ -1605,7 +1606,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 														Metrics:      reversedMetrics[0:10],
 													}),
 													ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-													ghttp.VerifyRequest("GET", aggregatedMetricsUrlPath,
+													ghttp.VerifyRequest("GET", aggregatedMetricsURLPath,
 														fmt.Sprintf("order=desc&page=1&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*30*1e9)),
 													),
 												),
@@ -1619,7 +1620,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 														Metrics:      reversedMetrics[10:20],
 													}),
 													ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-													ghttp.VerifyRequest("GET", aggregatedMetricsUrlPath,
+													ghttp.VerifyRequest("GET", aggregatedMetricsURLPath,
 														fmt.Sprintf("order=desc&page=2&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*30*1e9)),
 													),
 												),
@@ -1633,7 +1634,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 														Metrics:      reversedMetrics[20:30],
 													}),
 													ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-													ghttp.VerifyRequest("GET", aggregatedMetricsUrlPath,
+													ghttp.VerifyRequest("GET", aggregatedMetricsURLPath,
 														fmt.Sprintf("order=desc&page=3&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*30*1e9)),
 													),
 												),
@@ -1712,7 +1713,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 														Metrics:      reversedMetrics[0:10],
 													}),
 													ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-													ghttp.VerifyRequest("GET", aggregatedMetricsUrlPath,
+													ghttp.VerifyRequest("GET", aggregatedMetricsURLPath,
 														fmt.Sprintf("order=desc&page=1&end-time=%v", lowPrecisionNowInNano+int64(29*30*1e9)),
 													),
 												),
@@ -1726,7 +1727,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 														Metrics:      reversedMetrics[10:20],
 													}),
 													ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-													ghttp.VerifyRequest("GET", aggregatedMetricsUrlPath,
+													ghttp.VerifyRequest("GET", aggregatedMetricsURLPath,
 														fmt.Sprintf("order=desc&page=2&end-time=%v", lowPrecisionNowInNano+int64(29*30*1e9)),
 													),
 												),
@@ -1740,7 +1741,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 														Metrics:      reversedMetrics[20:30],
 													}),
 													ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-													ghttp.VerifyRequest("GET", aggregatedMetricsUrlPath,
+													ghttp.VerifyRequest("GET", aggregatedMetricsURLPath,
 														fmt.Sprintf("order=desc&page=3&end-time=%v", lowPrecisionNowInNano+int64(29*30*1e9)),
 													),
 												),
@@ -1789,7 +1790,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 													Metrics:      metrics[0:10],
 												}),
 												ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-												ghttp.VerifyRequest("GET", aggregatedMetricsUrlPath,
+												ghttp.VerifyRequest("GET", aggregatedMetricsURLPath,
 													fmt.Sprintf("order=asc&page=1&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*30*1e9)),
 												),
 											),
@@ -1803,7 +1804,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 													Metrics:      metrics[10:20],
 												}),
 												ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-												ghttp.VerifyRequest("GET", aggregatedMetricsUrlPath,
+												ghttp.VerifyRequest("GET", aggregatedMetricsURLPath,
 													fmt.Sprintf("order=asc&page=2&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*30*1e9)),
 												),
 											),
@@ -1817,7 +1818,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 													Metrics:      metrics[20:30],
 												}),
 												ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
-												ghttp.VerifyRequest("GET", aggregatedMetricsUrlPath,
+												ghttp.VerifyRequest("GET", aggregatedMetricsURLPath,
 													fmt.Sprintf("order=asc&page=3&start-time=%v&end-time=%v", lowPrecisionNowInNano, lowPrecisionNowInNano+int64(29*30*1e9)),
 												),
 											),
@@ -1859,7 +1860,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 								Context(" Print the output to a file", func() {
 
 									BeforeEach(func() {
-										apiServer.RouteToHandler("GET", aggregatedMetricsUrlPath,
+										apiServer.RouteToHandler("GET", aggregatedMetricsURLPath,
 											ghttp.CombineHandlers(
 												ghttp.RespondWithJSONEncoded(http.StatusOK, &AggregatedMetricsResults{
 													TotalResults: 10,
@@ -1883,7 +1884,8 @@ var _ = Describe("App-AutoScaler Commands", func() {
 										Expect(session.Out).To(gbytes.Say("OK"))
 
 										Expect(outputFile).To(BeARegularFile())
-										contents, err := ioutil.ReadFile(outputFile)
+										var contents []byte
+										contents, err = os.ReadFile(outputFile)
 										Expect(err).NotTo(HaveOccurred())
 
 										metricsTable := strings.Split(string(bytes.TrimRight(contents, "\n")), "\n")
@@ -1917,7 +1919,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 	Describe("Commands autoscaling-history, ash", func() {
 
 		var (
-			urlpath               = "/v1/apps/" + fakeAppId + "/scaling_histories"
+			urlpath               = "/v1/apps/" + fakeAppID + "/scaling_histories"
 			now                   = time.Now()
 			lowPrecisionNowInNano = (now.UnixNano() / 1e9) * 1e9
 		)
@@ -2102,7 +2104,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 								ghttp.RespondWith(http.StatusOK, fmt.Sprintf(`
 						{"resources":[{
 							"guid": "%s",
-							"name": "%s"}]}`, fakeAppId, fakeAppName)),
+							"name": "%s"}]}`, fakeAppID, fakeAppName)),
 							)
 						})
 
@@ -2132,7 +2134,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 						When("access token is correct", func() {
 
 							BeforeEach(func() {
-								rpcHandlers.AccessTokenStub = func(args string, retVal *string) error {
+								rpcHandlers.AccessTokenStub = func(_ string, retVal *string) error {
 									*retVal = fakeAccessToken
 									return nil
 								}
@@ -2173,7 +2175,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 								BeforeEach(func() {
 									for i := 0; i < 10; i++ {
 										histories = append(histories, &AppScalingHistory{
-											AppId:        fakeAppId,
+											AppId:        fakeAppID,
 											Timestamp:    now.UnixNano() + int64(i*120*1e9),
 											ScalingType:  0, //dynamic
 											Status:       0, //succeed
@@ -2187,7 +2189,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 
 									for i := 10; i < 20; i++ {
 										histories = append(histories, &AppScalingHistory{
-											AppId:        fakeAppId,
+											AppId:        fakeAppID,
 											Timestamp:    now.UnixNano() + int64(i*120*1e9),
 											ScalingType:  1, //scheduled
 											Status:       0, //succeed
@@ -2201,7 +2203,7 @@ var _ = Describe("App-AutoScaler Commands", func() {
 
 									for i := 20; i < 30; i++ {
 										histories = append(histories, &AppScalingHistory{
-											AppId:        fakeAppId,
+											AppId:        fakeAppID,
 											Timestamp:    now.UnixNano() + int64(i*120*1e9),
 											ScalingType:  1, //scheduled
 											Status:       1, //failed
@@ -2646,7 +2648,8 @@ var _ = Describe("App-AutoScaler Commands", func() {
 										Expect(session.Out).To(gbytes.Say("OK"))
 
 										Expect(outputFile).To(BeARegularFile())
-										contents, err := ioutil.ReadFile(outputFile)
+										var contents []byte
+										contents, err = os.ReadFile(outputFile)
 										Expect(err).NotTo(HaveOccurred())
 
 										historyTable := strings.Split(string(bytes.TrimRight(contents, "\n")), "\n")
@@ -2685,10 +2688,13 @@ var _ = Describe("App-AutoScaler Commands", func() {
 
 })
 
-// convertToNipIoUrl converts a local(IP-based) URL to a nip.io URL, so that we can run both Cloud Controller and Autoscaler API mock endpoints on the same server with different hostnames
-// see https://nip.io/ for details on the used service
-func convertToNipIoUrl(localUrl string, hostname string) *url.URL {
-	u, err := url.Parse(localUrl)
+// convertToNipIoURL converts a local(IP-based) URL to a nip.io URL,
+// so that we can run both Cloud Controller and Autoscaler API mock
+// endpoints on the same server with different hostnames
+// (e.g. api.127.0.0.1.nip.io:31337 and autoscaler.127.0.0.1.nip.io:31337),
+// see https://nip.io/ for details on the used service.
+func convertToNipIoURL(localURL string, hostname string) *url.URL {
+	u, err := url.Parse(localURL)
 	Expect(err).NotTo(HaveOccurred())
 	actualHost := u.Hostname()
 	Expect(actualHost).To(MatchRegexp(`\d+\.\d+\.\d+\.\d+`))
@@ -2699,22 +2705,22 @@ func convertToNipIoUrl(localUrl string, hostname string) *url.URL {
 }
 
 func setLoggedIn(rpcHandlers *rpcserverfakes.FakeHandlers) {
-	rpcHandlers.IsLoggedInStub = func(args string, retVal *bool) error {
+	rpcHandlers.IsLoggedInStub = func(_ string, retVal *bool) error {
 		*retVal = true
 		return nil
 	}
-	rpcHandlers.AccessTokenStub = func(args string, retVal *string) error {
+	rpcHandlers.AccessTokenStub = func(_ string, retVal *string) error {
 		*retVal = fakeAccessToken
 		return nil
 	}
 }
 
 func setTargeted(rpcHandlers *rpcserverfakes.FakeHandlers) {
-	rpcHandlers.HasSpaceStub = func(args string, retVal *bool) error {
+	rpcHandlers.HasSpaceStub = func(_ string, retVal *bool) error {
 		*retVal = true
 		return nil
 	}
-	rpcHandlers.GetCurrentSpaceStub = func(args string, retVal *plugin_models.Space) error {
+	rpcHandlers.GetCurrentSpaceStub = func(_ string, retVal *plugin_models.Space) error {
 		*retVal = plugin_models.Space{
 			SpaceFields: plugin_models.SpaceFields{
 				Guid: "fakeSpaceGuid",
@@ -2726,7 +2732,7 @@ func setTargeted(rpcHandlers *rpcserverfakes.FakeHandlers) {
 }
 
 func setUntargeted(rpcHandlers *rpcserverfakes.FakeHandlers) {
-	rpcHandlers.HasSpaceStub = func(args string, retVal *bool) error {
+	rpcHandlers.HasSpaceStub = func(_ string, retVal *bool) error {
 		*retVal = false
 		return nil
 	}

@@ -236,54 +236,6 @@
           "store_path": "/nix/store/frhllixq8aj8ygnaa7mbc336mn5xi1bn-goimports-reviser-3.6.5"
         }
       }
-    },
-    "golangci-lint@latest": {
-      "last_modified": "2024-08-14T11:41:26Z",
-      "resolved": "github:NixOS/nixpkgs/0cb2fd7c59fed0cd82ef858cbcbdb552b9a33465#golangci-lint",
-      "source": "devbox-search",
-      "version": "1.60.1",
-      "systems": {
-        "aarch64-darwin": {
-          "outputs": [
-            {
-              "name": "out",
-              "path": "/nix/store/nb8a2y6dcsmhr32hlmpamw50dkdfn3wl-golangci-lint-1.60.1",
-              "default": true
-            }
-          ],
-          "store_path": "/nix/store/nb8a2y6dcsmhr32hlmpamw50dkdfn3wl-golangci-lint-1.60.1"
-        },
-        "aarch64-linux": {
-          "outputs": [
-            {
-              "name": "out",
-              "path": "/nix/store/8112xawpm1ypp6gsz9h09ri6zjjd3m7q-golangci-lint-1.60.1",
-              "default": true
-            }
-          ],
-          "store_path": "/nix/store/8112xawpm1ypp6gsz9h09ri6zjjd3m7q-golangci-lint-1.60.1"
-        },
-        "x86_64-darwin": {
-          "outputs": [
-            {
-              "name": "out",
-              "path": "/nix/store/zjh1bnambjwj13j9gxx0xg8hxblqacxs-golangci-lint-1.60.1",
-              "default": true
-            }
-          ],
-          "store_path": "/nix/store/zjh1bnambjwj13j9gxx0xg8hxblqacxs-golangci-lint-1.60.1"
-        },
-        "x86_64-linux": {
-          "outputs": [
-            {
-              "name": "out",
-              "path": "/nix/store/il2a9jd3kbh91yxbm90z0am3c34gfxgf-golangci-lint-1.60.1",
-              "default": true
-            }
-          ],
-          "store_path": "/nix/store/il2a9jd3kbh91yxbm90z0am3c34gfxgf-golangci-lint-1.60.1"
-        }
-      }
     }
   }
 }
