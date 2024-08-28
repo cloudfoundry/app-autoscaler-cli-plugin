@@ -1,11 +1,26 @@
 name: Release
 permissions:
   contents: write
-on: workflow_dispatch
-
+on:
+  workflow_dispatch:
+    inputs:
+      major_version:
+        description: Major version
+        required: true
+        type: number
+      minor_version:
+        description: Minor version
+        required: true
+        type: number
+      patch_version:
+        description: Patch version
+        required: true
+        type: number
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
+    env:
+      NEW_TAG: v${{ github.event.inputs.major_version }}.${{ github.event.inputs.minor_version }}.${{ github.event.inputs.patch_version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -13,11 +28,43 @@ jobs:
         uses: jetify-com/devbox-install-action@a03caf5813591bc882139eba6ae947930a83a427 # v0.11.0
         with:
           enable-cache: 'true'
+      - name: Make devbox shellenv available
+        run: |
+          eval "$(devbox shellenv)"
+          printenv >> $GITHUB_ENV
       - name: Build release
         run: |
-          devbox run make SEMVER_PRERELEASE=release
+          make SEMVER_PRERELEASE=release SEMVER_MAJOR_VERSION=${{ github.event.inputs.major_version }} SEMVER_MINOR_VERSION=${{ github.event.inputs.minor_version }} SEMVER_PATCH_VERSION=${{ github.event.inputs.patch_version }}
+      - name: Create and upload tag
+        run: |
+          git tag -a ${NEW_TAG} -m "Release ${NEW_TAG}"
+          git push origin ${NEW_TAG}
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
           files: build/*
+          tag_name: ${{ env.NEW_TAG }}
+      - name: Checkout https://github.com/cloudfoundry/cli-plugin-repo
+        uses: actions/checkout@v4
+        with:
+          repository: cloudfoundry/cli-plugin-repo
+          ref: main
+          token: ${{ secrets.APP_AUTOSCALER_CI_TOKEN }}
+          path: cli-plugin-repo
+      - name: Update plugin repo
+        env:
+          GH_TOKEN: ${{ secrets.APP_AUTOSCALER_CI_TOKEN }}
+        run: |
+          make SEMVER_PRERELEASE=release SEMVER_MAJOR_VERSION=${{ github.event.inputs.major_version }} SEMVER_MINOR_VERSION=${{ github.event.inputs.minor_version }} SEMVER_PATCH_VERSION=${{ github.event.inputs.patch_version }} update-repo-index
+          pushd cli-plugin-repo
+          gh repo set-default cloudfoundry/cli-plugin-repo
+          gh repo fork --remote
+          git config user.email "ApplicationAutoscaler@sap.com"
+          git config user.name "Application Autoscaler CI Bot"
+          git switch -c bump-app-autoscaler-cli-plugin-to-${NEW_TAG}
+          git add .
+          git commit -m "Bump app-autoscaler-cli-plugin to ${NEW_TAG}\n\nThis is an automated commit to bump app-autoscaler-cli-plugin to [${NEW_TAG}](https://github.com/cloudfoundry/app-autoscaler-cli-plugin/releases/tag/${NEW_TAG})."
+          git push origin bump-app-autoscaler-cli-plugin-to-${NEW_TAG}
+          # gh pr create --fill --head origin:bump-app-autoscaler-cli-plugin-to-${NEW_TAG} --base main # This currently not working due to https://github.com/cli/cli/issues/2691
+          popd
 

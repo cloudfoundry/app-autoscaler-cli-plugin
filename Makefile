@@ -18,13 +18,14 @@ GOMODULECMD    :=main
 SEMVER_MAJOR_VERSION    ?=3
 SEMVER_MINOR_VERSION    ?=1
 SEMVER_PATCH_VERSION    ?=0
+SEMVER_FULL_VERSION     :=$(SEMVER_MAJOR_VERSION).$(SEMVER_MINOR_VERSION).$(SEMVER_PATCH_VERSION)
 SEMVER_PRERELEASE ?= dev
 SEMVER_BUILDMETA  ?= 0
 BUILD_DATE        :=$(shell date -u -Iseconds)
 BUILD_VCS_URL     :=$(shell git config --get remote.origin.url) 
 BUILD_VCS_ID      :=$(shell git log -n 1 --date=iso-strict-local --format="%h")
 BUILD_VCS_ID_DATE :=$(shell TZ=UTC0 git log -n 1 --date=iso-strict-local --format='%ad')
-FILE_BUILD_VERSION :=$(SEMVER_MAJOR_VERSION).${SEMVER_MINOR_VERSION}.${SEMVER_PATCH_VERSION}-$(SEMVER_PRERELEASE)+$(SEMVER_BUILDMETA)
+FILE_BUILD_VERSION :=$(SEMVER_FULL_VERSION)-$(SEMVER_PRERELEASE)+$(SEMVER_BUILDMETA)
 
 GO_LDFLAGS = -ldflags="$(BUILDFLAGS) \
 	-X '$(GOMODULECMD).BuildMajorVersion=$(SEMVER_MAJOR_VERSION)' \
@@ -88,6 +89,18 @@ test: ## Run tests
 lint: ## Run linter
 	@echo "# running linter"
 	@golangci-lint run --new-from-rev=HEAD~1
+
+update-repo-index: # releases ## Update the repo-index.yml file
+	@[ -f cli-plugin-repo/repo-index.yml ] || { echo "This target expects a checkout of https://github.com/cloudfoundry/cli-plugin-repo in the directory cli-plugin-repo"; exit 1; }
+	echo "# updating repo-index.yml"
+	pipenv install
+	pipenv run scripts/update-cli-plugin-repo.py ${SEMVER_FULL_VERSION} osx ${BUILD}-darwin-amd64-${FILE_BUILD_VERSION}
+	pipenv run scripts/update-cli-plugin-repo.py ${SEMVER_FULL_VERSION} linux64 ${BUILD}-linux-amd64-${FILE_BUILD_VERSION}
+	pipenv run scripts/update-cli-plugin-repo.py ${SEMVER_FULL_VERSION} win64 ${BUILD}-windows-amd64-${FILE_BUILD_VERSION}.exe
+	echo "# sorting repo-index.yml"
+	pushd cli-plugin-repo
+	go run sort/main.go repo-index.yml
+	popd
 
 help: ## Show this help
 	@grep --extended-regexp --no-filename '\s##\s' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
