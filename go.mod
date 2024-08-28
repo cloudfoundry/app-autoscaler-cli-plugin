@@ -4,6 +4,7 @@ go 1.23.0
 
 require (
 	code.cloudfoundry.org/cli v0.0.0-20240709143557-6248ca371f21
+	github.com/cloudfoundry/go-cfclient/v3 v3.0.0-alpha.9
 	github.com/fatih/color v1.17.0
 	github.com/jessevdk/go-flags v1.6.1
 	github.com/onsi/ginkgo/v2 v2.20.1
@@ -20,7 +21,6 @@ require (
 	github.com/charlievieth/fs v0.0.3 // indirect
 	github.com/cloudfoundry/bosh-cli v6.4.1+incompatible // indirect
 	github.com/cloudfoundry/bosh-utils v0.0.390 // indirect
-	github.com/cloudfoundry/go-cfclient/v3 v3.0.0-alpha.9 // indirect
 	github.com/codegangsta/inject v0.0.0-20150114235600-33e0aa1cb7c0 // indirect
 	github.com/cppforlife/go-patch v0.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect

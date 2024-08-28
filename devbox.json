@@ -1,9 +1,12 @@
 {
   "packages": {
-    "ginkgo":            "2.20.0",
-    "gnumake":           "4.4",
-    "go":                "1.23.0",
-    "goimports-reviser": "latest",
-    "path:.#golangci-lint":     ""
+    "ginkgo":               "2.20.0",
+    "gnumake":              "4.4",
+    "go":                   "1.23.0",
+    "goimports-reviser":    "latest",
+    "path:.#golangci-lint": "",
+    "python":               "latest",
+    "pipenv":               "latest",
+    "github-cli":           "latest"
   }
 }
