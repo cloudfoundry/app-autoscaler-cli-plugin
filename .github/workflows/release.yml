@@ -24,6 +24,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          token: "${{ secrets.APP_AUTOSCALER_CI_TOKEN }}"
       - name: Install devbox
         uses: jetify-com/devbox-install-action@a03caf5813591bc882139eba6ae947930a83a427 # v0.11.0
         with:
@@ -37,6 +39,8 @@ jobs:
           make SEMVER_PRERELEASE=release SEMVER_MAJOR_VERSION='${{ github.event.inputs.major_version }}' SEMVER_MINOR_VERSION='${{ github.event.inputs.minor_version }}' SEMVER_PATCH_VERSION='${{ github.event.inputs.patch_version }}'
       - name: Create and upload tag
         run: |
+          git config --global user.email "ApplicationAutoscaler@sap.com"
+          git config --global user.name "Application Autoscaler CI Bot"
           git tag --annotate "${NEW_TAG}" --message="Release ${NEW_TAG}"
           git push origin ${NEW_TAG}
       - name: Release
@@ -59,8 +63,6 @@ jobs:
           pushd cli-plugin-repo
           gh repo set-default cloudfoundry/cli-plugin-repo
           gh repo fork --remote
-          git config user.email "ApplicationAutoscaler@sap.com"
-          git config user.name "Application Autoscaler CI Bot"
           readonly branch_name="bump-app-autoscaler-cli-plugin-to-${NEW_TAG}"
           git switch --create="${branch_name}"
           git add .
