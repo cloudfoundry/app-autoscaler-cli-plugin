@@ -95,8 +95,8 @@ update-repo-index: # releases ## Update the repo-index.yml file
 	echo "# updating repo-index.yml"
 	pipenv install
 	pipenv run scripts/update-cli-plugin-repo.py ${SEMVER_FULL_VERSION} osx ${BUILD}-darwin-amd64-${FILE_BUILD_VERSION}
-	pipenv run scripts/update-cli-plugin-repo.py ${SEMVER_FULL_VERSION} linux64 ${BUILD}-linux-amd64-${FILE_BUILD_VERSION}
-	pipenv run scripts/update-cli-plugin-repo.py ${SEMVER_FULL_VERSION} win64 ${BUILD}-windows-amd64-${FILE_BUILD_VERSION}.exe
+	pipenv run scripts/update-cli-plugin-repo.py "${SEMVER_FULL_VERSION}" linux64 "${BUILD}-linux-amd64-${FILE_BUILD_VERSION}"
+	pipenv run scripts/update-cli-plugin-repo.py "${SEMVER_FULL_VERSION}" win64 "${BUILD}-windows-amd64-${FILE_BUILD_VERSION}.exe"
 	echo "# sorting repo-index.yml"
 	pushd cli-plugin-repo
 	go run sort/main.go repo-index.yml
