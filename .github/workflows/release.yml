@@ -48,6 +48,8 @@ jobs:
         with:
           files: build/*
           tag_name: "${{ env.NEW_TAG }}"
+          generate_release_notes: true
+          fail_on_unmatched_files: true
       - name: Checkout https://github.com/cloudfoundry/cli-plugin-repo
         uses: actions/checkout@v4
         with:

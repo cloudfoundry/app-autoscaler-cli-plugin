@@ -2,7 +2,6 @@
 
 App-AutoScaler plug-in provides the command line interface to manage [App AutoScaler](https://github.com/cloudfoundry/app-autoscaler) policies, retrieve metrics and scaling event history.
 
-
 ## Install plugin
 
 ### From CF-Community
@@ -11,7 +10,7 @@ App-AutoScaler plug-in provides the command line interface to manage [App AutoSc
 cf install-plugin -r CF-Community app-autoscaler-plugin
 ```
 
-## From source code
+### From source code
 
 
 ```shell
@@ -25,6 +24,10 @@ make install
 ```shell
 cf uninstall-plugin AutoScaler
 ```
+
+## Development
+
+Please see [the development docs](doc/development.md) for how to work on this plugin.
 
 ## Command List
 
