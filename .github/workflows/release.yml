@@ -66,7 +66,7 @@ jobs:
           readonly branch_name="bump-app-autoscaler-cli-plugin-to-${NEW_TAG}"
           git switch --create="${branch_name}"
           git add .
-          git commit --message="Bump app-autoscaler-cli-plugin to ${NEW_TAG}\n\nThis is an automated commit to bump app-autoscaler-cli-plugin to [${NEW_TAG}](https://github.com/cloudfoundry/app-autoscaler-cli-plugin/releases/tag/${NEW_TAG})."
+          git commit --message="Bump app-autoscaler-cli-plugin to ${NEW_TAG}" --message="This is an automated commit to bump app-autoscaler-cli-plugin to [${NEW_TAG}](https://github.com/cloudfoundry/app-autoscaler-cli-plugin/releases/tag/${NEW_TAG})."
           git push origin "${branch_name}"
           # gh pr create --fill --head "origin:${branch_name}" --base main # This currently not working due to https://github.com/cli/cli/issues/2691
           popd
