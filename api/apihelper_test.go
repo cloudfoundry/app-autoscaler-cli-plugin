@@ -29,7 +29,7 @@ var _ = Describe("API Helper Test", func() {
 		err        error
 		apiServer  *ghttp.Server
 		apihelper  *APIHelper
-		fakePolicy ScalingPolicy = ScalingPolicy{
+		fakePolicy = ScalingPolicy{
 			InstanceMin: 1,
 			InstanceMax: 2,
 			ScalingRules: []*ScalingRule{
@@ -44,6 +44,56 @@ var _ = Describe("API Helper Test", func() {
 				},
 			},
 		}
+		fakePolicyWithConfiguration = ScalingPolicy{
+			InstanceMin: 1,
+			InstanceMax: 2,
+			ScalingRules: []*ScalingRule{
+				{
+					MetricType:            "memoryused",
+					StatWindowSeconds:     300,
+					BreachDurationSeconds: 600,
+					Threshold:             30,
+					Operator:              "<=",
+					CoolDownSeconds:       300,
+					Adjustment:            "-1",
+				},
+			},
+			Configuration: &Configuration{
+				CustomMetrics: struct {
+					MetricSubmissionStrategy struct {
+						AllowFrom string `json:"allow_from"`
+					} `json:"metric_submission_strategy"`
+				}{
+					MetricSubmissionStrategy: struct {
+						AllowFrom string `json:"allow_from"`
+					}{
+						AllowFrom: "bound_app",
+					},
+				},
+			},
+		}
+		expectedPolicyWithConfigurationJSON = `{
+  "instance_min_count": 1,
+        "instance_max_count": 2,
+        "scaling_rules": [
+          {
+            "metric_type": "memoryused",
+            "stat_window_secs": 300,
+            "breach_duration_secs": 600,
+            "threshold": 30,
+            "operator": "<=",
+            "cool_down_secs": 300,
+            "adjustment": "-1"
+          }
+        ],
+        "configuration": {
+          "custom_metrics": {
+            "metric_submission_strategy": {
+              "allow_from": "bound_app"
+            }
+          }
+        }
+	}`
 	)
 
 	BeforeEach(func() {
@@ -174,7 +224,7 @@ var _ = Describe("API Helper Test", func() {
 		})
 
 		Context("Get policy", func() {
-			var urlpath string = "/v1/apps/" + fakeAppId + "/policy"
+			var urlpath = "/v1/apps/" + fakeAppId + "/policy"
 
 			Context("Succeed with valid auth token", func() {
 				BeforeEach(func() {
@@ -186,12 +236,12 @@ var _ = Describe("API Helper Test", func() {
 					)
 				})
 
-				It("succeed", func() {
+				It("succeed with policy only", func() {
 					response, err := apihelper.GetPolicy()
 					Expect(err).NotTo(HaveOccurred())
 
 					var actualPolicy ScalingPolicy
-					_ = json.Unmarshal([]byte(response), &actualPolicy)
+					_ = json.Unmarshal(response, &actualPolicy)
 					Expect(actualPolicy).To(MatchFields(IgnoreExtras, Fields{
 						"InstanceMin": BeNumerically("==", fakePolicy.InstanceMin),
 						"InstanceMax": BeNumerically("==", fakePolicy.InstanceMax),
@@ -206,6 +256,19 @@ var _ = Describe("API Helper Test", func() {
 						"CoolDownSeconds":       BeNumerically("==", fakePolicy.ScalingRules[0].CoolDownSeconds),
 						"Adjustment":            Equal(fakePolicy.ScalingRules[0].Adjustment),
 					}))
+				})
+				It("succeed with policy and configuration", func() {
+					apiServer.RouteToHandler("GET", urlpath,
+						ghttp.CombineHandlers(
+							ghttp.RespondWithJSONEncoded(http.StatusOK, &fakePolicyWithConfiguration),
+							ghttp.VerifyHeaderKV("Authorization", fakeAccessToken),
+						),
+					)
+					response, err := apihelper.GetPolicy()
+					Expect(err).NotTo(HaveOccurred())
+
+					Expect(response).To(MatchJSON(expectedPolicyWithConfigurationJSON))
+
 				})
 			})
 
@@ -748,7 +811,7 @@ var _ = Describe("API Helper Test", func() {
 
 		})
 
-		Context("Get Histrory", func() {
+		Context("Get History", func() {
 			var urlpath = "/v1/apps/" + fakeAppId + "/scaling_histories"
 			var now int64
 			var histories, reversedHistories []*AppScalingHistory

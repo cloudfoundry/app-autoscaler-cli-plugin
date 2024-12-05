@@ -12,8 +12,8 @@ const (
 	SetAPIEndpoint     = "Setting AutoScaler api endpoint to %s..."
 	UnsetAPIEndpoint   = "Unsetting AutoScaler api endpoint."
 	InvalidAPIEndpoint = "Invalid AutoScaler API endpoint : %s"
-	InvalidSSLCerts    = "Issue connnecting to %s: %s\nTIP: Use --skip-ssl-validation to continue with an insecure API endpoint."
-	InconsistentDomain = "Failed to set AutoScaler domain to %s since it is inconsitent with the domain of CF API %s."
+	InvalidSSLCerts    = "Issue connecting to %s: %s\nTIP: Use --skip-ssl-validation to continue with an insecure API endpoint."
+	InconsistentDomain = "Failed to set AutoScaler domain to %s since it is inconsistent with the domain of CF API %s."
 
 	Unauthorized  = "Unauthorized. Failed to access AutoScaler API endpoint %s."
 	LoginRequired = "You must be logged in %s first."

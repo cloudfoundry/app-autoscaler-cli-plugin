@@ -105,7 +105,7 @@ func RetrieveHistory(cliConnection api.Connection, appName string, startTime, en
 		data       [][]string
 	)
 
-	for true {
+	for {
 		next, data, err = apihelper.GetHistory(startTime, endTime, asc, page)
 		if err != nil {
 			return err
