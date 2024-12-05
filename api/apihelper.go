@@ -266,7 +266,7 @@ func (helper *APIHelper) CreatePolicy(data interface{}) error {
 	}
 	defer resp.Body.Close()
 
-	raw, err := ioutil.ReadAll(resp.Body)
+	raw, err := io.ReadAll(resp.Body)
 
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
 
@@ -303,7 +303,7 @@ func (helper *APIHelper) DeletePolicy() error {
 	}
 	defer resp.Body.Close()
 
-	raw, err := ioutil.ReadAll(resp.Body)
+	raw, err := io.ReadAll(resp.Body)
 	if resp.StatusCode != http.StatusOK {
 		var errorMsg string
 		switch resp.StatusCode {
@@ -358,7 +358,7 @@ func (helper *APIHelper) GetAggregatedMetrics(metricName string, startTime, endT
 	}
 	defer resp.Body.Close()
 
-	raw, err := ioutil.ReadAll(resp.Body)
+	raw, err := io.ReadAll(resp.Body)
 	if resp.StatusCode != http.StatusOK {
 		var errorMsg string
 		switch resp.StatusCode {
@@ -424,7 +424,7 @@ func (helper *APIHelper) GetHistory(startTime, endTime int64, asc bool, page uin
 	}
 	defer resp.Body.Close()
 
-	raw, err := ioutil.ReadAll(resp.Body)
+	raw, err := io.ReadAll(resp.Body)
 	if resp.StatusCode != http.StatusOK {
 		var errorMsg string
 		switch resp.StatusCode {

@@ -4,11 +4,20 @@ type ScalingType int
 
 type ScalingStatus int
 
+type Configuration struct {
+	CustomMetrics struct {
+		MetricSubmissionStrategy struct {
+			AllowFrom string `json:"allow_from"`
+		} `json:"metric_submission_strategy"`
+	} `json:"custom_metrics"`
+}
+
 type ScalingPolicy struct {
-	InstanceMin  int               `json:"instance_min_count"`
-	InstanceMax  int               `json:"instance_max_count"`
-	ScalingRules []*ScalingRule    `json:"scaling_rules,omitempty"`
-	Schedules    *ScalingSchedules `json:"schedules,omitempty"`
+	InstanceMin   int               `json:"instance_min_count"`
+	InstanceMax   int               `json:"instance_max_count"`
+	ScalingRules  []*ScalingRule    `json:"scaling_rules,omitempty"`
+	Schedules     *ScalingSchedules `json:"schedules,omitempty"`
+	Configuration *Configuration    `json:"configuration,omitempty"`
 }
 
 type ScalingRule struct {

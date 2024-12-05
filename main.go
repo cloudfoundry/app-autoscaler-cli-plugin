@@ -33,7 +33,7 @@ var BuildVcsId string
 var BuildVcsIdDate string
 
 func (as *AutoScaler) GetMetadata() plugin.PluginMetadata {
-	version := getVetsion()
+	version := getVersion()
 
 	return plugin.PluginMetadata{
 		Name:    "AutoScaler",
@@ -114,7 +114,7 @@ OPTIONS:
 	}
 }
 
-func getVetsion() plugin.VersionType {
+func getVersion() plugin.VersionType {
 	// We set a default version 0.0.0, and then we try to parse the version from the build flags
 	// errors are ignored, as we will use the default version in case of errors
 	version := plugin.VersionType{Major: 0, Minor: 0, Build: 0}
@@ -129,14 +129,14 @@ func main() {
 
 	args := os.Args[1:]
 	if len(args) == 0 {
-		version := getVetsion()
+		version := getVersion()
 		fmt.Printf("Upstream Version: %d.%d.%d\n", version.Major, version.Minor, version.Build)
 		fmt.Println("Build Prerelease: ", BuildPrerelease)
 		fmt.Println("Build Version: ", BuildMeta)
 		fmt.Println("Build Date: ", BuildDate)
 		fmt.Println("VCS Url:", BuildVcsUrl)
 		fmt.Println("VCS Identifier: ", BuildVcsId)
-		fmt.Println("VCS Identififer Date: ", BuildVcsIdDate)
+		fmt.Println("VCS Identifier Date: ", BuildVcsIdDate)
 	}
 	plugin.Start(new(AutoScaler))
 }
