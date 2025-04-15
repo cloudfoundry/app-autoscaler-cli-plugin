@@ -4,7 +4,7 @@ go 1.23.0
 
 require (
 	code.cloudfoundry.org/cli v0.0.0-20240709143557-6248ca371f21
-	github.com/cloudfoundry/go-cfclient/v3 v3.0.0-alpha.9
+	github.com/cloudfoundry/go-cfclient/v3 v3.0.0-alpha.12
 	github.com/fatih/color v1.18.0
 	github.com/jessevdk/go-flags v1.6.1
 	github.com/onsi/ginkgo/v2 v2.23.4
@@ -40,12 +40,12 @@ require (
 	github.com/rogpeppe/go-internal v1.6.1 // indirect
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
-	github.com/stretchr/testify v1.9.0 // indirect
+	github.com/stretchr/testify v1.10.0 // indirect
 	github.com/vito/go-interact v1.0.0 // indirect
 	go.uber.org/automaxprocs v1.6.0 // indirect
 	golang.org/x/crypto v0.36.0 // indirect
 	golang.org/x/net v0.37.0 // indirect
-	golang.org/x/oauth2 v0.21.0 // indirect
+	golang.org/x/oauth2 v0.28.0 // indirect
 	golang.org/x/sys v0.32.0 // indirect
 	golang.org/x/term v0.30.0 // indirect
 	golang.org/x/text v0.23.0 // indirect
