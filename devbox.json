@@ -4,7 +4,7 @@
     "golangci-lint":        "latest",
     "python":               "latest",
     "pipenv":               "latest",
-    "github-cli":           "latest",
+    "github-cli":           "2.23.0",
     "ginkgo":               "latest",
     "gnumake":              "latest",
     "go":                   "latest"
