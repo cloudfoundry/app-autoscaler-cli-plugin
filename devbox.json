@@ -1,7 +1,7 @@
 {
   "packages": {
     "goimports-reviser":    "latest",
-    "golangci-lint":        "latest",
+    "golangci-lint":        "2.0.2",
     "python":               "latest",
     "pipenv":               "latest",
     "github-cli":           "latest",
