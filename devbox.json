@@ -5,7 +5,7 @@
     "python":               "latest",
     "pipenv":               "2020.11.15",
     "github-cli":           "2.23.0",
-    "ginkgo":               "latest",
+    "ginkgo":               "2.23.4",
     "gnumake":              "4.4.1",
     "go":                   "latest"
   }
