@@ -6,7 +6,7 @@
     "pipenv":               "latest",
     "github-cli":           "2.23.0",
     "ginkgo":               "latest",
-    "gnumake":              "latest",
+    "gnumake":              "4.4.1",
     "go":                   "latest"
   }
 }
