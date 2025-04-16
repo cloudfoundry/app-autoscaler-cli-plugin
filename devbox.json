@@ -7,6 +7,6 @@
     "github-cli":           "2.23.0",
     "ginkgo":               "latest",
     "gnumake":              "4.4.1",
-    "go":                   "latest"
+    "go":                   "1.24.1"
   }
 }
