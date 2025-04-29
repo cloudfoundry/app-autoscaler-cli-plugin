@@ -1,7 +1,7 @@
 {
   "lockfile_version": "1",
   "packages": {
-    "ginkgo@latest": {
+    "ginkgo@2.23.4": {
       "last_modified": "2025-04-11T04:58:38Z",
       "resolved": "github:NixOS/nixpkgs/642c54c23609fefb5708b0e2be261446c59138f6#ginkgo",
       "source": "devbox-search",
@@ -49,7 +49,7 @@
         }
       }
     },
-    "github-cli@latest": {
+    "github-cli@2.23.0": {
       "last_modified": "2023-02-24T09:01:09Z",
       "resolved": "github:NixOS/nixpkgs/7d0ed7f2e5aea07ab22ccb338d27fbe347ed2f11#github-cli",
       "source": "devbox-search",
@@ -59,7 +59,7 @@
       "last_modified": "2025-04-13T09:22:33Z",
       "resolved": "github:NixOS/nixpkgs/18dd725c29603f582cf1900e0d25f9f1063dbf11?lastModified=1744536153&narHash=sha256-awS2zRgF4uTwrOKwwiJcByDzDOdo3Q1rPZbiHQg%2FN38%3D"
     },
-    "gnumake@latest": {
+    "gnumake@4.4.1": {
       "last_modified": "2025-03-11T17:52:14Z",
       "resolved": "github:NixOS/nixpkgs/0d534853a55b5d02a4ababa1d71921ce8f0aee4c#gnumake",
       "source": "devbox-search",
@@ -151,7 +151,7 @@
         }
       }
     },
-    "go@latest": {
+    "go@1.24.1": {
       "last_modified": "2025-03-11T17:52:14Z",
       "resolved": "github:NixOS/nixpkgs/0d534853a55b5d02a4ababa1d71921ce8f0aee4c#go",
       "source": "devbox-search",
@@ -199,7 +199,7 @@
         }
       }
     },
-    "goimports-reviser@latest": {
+    "goimports-reviser@3.9.1": {
       "last_modified": "2025-03-30T07:43:48Z",
       "resolved": "github:NixOS/nixpkgs/63158b9cbb6ec93d26255871c447b0f01da81619#goimports-reviser",
       "source": "devbox-search",
@@ -247,7 +247,7 @@
         }
       }
     },
-    "golangci-lint@latest": {
+    "golangci-lint@2.0.2": {
       "last_modified": "2025-03-31T17:23:37Z",
       "resolved": "github:NixOS/nixpkgs/3eeaa42ef4c19447b48d1c676fe59077dfd0846e#golangci-lint",
       "source": "devbox-search",
@@ -295,7 +295,7 @@
         }
       }
     },
-    "pipenv@latest": {
+    "pipenv@2024.4.1": {
       "last_modified": "2025-03-16T16:17:41Z",
       "resolved": "github:NixOS/nixpkgs/8f76cf16b17c51ae0cc8e55488069593f6dab645#pipenv",
       "source": "devbox-search",
@@ -359,7 +359,7 @@
         }
       }
     },
-    "python@latest": {
+    "python@3.13.2": {
       "last_modified": "2025-03-27T11:50:31Z",
       "plugin_version": "0.0.4",
       "resolved": "github:NixOS/nixpkgs/6c5963357f3c1c840201eda129a99d455074db04#python313",
