@@ -53,21 +53,11 @@
       "last_modified": "2023-02-24T09:01:09Z",
       "resolved": "github:NixOS/nixpkgs/7d0ed7f2e5aea07ab22ccb338d27fbe347ed2f11#github-cli",
       "source": "devbox-search",
-      "version": "2.23.0",
-      "systems": {
-        "x86_64-linux": {
-          "outputs": [
-            {
-              "path": "/tmp/containerbase/cache/nix/store/1hxn1vhnfj3a23vrk6pdir05959q6iw6-gh-2.23.0",
-              "default": true
-            }
-          ]
-        }
-      }
+      "version": "2.23.0"
     },
     "github:NixOS/nixpkgs/nixpkgs-unstable": {
-      "last_modified": "2025-04-13T09:22:33Z",
-      "resolved": "github:NixOS/nixpkgs/18dd725c29603f582cf1900e0d25f9f1063dbf11?lastModified=1744536153&narHash=sha256-awS2zRgF4uTwrOKwwiJcByDzDOdo3Q1rPZbiHQg%2FN38%3D"
+      "last_modified": "2025-05-12T23:16:24Z",
+      "resolved": "github:NixOS/nixpkgs/2e1da60850ce8159db9654a969c2c683f41c18b5?lastModified=1747091784&narHash=sha256-%2F2jlDI5%2BDfAbxdluamyRsORHueBYUiQh%2BaK%2FkshSvmE%3D"
     },
     "gnumake@4.4.1": {
       "last_modified": "2025-05-12T14:38:58Z",
@@ -370,9 +360,9 @@
       }
     },
     "python@3.13.3": {
-      "last_modified": "2025-05-06T08:06:31Z",
+      "last_modified": "2025-05-12T14:38:58Z",
       "plugin_version": "0.0.4",
-      "resolved": "github:NixOS/nixpkgs/1cb1c02a6b1b7cf67e3d7731cbbf327a53da9679#python313",
+      "resolved": "github:NixOS/nixpkgs/eaeed9530c76ce5f1d2d8232e08bec5e26f18ec1#python313",
       "source": "devbox-search",
       "version": "3.13.3",
       "systems": {
