@@ -1,7 +1,7 @@
 {
   "packages": {
     "goimports-reviser": "3.10.0",
-    "golangci-lint":     "2.3.1",
+    "golangci-lint":     "2.4.0",
     "python":            "3.13.3",
     "pipenv":            "2025.0.4",
     "ginkgo":            "2.25.3",
