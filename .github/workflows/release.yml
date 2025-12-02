@@ -23,7 +23,7 @@ jobs:
       NEW_TAG: "v${{ github.event.inputs.major_version }}.${{ github.event.inputs.minor_version }}.${{ github.event.inputs.patch_version }}"
     steps:
       - name: Checkout
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
         with:
           token: "${{ secrets.APP_AUTOSCALER_CI_TOKEN }}"
       - name: Install devbox
@@ -51,7 +51,7 @@ jobs:
           generate_release_notes: true
           fail_on_unmatched_files: true
       - name: Checkout https://github.com/cloudfoundry/cli-plugin-repo
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
         with:
           repository: cloudfoundry/cli-plugin-repo
           ref: main
