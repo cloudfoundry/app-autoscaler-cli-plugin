@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/url"
 
-	plugin_models "code.cloudfoundry.org/cli/plugin/models"
+	plugin_models "code.cloudfoundry.org/cli/v8/plugin/models"
 
 	"code.cloudfoundry.org/app-autoscaler-cli-plugin/ui"
 )

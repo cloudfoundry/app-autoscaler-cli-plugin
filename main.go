@@ -5,7 +5,7 @@ import (
 	"os"
 	"strconv"
 
-	"code.cloudfoundry.org/cli/plugin"
+	"code.cloudfoundry.org/cli/v8/plugin"
 	flags "github.com/jessevdk/go-flags"
 
 	"code.cloudfoundry.org/app-autoscaler-cli-plugin/commands"

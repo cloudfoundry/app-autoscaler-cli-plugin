@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"os"
 
-	"code.cloudfoundry.org/cli/plugin/pluginfakes"
+	"code.cloudfoundry.org/cli/v8/plugin/pluginfakes"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/ghttp"

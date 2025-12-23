@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"code.cloudfoundry.org/cli/cf/trace"
+	"code.cloudfoundry.org/cli/v8/cf/trace"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gbytes"
