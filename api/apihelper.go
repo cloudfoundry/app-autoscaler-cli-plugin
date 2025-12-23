@@ -17,7 +17,7 @@ import (
 	"strings"
 	"time"
 
-	"code.cloudfoundry.org/cli/cf/trace"
+	"code.cloudfoundry.org/cli/v8/cf/trace"
 
 	"code.cloudfoundry.org/app-autoscaler-cli-plugin/models"
 	"code.cloudfoundry.org/app-autoscaler-cli-plugin/ui"

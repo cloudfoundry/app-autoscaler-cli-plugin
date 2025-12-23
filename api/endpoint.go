@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"code.cloudfoundry.org/cli/cf/configuration/confighelpers"
+	"code.cloudfoundry.org/cli/v8/cf/configuration/confighelpers"
 
 	"code.cloudfoundry.org/app-autoscaler-cli-plugin/ui"
 )
