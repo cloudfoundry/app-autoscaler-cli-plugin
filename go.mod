@@ -7,7 +7,7 @@ require (
 	github.com/cloudfoundry/go-cfclient/v3 v3.0.0-alpha.17
 	github.com/fatih/color v1.18.0
 	github.com/jessevdk/go-flags v1.6.1
-	github.com/onsi/ginkgo/v2 v2.27.4
+	github.com/onsi/ginkgo/v2 v2.27.5
 	github.com/onsi/gomega v1.39.0
 )
 
