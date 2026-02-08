@@ -257,51 +257,51 @@
         }
       }
     },
-    "goimports-reviser@3.10.0": {
-      "last_modified": "2026-01-23T17:20:52Z",
-      "resolved": "github:NixOS/nixpkgs/a1bab9e494f5f4939442a57a58d0449a109593fe#goimports-reviser",
+    "goimports-reviser@3.11.0": {
+      "last_modified": "2026-02-01T05:13:08Z",
+      "resolved": "github:NixOS/nixpkgs/207d15f1a6603226e1e223dc79ac29c7846da32e#goimports-reviser",
       "source": "devbox-search",
-      "version": "3.10.0",
+      "version": "3.11.0",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/bbx8p37mgl41gdwjmxx73amgcya6fx1p-goimports-reviser-3.10.0",
+              "path": "/nix/store/kj2kq3qcvfimzjwx9qjd9b3qpzcfki1v-goimports-reviser-3.11.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/bbx8p37mgl41gdwjmxx73amgcya6fx1p-goimports-reviser-3.10.0"
+          "store_path": "/nix/store/kj2kq3qcvfimzjwx9qjd9b3qpzcfki1v-goimports-reviser-3.11.0"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/g880df91vpsjl6p6ksak9ind643ikn92-goimports-reviser-3.10.0",
+              "path": "/nix/store/silbk98a9i9786jrs4hfckz8flfyf2vf-goimports-reviser-3.11.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/g880df91vpsjl6p6ksak9ind643ikn92-goimports-reviser-3.10.0"
+          "store_path": "/nix/store/silbk98a9i9786jrs4hfckz8flfyf2vf-goimports-reviser-3.11.0"
         },
         "x86_64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/jlprjg1v812k2gx07j1l3kfxilbwlimk-goimports-reviser-3.10.0",
+              "path": "/nix/store/h9g6vjmjwymizpk36ml4qjgz73swrn4k-goimports-reviser-3.11.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/jlprjg1v812k2gx07j1l3kfxilbwlimk-goimports-reviser-3.10.0"
+          "store_path": "/nix/store/h9g6vjmjwymizpk36ml4qjgz73swrn4k-goimports-reviser-3.11.0"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/xcl2gd1nvc206kylyaa3swq5nz1ywwpj-goimports-reviser-3.10.0",
+              "path": "/nix/store/gyrn1s55vjq20x01nsjyig44nx79c88p-goimports-reviser-3.11.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/xcl2gd1nvc206kylyaa3swq5nz1ywwpj-goimports-reviser-3.10.0"
+          "store_path": "/nix/store/gyrn1s55vjq20x01nsjyig44nx79c88p-goimports-reviser-3.11.0"
         }
       }
     },
