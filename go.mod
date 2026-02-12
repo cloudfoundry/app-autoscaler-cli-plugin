@@ -1,9 +1,9 @@
 module code.cloudfoundry.org/app-autoscaler-cli-plugin
 
-go 1.25.4
+go 1.25.7
 
 require (
-	code.cloudfoundry.org/cli/v8 v8.17.0
+	code.cloudfoundry.org/cli/v8 v8.17.1
 	github.com/cloudfoundry/go-cfclient/v3 v3.0.0-alpha.18
 	github.com/fatih/color v1.18.0
 	github.com/jessevdk/go-flags v1.6.1
@@ -12,9 +12,9 @@ require (
 )
 
 require (
-	code.cloudfoundry.org/bytefmt v0.57.0 // indirect
+	code.cloudfoundry.org/bytefmt v0.60.0 // indirect
 	code.cloudfoundry.org/jsonry v1.1.4 // indirect
-	code.cloudfoundry.org/tlsconfig v0.39.0 // indirect
+	code.cloudfoundry.org/tlsconfig v0.42.0 // indirect
 	github.com/Masterminds/semver/v3 v3.4.0 // indirect
 	github.com/SermoDigital/jose v0.9.2-0.20161205224733-f6df55f235c2 // indirect
 	github.com/blang/semver/v4 v4.0.0 // indirect
@@ -52,7 +52,7 @@ require (
 	golang.org/x/term v0.39.0 // indirect
 	golang.org/x/text v0.33.0 // indirect
 	golang.org/x/tools v0.41.0 // indirect
-	google.golang.org/protobuf v1.36.7 // indirect
+	google.golang.org/protobuf v1.36.8 // indirect
 	gopkg.in/cheggaaa/pb.v1 v1.0.28 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
