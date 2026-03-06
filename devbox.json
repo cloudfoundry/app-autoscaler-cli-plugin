@@ -1,6 +1,6 @@
 {
   "packages": {
-    "goimports-reviser": "3.11.0",
+    "goimports-reviser": "3.12.6",
     "golangci-lint":     "2.10.1",
     "python":            "3.14.3",
     "pipenv":            "2026.0.3",
