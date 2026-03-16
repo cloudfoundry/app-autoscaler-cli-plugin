@@ -44,7 +44,7 @@ jobs:
           git tag --annotate "${NEW_TAG}" --message="Release ${NEW_TAG}"
           git push origin ${NEW_TAG}
       - name: Release
-        uses: softprops/action-gh-release@b25b93d384199fc0fc8c2e126b2d937a0cbeb2ae # v2
+        uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2
         with:
           files: build/*
           tag_name: "${{ env.NEW_TAG }}"
