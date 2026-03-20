@@ -5,7 +5,7 @@ go 1.25.7
 require (
 	code.cloudfoundry.org/cli/v8 v8.18.0
 	github.com/cloudfoundry/go-cfclient/v3 v3.0.0-alpha.20
-	github.com/fatih/color v1.18.0
+	github.com/fatih/color v1.19.0
 	github.com/jessevdk/go-flags v1.6.1
 	github.com/onsi/ginkgo/v2 v2.28.1
 	github.com/onsi/gomega v1.39.1
@@ -48,7 +48,7 @@ require (
 	golang.org/x/net v0.51.0 // indirect
 	golang.org/x/oauth2 v0.30.0 // indirect
 	golang.org/x/sync v0.19.0 // indirect
-	golang.org/x/sys v0.41.0 // indirect
+	golang.org/x/sys v0.42.0 // indirect
 	golang.org/x/term v0.40.0 // indirect
 	golang.org/x/text v0.34.0 // indirect
 	golang.org/x/tools v0.42.0 // indirect
