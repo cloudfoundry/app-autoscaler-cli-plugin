@@ -1,7 +1,7 @@
 code.cloudfoundry.org/bytefmt v0.67.0 h1:5zOnQBHYlHQMXXs42nzUJHUVTlhni0Kdlaxzwguxudg=
 code.cloudfoundry.org/bytefmt v0.67.0/go.mod h1:JT2/SZbghzGk207djL8l4a1IMsxG/48vf+RbqTa/SBA=
-code.cloudfoundry.org/cli/v8 v8.18.1 h1:CRt85VfuXhdBjMVfNGdZeQ0FgaIBphvMfdt4xU4htzo=
-code.cloudfoundry.org/cli/v8 v8.18.1/go.mod h1:Tw9+lmzTHNwgL/mJPmWj6L+fiSTGXXpkJpwQR0SkNCE=
+code.cloudfoundry.org/cli/v8 v8.18.2 h1:sjdkQCdYtfi63DiUGFhXrXtm84bg6siq/EHkVFBi9M0=
+code.cloudfoundry.org/cli/v8 v8.18.2/go.mod h1:ya/3zPf67R6Ee0fkdDEQMSg81hSdkw0aObfsVazip4A=
 code.cloudfoundry.org/gofileutils v0.0.0-20170111115228-4d0c80011a0f h1:UrKzEwTgeiff9vxdrfdqxibzpWjxLnuXDI5m6z3GJAk=
 code.cloudfoundry.org/gofileutils v0.0.0-20170111115228-4d0c80011a0f/go.mod h1:sk5LnIjB/nIEU7yP5sDQExVm62wu0pBh3yrElngUisI=
 code.cloudfoundry.org/jsonry v1.1.4 h1:P9N7IlH1/4aRCLcXLgLFj1hkcBmV7muijJzY+K6U4hE=
