@@ -10,6 +10,7 @@ import (
 
 	"code.cloudfoundry.org/app-autoscaler-cli-plugin/commands"
 	"code.cloudfoundry.org/app-autoscaler-cli-plugin/ui"
+	"code.cloudfoundry.org/app-autoscaler-cli-plugin/util/useragent"
 )
 
 type AutoScaler struct{}
@@ -126,6 +127,10 @@ func getVersion() plugin.VersionType {
 }
 
 func main() {
+	commands.AutoScaler.UserAgent = useragent.UserAgent(
+		fmt.Sprintf("%s.%s.%s", BuildMajorVersion, BuildMinorVersion, BuildPatchVersion),
+		BuildVcsUrl,
+	)
 
 	args := os.Args[1:]
 	if len(args) == 0 {

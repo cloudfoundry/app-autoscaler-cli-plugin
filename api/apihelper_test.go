@@ -23,6 +23,7 @@ var _ = Describe("API Helper Test", func() {
 	const (
 		fakeAppId       string = "fakeAppId"
 		fakeAccessToken string = "fakeAccessToken"
+		fakeUserAgent   string = "app-autoscaler-cli-plugin/1.2.3 (https://github.com/test) Go/test"
 	)
 
 	var (
@@ -112,12 +113,26 @@ var _ = Describe("API Helper Test", func() {
 				AppName:       "fakeAppName",
 			},
 			"false",
+			fakeUserAgent,
 		)
 
 	})
 
 	AfterEach(func() {
 		apiServer.Close()
+	})
+
+	Context("User-Agent header", func() {
+		It("is set on requests", func() {
+			apiServer.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.RespondWith(http.StatusOK, ""),
+					ghttp.VerifyHeaderKV("User-Agent", fakeUserAgent),
+				),
+			)
+			err = apihelper.CheckHealth()
+			Expect(err).NotTo(HaveOccurred())
+		})
 	})
 
 	Context("Common invalid access errors", func() {
@@ -184,6 +199,7 @@ var _ = Describe("API Helper Test", func() {
 						AppName:       "fakeAppName",
 					},
 					"false",
+					fakeUserAgent,
 				)
 
 			})
