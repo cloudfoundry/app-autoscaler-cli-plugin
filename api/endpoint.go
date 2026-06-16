@@ -41,7 +41,7 @@ func UnsetEndpoint() error {
 	return nil
 }
 
-func SetEndpoint(cfclient *CFClient, url string, skipSSLValidation bool) error {
+func SetEndpoint(cfclient *CFClient, url string, skipSSLValidation bool, userAgent string) error {
 
 	cfDomain := getDomain(cfclient.CCAPIEndpoint)
 	autoscalerDomain := getDomain(url)
@@ -55,7 +55,7 @@ func SetEndpoint(cfclient *CFClient, url string, skipSSLValidation bool) error {
 		SkipSSLValidation: skipSSLValidation,
 	}
 
-	apihelper := NewAPIHelper(endpoint, cfclient, os.Getenv("CF_TRACE"))
+	apihelper := NewAPIHelper(endpoint, cfclient, os.Getenv("CF_TRACE"), userAgent)
 	err := apihelper.CheckHealth()
 	if err != nil {
 		return err
@@ -72,7 +72,7 @@ func SetEndpoint(cfclient *CFClient, url string, skipSSLValidation bool) error {
 	return nil
 }
 
-func GetEndpoint(cfclient *CFClient) (*APIEndpoint, error) {
+func GetEndpoint(cfclient *CFClient, userAgent string) (*APIEndpoint, error) {
 
 	endpoint, err := getEndpointFromConfig()
 	if err != nil {
@@ -89,7 +89,7 @@ func GetEndpoint(cfclient *CFClient) (*APIEndpoint, error) {
 	}
 
 	if endpoint.URL == "" {
-		endpoint, err = getDefaultEndpoint(cfclient)
+		endpoint, err = getDefaultEndpoint(cfclient, userAgent)
 		if err != nil {
 			return nil, err
 		}
@@ -98,13 +98,13 @@ func GetEndpoint(cfclient *CFClient) (*APIEndpoint, error) {
 
 }
 
-func getDefaultEndpoint(cfclient *CFClient) (*APIEndpoint, error) {
+func getDefaultEndpoint(cfclient *CFClient, userAgent string) (*APIEndpoint, error) {
 
 	ccAPIURL := cfclient.CCAPIEndpoint
 	asAPIURL := strings.Replace(ccAPIURL, "api.", "autoscaler.", 1)
 
 	//ignore all erros here if the default value won't work
-	SetEndpoint(cfclient, asAPIURL, cfclient.IsSSLDisabled)
+	SetEndpoint(cfclient, asAPIURL, cfclient.IsSSLDisabled, userAgent)
 	return getEndpointFromConfig()
 
 }
