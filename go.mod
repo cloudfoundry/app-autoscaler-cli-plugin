@@ -4,7 +4,7 @@ go 1.26.4
 
 require (
 	code.cloudfoundry.org/cli/v8 v8.18.4
-	github.com/cloudfoundry/go-cfclient/v3 v3.0.0-alpha.21
+	github.com/cloudfoundry/go-cfclient/v3 v3.0.0-beta.1
 	github.com/fatih/color v1.19.0
 	github.com/jessevdk/go-flags v1.6.1
 	github.com/onsi/ginkgo/v2 v2.32.0
