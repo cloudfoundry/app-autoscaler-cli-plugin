@@ -16,6 +16,7 @@ type CFClient struct {
 	AppId         string
 	AppName       string
 	IsSSLDisabled bool
+	UserAgent     string
 }
 
 type Connection interface {
@@ -27,7 +28,7 @@ type Connection interface {
 	IsSSLDisabled() (bool, error)
 }
 
-func NewCFClient(connection Connection) (*CFClient, error) {
+func NewCFClient(connection Connection, userAgent string) (*CFClient, error) {
 
 	ccAPIEndpoint, err := connection.ApiEndpoint()
 	if err != nil {
@@ -46,6 +47,7 @@ func NewCFClient(connection Connection) (*CFClient, error) {
 		connection:    connection,
 		CCAPIEndpoint: ccAPIEndpoint,
 		IsSSLDisabled: isSSLDisabled,
+		UserAgent:     userAgent,
 	}
 
 	return client, nil
@@ -83,7 +85,7 @@ func (client *CFClient) Configure(appName string) error {
 		return err
 	}
 
-	cfAPIClient, err := NewCFAPIClient(ccAPIURL, authToken, client.IsSSLDisabled)
+	cfAPIClient, err := NewCFAPIClient(ccAPIURL, authToken, client.IsSSLDisabled, client.UserAgent)
 	if err != nil {
 		return err
 	}

@@ -23,19 +23,19 @@ func (cmd ApiCommand) Execute([]string) error {
 		return cmd.UnsetEndpoint()
 	}
 	if cmd.OptionalArgs.URL == "" {
-		return cmd.GetEndpoint(AutoScaler.CLIConnection)
+		return cmd.GetEndpoint(AutoScaler.CLIConnection, AutoScaler.UserAgent)
 	} else {
-		return cmd.SetEndpoint(AutoScaler.CLIConnection, cmd.OptionalArgs.URL, cmd.SkipSSLValidation)
+		return cmd.SetEndpoint(AutoScaler.CLIConnection, cmd.OptionalArgs.URL, cmd.SkipSSLValidation, AutoScaler.UserAgent)
 	}
 }
 
-func (cmd *ApiCommand) GetEndpoint(cliConnection api.Connection) error {
+func (cmd *ApiCommand) GetEndpoint(cliConnection api.Connection, userAgent string) error {
 
-	cfclient, err := api.NewCFClient(cliConnection)
+	cfclient, err := api.NewCFClient(cliConnection, userAgent)
 	if err != nil {
 		return err
 	}
-	endpoint, err := api.GetEndpoint(cfclient)
+	endpoint, err := api.GetEndpoint(cfclient, userAgent)
 	if err != nil {
 		return err
 	}
@@ -61,9 +61,9 @@ func (cmd *ApiCommand) UnsetEndpoint() error {
 
 }
 
-func (cmd *ApiCommand) SetEndpoint(cliConnection api.Connection, url string, skipSSLValidation bool) error {
+func (cmd *ApiCommand) SetEndpoint(cliConnection api.Connection, url string, skipSSLValidation bool, userAgent string) error {
 
-	cfclient, err := api.NewCFClient(cliConnection)
+	cfclient, err := api.NewCFClient(cliConnection, userAgent)
 	if err != nil {
 		return err
 	}
@@ -76,7 +76,7 @@ func (cmd *ApiCommand) SetEndpoint(cliConnection api.Connection, url string, ski
 	}
 
 	ui.SayMessage(ui.SetAPIEndpoint, url)
-	err = api.SetEndpoint(cfclient, url, skipSSLValidation)
+	err = api.SetEndpoint(cfclient, url, skipSSLValidation, userAgent)
 	if err != nil {
 		return err
 	}

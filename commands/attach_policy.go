@@ -21,16 +21,16 @@ type AttachPolicyPositionalArgs struct {
 }
 
 func (command AttachPolicyCommand) Execute([]string) error {
-	return CreatePolicy(AutoScaler.CLIConnection, command.RequiredlArgs.AppName, command.RequiredlArgs.PolicyFile)
+	return CreatePolicy(AutoScaler.CLIConnection, command.RequiredlArgs.AppName, command.RequiredlArgs.PolicyFile, AutoScaler.UserAgent)
 }
 
-func CreatePolicy(cliConnection api.Connection, appName string, policyFile string) error {
+func CreatePolicy(cliConnection api.Connection, appName string, policyFile string, userAgent string) error {
 
-	cfclient, err := api.NewCFClient(cliConnection)
+	cfclient, err := api.NewCFClient(cliConnection, userAgent)
 	if err != nil {
 		return err
 	}
-	endpoint, err := api.GetEndpoint(cfclient)
+	endpoint, err := api.GetEndpoint(cfclient, userAgent)
 	if err != nil {
 		return err
 	}
@@ -43,7 +43,7 @@ func CreatePolicy(cliConnection api.Connection, appName string, policyFile strin
 		return err
 	}
 
-	apihelper := api.NewAPIHelper(endpoint, cfclient, os.Getenv("CF_TRACE"))
+	apihelper := api.NewAPIHelper(endpoint, cfclient, os.Getenv("CF_TRACE"), userAgent)
 
 	ui.SayMessage(ui.AttachPolicyHint, appName)
 	contents, err := ioutil.ReadFile(policyFile)
