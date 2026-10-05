@@ -88,12 +88,12 @@
       }
     },
     "github:NixOS/nixpkgs/nixpkgs-unstable": {
-      "last_modified": "2026-09-27T11:55:07Z",
-      "resolved": "github:NixOS/nixpkgs/3181085bfd08663b6b9e60bc7a8395c2aaa741bd?lastModified=1790510107&narHash=sha256-EVMNYv7hYDDD9TGVT%2FhIyTYgpiXA8y3m5xIEIxuGNU0%3D"
+      "last_modified": "2026-10-03T07:08:11Z",
+      "resolved": "github:NixOS/nixpkgs/73e728ddb6b7a12d18808f510813a13ee1fe4cce?lastModified=1791011291&narHash=sha256-V6OBJccNKBo%2FktknxlJXZChPoI0NE2lembArBO3CE9k%3D"
     },
     "gnumake@4.4.1": {
-      "last_modified": "2026-09-27T03:42:02Z",
-      "resolved": "github:NixOS/nixpkgs/8d5d270900d3fc75655ea2d9d248b234f6631439#gnumake",
+      "last_modified": "2026-10-02T22:55:44Z",
+      "resolved": "github:NixOS/nixpkgs/55ba7f49ef2962b42cbd126522b7df5f95037679#gnumake",
       "source": "devbox-search",
       "version": "4.4.1",
       "systems": {
@@ -101,51 +101,51 @@
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/nzzp66yprdiqhlw013f0qqnvkz1bi7j1-gnumake-4.4.1",
+              "path": "/nix/store/8l4wgxmhdxfvc9g18y76bnxl1ghgcp7n-gnumake-4.4.1",
               "default": true
             },
             {
               "name": "man",
-              "path": "/nix/store/fqfwajfvmj7xyd670bh14jidq6804pja-gnumake-4.4.1-man",
+              "path": "/nix/store/3h4fr0vcwhn62lppmwz2kr4z1qrl5g10-gnumake-4.4.1-man",
               "default": true
             },
             {
               "name": "doc",
-              "path": "/nix/store/i96jvlr7jhf499qjwzcflkwv3pn1fazv-gnumake-4.4.1-doc"
+              "path": "/nix/store/6xc12mfjdpps4gryzw1vba0kinx7mg5r-gnumake-4.4.1-doc"
             },
             {
               "name": "info",
-              "path": "/nix/store/9djc3a3q5bbxfram7avp35bvwfvq6mmy-gnumake-4.4.1-info"
+              "path": "/nix/store/vri43a3jysfvlr7yyhw1qa6rvzzsc3hw-gnumake-4.4.1-info"
             }
           ],
-          "store_path": "/nix/store/nzzp66yprdiqhlw013f0qqnvkz1bi7j1-gnumake-4.4.1"
+          "store_path": "/nix/store/8l4wgxmhdxfvc9g18y76bnxl1ghgcp7n-gnumake-4.4.1"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/05difb0b1s9bzadqngmfcjlzpvhza5kq-gnumake-4.4.1",
+              "path": "/nix/store/q07jxvck60qgrg4p1ywypddh5zz6i9s2-gnumake-4.4.1",
               "default": true
             },
             {
               "name": "man",
-              "path": "/nix/store/4967h3q84h7m43bay2jc6s0vs0b4vl8b-gnumake-4.4.1-man",
+              "path": "/nix/store/4yqlxwxva5hvnknzx4iiilmgjy2qy35q-gnumake-4.4.1-man",
               "default": true
             },
             {
               "name": "debug",
-              "path": "/nix/store/2m0m9rqpbp41qsvpyndm5lrlhz8ib6rm-gnumake-4.4.1-debug"
+              "path": "/nix/store/h3d6nz3ihl1jarlhppmckfqx048d6mri-gnumake-4.4.1-debug"
             },
             {
               "name": "doc",
-              "path": "/nix/store/2rd6ibqk57k6kxs2l9lcikb32gbr3q4i-gnumake-4.4.1-doc"
+              "path": "/nix/store/5d1cpj29hkw3pky3cs89gbkgpsgb4mz5-gnumake-4.4.1-doc"
             },
             {
               "name": "info",
-              "path": "/nix/store/7hfrdpmnif4lf0cagm07gzzys7fcfamg-gnumake-4.4.1-info"
+              "path": "/nix/store/h2xl525mjqr9wyqfb51z85hglhy07hsg-gnumake-4.4.1-info"
             }
           ],
-          "store_path": "/nix/store/05difb0b1s9bzadqngmfcjlzpvhza5kq-gnumake-4.4.1"
+          "store_path": "/nix/store/q07jxvck60qgrg4p1ywypddh5zz6i9s2-gnumake-4.4.1"
         },
         "x86_64-darwin": {
           "outputs": [
@@ -174,28 +174,28 @@
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/kpnsgmzydsr7ig2p09p0143rsw1qik5b-gnumake-4.4.1",
+              "path": "/nix/store/z565rgmn9vccv2h0g87z725pw610jmm8-gnumake-4.4.1",
               "default": true
             },
             {
               "name": "man",
-              "path": "/nix/store/cnhhvss345vj63rgzx9jq172b6ni7x5i-gnumake-4.4.1-man",
+              "path": "/nix/store/pfqv0fpdf48lj1x0a4ws49kjx6wbqa8q-gnumake-4.4.1-man",
               "default": true
             },
             {
               "name": "debug",
-              "path": "/nix/store/aiblfv71cad3vckhc76xbccg805928iy-gnumake-4.4.1-debug"
+              "path": "/nix/store/y063fsa1m3f09v1j7vkzf9vciknp64jf-gnumake-4.4.1-debug"
             },
             {
               "name": "doc",
-              "path": "/nix/store/7mzzf3prlkzj89b9d80mxdasgdzjg8bk-gnumake-4.4.1-doc"
+              "path": "/nix/store/2hv3gf67ig7r1rz910l0chxkm8y5jx31-gnumake-4.4.1-doc"
             },
             {
               "name": "info",
-              "path": "/nix/store/k9vqm03zln0mf7xcylnwlcjh0g2wcqjs-gnumake-4.4.1-info"
+              "path": "/nix/store/c2hmvqb78656k2w3lq7vzvpmkj2ysbda-gnumake-4.4.1-info"
             }
           ],
-          "store_path": "/nix/store/kpnsgmzydsr7ig2p09p0143rsw1qik5b-gnumake-4.4.1"
+          "store_path": "/nix/store/z565rgmn9vccv2h0g87z725pw610jmm8-gnumake-4.4.1"
         }
       }
     },
@@ -324,8 +324,8 @@
       }
     },
     "pipenv@2026.5.1": {
-      "last_modified": "2026-09-27T03:42:02Z",
-      "resolved": "github:NixOS/nixpkgs/8d5d270900d3fc75655ea2d9d248b234f6631439#pipenv",
+      "last_modified": "2026-10-02T22:55:44Z",
+      "resolved": "github:NixOS/nixpkgs/55ba7f49ef2962b42cbd126522b7df5f95037679#pipenv",
       "source": "devbox-search",
       "version": "2026.5.1",
       "systems": {
@@ -333,29 +333,29 @@
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/ddrfn73lzwz8685sn593pld3b0xvyq3f-pipenv-2026.5.1",
+              "path": "/nix/store/087ba37201hfdmbb1xpqldb9c5da79ah-pipenv-2026.5.1",
               "default": true
             },
             {
               "name": "dist",
-              "path": "/nix/store/zxsz79d43ih7la5h6g8wlc1bw0cam3ba-pipenv-2026.5.1-dist"
+              "path": "/nix/store/z25hbylg5rkg02fnjym6kz8lk8bla6qj-pipenv-2026.5.1-dist"
             }
           ],
-          "store_path": "/nix/store/ddrfn73lzwz8685sn593pld3b0xvyq3f-pipenv-2026.5.1"
+          "store_path": "/nix/store/087ba37201hfdmbb1xpqldb9c5da79ah-pipenv-2026.5.1"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/wrk65nrpl3xj5wdrrjzrs68hc6b4va9a-pipenv-2026.5.1",
+              "path": "/nix/store/mx86ns82mn79wyl7f3gmiq9pkfg6vhr7-pipenv-2026.5.1",
               "default": true
             },
             {
               "name": "dist",
-              "path": "/nix/store/qfp8n7xrniic6yva3r56r9kipk4knjch-pipenv-2026.5.1-dist"
+              "path": "/nix/store/i7y5k6nh2p514yjqwdcly2g63a3qszzi-pipenv-2026.5.1-dist"
             }
           ],
-          "store_path": "/nix/store/wrk65nrpl3xj5wdrrjzrs68hc6b4va9a-pipenv-2026.5.1"
+          "store_path": "/nix/store/mx86ns82mn79wyl7f3gmiq9pkfg6vhr7-pipenv-2026.5.1"
         },
         "x86_64-darwin": {
           "outputs": [
@@ -375,15 +375,15 @@
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/gljqdi6bkkmfbhrfxi85z9nj2spb8r15-pipenv-2026.5.1",
+              "path": "/nix/store/z82y4nl6kg09am66q5wgy0rjgvhw32s9-pipenv-2026.5.1",
               "default": true
             },
             {
               "name": "dist",
-              "path": "/nix/store/753ak0c29yxjjiqlalv3zcymsgzr0gc2-pipenv-2026.5.1-dist"
+              "path": "/nix/store/p755zciwvdxcsniwhlq1ih2mcwzq6mnb-pipenv-2026.5.1-dist"
             }
           ],
-          "store_path": "/nix/store/gljqdi6bkkmfbhrfxi85z9nj2spb8r15-pipenv-2026.5.1"
+          "store_path": "/nix/store/z82y4nl6kg09am66q5wgy0rjgvhw32s9-pipenv-2026.5.1"
         }
       }
     },
