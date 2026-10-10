@@ -70,17 +70,17 @@ func (command MetricsCommand) Execute([]string) error {
 	}
 	return RetrieveAggregatedMetrics(AutoScaler.CLIConnection,
 		command.RequiredlArgs.AppName, command.RequiredlArgs.MetricName,
-		st, et, fpo, command.Desc, command.Asc, writer, command.Output)
+		st, et, fpo, command.Desc, command.Asc, writer, command.Output, AutoScaler.UserAgent)
 }
 
-func RetrieveAggregatedMetrics(cliConnection api.Connection, appName, metricName string, startTime, endTime int64, firstPageOnly bool, desc bool, asc bool, writer io.Writer, outputfile string) error {
+func RetrieveAggregatedMetrics(cliConnection api.Connection, appName, metricName string, startTime, endTime int64, firstPageOnly bool, desc bool, asc bool, writer io.Writer, outputfile string, userAgent string) error {
 
-	cfclient, err := api.NewCFClient(cliConnection)
+	cfclient, err := api.NewCFClient(cliConnection, userAgent)
 	if err != nil {
 		return err
 	}
 
-	endpoint, err := api.GetEndpoint(cfclient)
+	endpoint, err := api.GetEndpoint(cfclient, userAgent)
 	if err != nil {
 		return err
 	}
@@ -93,7 +93,7 @@ func RetrieveAggregatedMetrics(cliConnection api.Connection, appName, metricName
 		return err
 	}
 
-	apihelper := api.NewAPIHelper(endpoint, cfclient, os.Getenv("CF_TRACE"))
+	apihelper := api.NewAPIHelper(endpoint, cfclient, os.Getenv("CF_TRACE"), userAgent)
 
 	if outputfile != "" {
 		ui.SayMessage(ui.SaveAggregatedMetricHint, appName, outputfile)

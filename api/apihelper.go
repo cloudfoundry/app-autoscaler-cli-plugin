@@ -34,17 +34,19 @@ const (
 )
 
 type APIHelper struct {
-	Endpoint *APIEndpoint
-	Client   *CFClient
-	Logger   trace.Printer
+	Endpoint  *APIEndpoint
+	Client    *CFClient
+	Logger    trace.Printer
+	UserAgent string
 }
 
-func NewAPIHelper(endpoint *APIEndpoint, cfclient *CFClient, traceEnabled string) *APIHelper {
+func NewAPIHelper(endpoint *APIEndpoint, cfclient *CFClient, traceEnabled string, userAgent string) *APIHelper {
 
 	return &APIHelper{
-		Endpoint: endpoint,
-		Client:   cfclient,
-		Logger:   trace.NewLogger(os.Stdout, false, traceEnabled, ""),
+		Endpoint:  endpoint,
+		Client:    cfclient,
+		Logger:    trace.NewLogger(os.Stdout, false, traceEnabled, ""),
+		UserAgent: userAgent,
 	}
 }
 
@@ -71,6 +73,7 @@ func makeTransport(skipSSLValidation bool, logger trace.Printer) http.RoundTripp
 }
 
 func (helper *APIHelper) DoRequest(req *http.Request) (*http.Response, error) {
+	req.Header.Set("User-Agent", helper.UserAgent)
 
 	client := newHTTPClient(helper.Endpoint.SkipSSLValidation || helper.Client.IsSSLDisabled, helper.Logger)
 	resp, err := client.Do(req)

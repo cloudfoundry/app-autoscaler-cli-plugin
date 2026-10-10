@@ -15,7 +15,7 @@ type CFAPIClient struct {
 	client *cf_client.Client
 }
 
-func NewCFAPIClient(ccAPIEndpoint *url.URL, authToken string, skipTLSValidation bool) (*CFAPIClient, error) {
+func NewCFAPIClient(ccAPIEndpoint *url.URL, authToken string, skipTLSValidation bool, userAgent string) (*CFAPIClient, error) {
 	// A refresh token is not provided by the CF CLI Plugin API and is not required as
 	// "AccessToken() now provides a refreshed o-auth token.",
 	// see https://github.com/cloudfoundry/cli/blob/main/plugin/plugin_examples/CHANGELOG.md#changes-in-v614
@@ -23,6 +23,7 @@ func NewCFAPIClient(ccAPIEndpoint *url.URL, authToken string, skipTLSValidation 
 
 	cfClientConfigOptions := []cf_client_config.Option{
 		cf_client_config.Token(authToken, refreshToken),
+		cf_client_config.UserAgent(userAgent),
 	}
 
 	if skipTLSValidation {
