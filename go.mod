@@ -1,9 +1,9 @@
 module code.cloudfoundry.org/app-autoscaler-cli-plugin
 
-go 1.26.7
+go 1.27.2
 
 require (
-	code.cloudfoundry.org/cli/v8 v8.19.0
+	code.cloudfoundry.org/cli/v8 v8.19.1
 	github.com/cloudfoundry/go-cfclient/v3 v3.0.0-beta.1
 	github.com/fatih/color v1.19.0
 	github.com/jessevdk/go-flags v1.6.1
@@ -12,11 +12,10 @@ require (
 )
 
 require (
-	code.cloudfoundry.org/bytefmt v0.86.0 // indirect
+	code.cloudfoundry.org/bytefmt v0.93.0 // indirect
 	code.cloudfoundry.org/jsonry v1.1.4 // indirect
-	code.cloudfoundry.org/tlsconfig v0.65.0 // indirect
+	code.cloudfoundry.org/tlsconfig v0.68.0 // indirect
 	github.com/Masterminds/semver/v3 v3.5.0 // indirect
-	github.com/SermoDigital/jose v0.9.2-0.20161205224733-f6df55f235c2 // indirect
 	github.com/blang/semver/v4 v4.0.0 // indirect
 	github.com/bmatcuk/doublestar v1.3.4 // indirect
 	github.com/charlievieth/fs v0.0.3 // indirect
@@ -28,30 +27,30 @@ require (
 	github.com/go-logr/logr v1.4.4 // indirect
 	github.com/go-martini/martini v0.0.0-20170121215854-22fa46961aab // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
+	github.com/golang-jwt/jwt/v5 v5.3.1 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
-	github.com/google/pprof v0.0.0-20260802141513-ef3492d7dac3 // indirect
+	github.com/google/pprof v0.0.0-20261005154351-639476b4d215 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/lunixbochs/vtclean v1.0.0 // indirect
 	github.com/martini-contrib/render v0.0.0-20150707142108-ec18f8345a11 // indirect
-	github.com/mattn/go-colorable v0.1.15 // indirect
+	github.com/mattn/go-colorable v0.1.16 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/mattn/go-runewidth v0.0.28 // indirect
+	github.com/mattn/go-runewidth v0.0.31 // indirect
 	github.com/oxtoacart/bpool v0.0.0-20190530202638-03653db5a59c // indirect
-	github.com/sirupsen/logrus v1.10.1 // indirect
-	github.com/stretchr/testify v1.12.0 // indirect
+	github.com/sirupsen/logrus v1.10.2 // indirect
+	github.com/stretchr/testify v1.12.1 // indirect
 	github.com/vito/go-interact v1.0.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
-	golang.org/x/crypto v0.55.0 // indirect
-	golang.org/x/mod v0.40.0 // indirect
-	golang.org/x/net v0.58.0 // indirect
+	golang.org/x/crypto v0.58.0 // indirect
+	golang.org/x/mod v0.41.0 // indirect
+	golang.org/x/net v0.60.0 // indirect
 	golang.org/x/oauth2 v0.36.0 // indirect
-	golang.org/x/sync v0.22.0 // indirect
-	golang.org/x/sys v0.47.0 // indirect
-	golang.org/x/term v0.45.0 // indirect
-	golang.org/x/text v0.41.0 // indirect
-	golang.org/x/tools v0.49.0 // indirect
+	golang.org/x/sync v0.24.0 // indirect
+	golang.org/x/sys v0.49.0 // indirect
+	golang.org/x/term v0.47.0 // indirect
+	golang.org/x/text v0.43.0 // indirect
+	golang.org/x/tools v0.51.0 // indirect
 	google.golang.org/protobuf v1.36.12-0.20260120151049-f2248ac996af // indirect
 	gopkg.in/cheggaaa/pb.v1 v1.0.28 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
