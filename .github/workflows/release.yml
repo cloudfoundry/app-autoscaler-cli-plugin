@@ -29,13 +29,11 @@ jobs:
       - name: Install devbox
         uses: jetify-com/devbox-install-action@8c6a66ed6273138b1915457069de78cb52fe3bd7 # 0.15.0
         with:
-          enable-cache: "true"
+          enable-cache: 'true'
       - name: Make devbox shellenv available
         uses: cloudfoundry/app-autoscaler/.github/actions/devbox-shellenv@main
       - name: Build release
         run: |
-          echo "echo exiting safely"
-          exit 0
           make SEMVER_PRERELEASE=release SEMVER_MAJOR_VERSION='${{ github.event.inputs.major_version }}' SEMVER_MINOR_VERSION='${{ github.event.inputs.minor_version }}' SEMVER_PATCH_VERSION='${{ github.event.inputs.patch_version }}'
       - name: Create and upload tag
         run: |
@@ -72,3 +70,4 @@ jobs:
           git push origin "${branch_name}"
           # gh pr create --fill --head "origin:${branch_name}" --base main # This currently not working due to https://github.com/cli/cli/issues/2691
           popd
+
