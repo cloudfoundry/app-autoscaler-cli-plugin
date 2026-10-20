@@ -1,6 +1,6 @@
 module code.cloudfoundry.org/app-autoscaler-cli-plugin
 
-go 1.27.2
+go 1.26.9
 
 require (
 	code.cloudfoundry.org/cli/v8 v8.19.1
