@@ -31,7 +31,7 @@ jobs:
         with:
           enable-cache: 'true'
       - name: Make devbox shellenv available
-        uses: cloudfoundry/app-autoscaler/.github/actions/devbox-shellenv@123ae9e5c1d683473d5361e70ccb22b4cd48c564 # main
+        uses: cloudfoundry/app-autoscaler/.github/actions/devbox-shellenv@ae687715eec36614203b9c94306fd452f71e7879 # main
       - name: Build release
         run: |
           make SEMVER_PRERELEASE=release SEMVER_MAJOR_VERSION='${{ github.event.inputs.major_version }}' SEMVER_MINOR_VERSION='${{ github.event.inputs.minor_version }}' SEMVER_PATCH_VERSION='${{ github.event.inputs.patch_version }}'
