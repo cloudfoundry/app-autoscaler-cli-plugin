@@ -36,17 +36,17 @@ func (command PolicyCommand) Execute([]string) error {
 		writer = os.Stdout
 	}
 
-	return RetrievePolicy(AutoScaler.CLIConnection, command.RequiredlArgs.AppName, writer, command.Output)
+	return RetrievePolicy(AutoScaler.CLIConnection, command.RequiredlArgs.AppName, writer, command.Output, AutoScaler.UserAgent)
 }
 
-func RetrievePolicy(cliConnection api.Connection, appName string, writer io.Writer, outputfile string) error {
+func RetrievePolicy(cliConnection api.Connection, appName string, writer io.Writer, outputfile string, userAgent string) error {
 
-	cfclient, err := api.NewCFClient(cliConnection)
+	cfclient, err := api.NewCFClient(cliConnection, userAgent)
 	if err != nil {
 		return err
 	}
 
-	endpoint, err := api.GetEndpoint(cfclient)
+	endpoint, err := api.GetEndpoint(cfclient, userAgent)
 	if err != nil {
 		return err
 	}
@@ -59,7 +59,7 @@ func RetrievePolicy(cliConnection api.Connection, appName string, writer io.Writ
 		return err
 	}
 
-	apihelper := api.NewAPIHelper(endpoint, cfclient, os.Getenv("CF_TRACE"))
+	apihelper := api.NewAPIHelper(endpoint, cfclient, os.Getenv("CF_TRACE"), userAgent)
 
 	if outputfile != "" {
 		ui.SayMessage(ui.SavePolicyHint, appName, outputfile)

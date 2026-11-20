@@ -18,6 +18,7 @@ var _ = Describe("Endpoint Helper Test", func() {
 
 	const (
 		fakeApiEndpoint = "autoscaler.boshlite.com"
+		fakeUserAgent   = "test-agent"
 	)
 
 	var (
@@ -50,18 +51,18 @@ var _ = Describe("Endpoint Helper Test", func() {
 
 			cliConnection.ApiEndpointReturns(apiServer.URL(), nil)
 			cliConnection.IsSSLDisabledReturns(false, nil)
-			cfclient, err = NewCFClient(cliConnection)
+			cfclient, err = NewCFClient(cliConnection, fakeUserAgent)
 			Expect(err).NotTo(HaveOccurred())
 		})
 
 		Context("When endpoint is valid", func() {
 			BeforeEach(func() {
-				err = SetEndpoint(cfclient, apiServer.URL()+"/", false)
+				err = SetEndpoint(cfclient, apiServer.URL()+"/", false, fakeUserAgent)
 				Expect(err).NotTo(HaveOccurred())
 			})
 
 			It("Set a valid json to config file", func() {
-				err = SetEndpoint(cfclient, apiServer.URL(), false)
+				err = SetEndpoint(cfclient, apiServer.URL(), false, fakeUserAgent)
 				Expect(err).NotTo(HaveOccurred())
 
 				content, err = ioutil.ReadFile(configFilePath)
@@ -80,11 +81,11 @@ var _ = Describe("Endpoint Helper Test", func() {
 			BeforeEach(func() {
 				cliConnection.ApiEndpointReturns("api.bosh-lite.com", nil)
 				cliConnection.IsSSLDisabledReturns(false, nil)
-				cfclient, err = NewCFClient(cliConnection)
+				cfclient, err = NewCFClient(cliConnection, fakeUserAgent)
 				Expect(err).NotTo(HaveOccurred())
 			})
 			It("it fails", func() {
-				err = SetEndpoint(cfclient, apiServer.URL(), false)
+				err = SetEndpoint(cfclient, apiServer.URL(), false, fakeUserAgent)
 				Expect(err).To(HaveOccurred())
 			})
 		})
@@ -97,7 +98,7 @@ var _ = Describe("Endpoint Helper Test", func() {
 			})
 
 			It("it fails", func() {
-				err = SetEndpoint(cfclient, apiServer.URL(), false)
+				err = SetEndpoint(cfclient, apiServer.URL(), false, fakeUserAgent)
 				Expect(err).To(HaveOccurred())
 			})
 		})
@@ -131,7 +132,7 @@ var _ = Describe("Endpoint Helper Test", func() {
 
 			cliConnection.ApiEndpointReturns(apiServer.URL(), nil)
 			cliConnection.IsSSLDisabledReturns(false, nil)
-			cfclient, err = NewCFClient(cliConnection)
+			cfclient, err = NewCFClient(cliConnection, fakeUserAgent)
 			Expect(err).NotTo(HaveOccurred())
 		})
 
@@ -144,7 +145,7 @@ var _ = Describe("Endpoint Helper Test", func() {
 			})
 
 			It("Return the existing URL when it's domain still consistent with the current cf domain", func() {
-				endpoint, err = GetEndpoint(cfclient)
+				endpoint, err = GetEndpoint(cfclient, fakeUserAgent)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(endpoint.URL).Should(Equal(apiServer.URL()))
 			})
@@ -158,7 +159,7 @@ var _ = Describe("Endpoint Helper Test", func() {
 				})
 
 				It("Clear staled setting and return the default autoscaler endpoint if it does work ", func() {
-					endpoint, err = GetEndpoint(cfclient)
+					endpoint, err = GetEndpoint(cfclient, fakeUserAgent)
 					Expect(err).NotTo(HaveOccurred())
 					Expect(endpoint.URL).Should(Equal(apiServer.URL()))
 				})
@@ -171,7 +172,7 @@ var _ = Describe("Endpoint Helper Test", func() {
 					})
 
 					It("Clear staled setting and set the endpoint to empty", func() {
-						endpoint, err = GetEndpoint(cfclient)
+						endpoint, err = GetEndpoint(cfclient, fakeUserAgent)
 						Expect(err).NotTo(HaveOccurred())
 						Expect(endpoint.URL).Should(Equal(""))
 					})
@@ -187,7 +188,7 @@ var _ = Describe("Endpoint Helper Test", func() {
 			})
 
 			It("Return a default URL when it is an valid autoscaler api server", func() {
-				endpoint, err = GetEndpoint(cfclient)
+				endpoint, err = GetEndpoint(cfclient, fakeUserAgent)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(endpoint.URL).Should(Equal(apiServer.URL()))
 			})
@@ -201,7 +202,7 @@ var _ = Describe("Endpoint Helper Test", func() {
 				})
 
 				It("Return empty string ", func() {
-					endpoint, err = GetEndpoint(cfclient)
+					endpoint, err = GetEndpoint(cfclient, fakeUserAgent)
 					Expect(err).NotTo(HaveOccurred())
 					Expect(endpoint.URL).Should(Equal(""))
 				})
@@ -219,7 +220,7 @@ var _ = Describe("Endpoint Helper Test", func() {
 				})
 
 				It("Clear the wrong setting and return the default autoscaler endpoint if it works", func() {
-					endpoint, err = GetEndpoint(cfclient)
+					endpoint, err = GetEndpoint(cfclient, fakeUserAgent)
 					Expect(err).NotTo(HaveOccurred())
 					Expect(endpoint.URL).Should(Equal(apiServer.URL()))
 				})
@@ -235,7 +236,7 @@ var _ = Describe("Endpoint Helper Test", func() {
 				})
 
 				It("Clear the wrong setting and return the default autoscaler endpoint if it works", func() {
-					endpoint, err = GetEndpoint(cfclient)
+					endpoint, err = GetEndpoint(cfclient, fakeUserAgent)
 					Expect(err).NotTo(HaveOccurred())
 					Expect(endpoint.URL).Should(Equal(apiServer.URL()))
 				})
